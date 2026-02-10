@@ -14,6 +14,94 @@ from reportlab.lib import colors
 from reportlab.lib.utils import ImageReader
 
 
+import base64
+import json
+import requests
+
+def github_put_file(token: str, repo: str, path: str, content_bytes: bytes, message: str, branch: str = "main"):
+    """
+    Create or update a file in a GitHub repo using the Contents API.
+    """
+    api_url = f"https://api.github.com/repos/{repo}/contents/{path}"
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github+json",
+    }
+
+    # Check if file exists to get its SHA (required for update)
+    r = requests.get(api_url, headers=headers, params={"ref": branch}, timeout=30)
+    sha = None
+    if r.status_code == 200:
+        sha = r.json().get("sha")
+    elif r.status_code != 404:
+        raise RuntimeError(f"GitHub GET failed ({r.status_code}): {r.text}")
+
+    payload = {
+        "message": message,
+        "content": base64.b64encode(content_bytes).decode("utf-8"),
+        "branch": branch,
+    }
+    if sha:
+        payload["sha"] = sha
+
+    r2 = requests.put(api_url, headers=headers, json=payload, timeout=30)
+    if r2.status_code not in (200, 201):
+        raise RuntimeError(f"GitHub PUT failed ({r2.status_code}): {r2.text}")
+
+    return r2.json()
+
+
+def save_latest_to_github(kpis: dict, pdf_bytes: bytes, xlsx_bytes: bytes):
+    """
+    Saves latest KPI snapshot + exports to GitHub.
+    """
+    token = st.secrets.get("GITHUB_TOKEN", None)
+    repo = st.secrets.get("GITHUB_REPO", None)
+    branch = st.secrets.get("GITHUB_BRANCH", "main")
+
+    if not token or not repo:
+        raise RuntimeError("Missing GitHub secrets. Please set GITHUB_TOKEN and GITHUB_REPO in Streamlit Secrets.")
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    # 1) KPIs JSON (pretty, readable)
+    kpis_payload = {
+        "generated_at": now,
+        "kpis": kpis,
+    }
+    kpis_bytes = json.dumps(kpis_payload, ensure_ascii=False, indent=2).encode("utf-8")
+
+    github_put_file(
+        token=token,
+        repo=repo,
+        path="data/latest_kpis.json",
+        content_bytes=kpis_bytes,
+        message=f"Update latest KPIs ({now})",
+        branch=branch,
+    )
+
+    # 2) PDF
+    github_put_file(
+        token=token,
+        repo=repo,
+        path="data/latest_dashboard.pdf",
+        content_bytes=pdf_bytes,
+        message=f"Update latest PDF dashboard ({now})",
+        branch=branch,
+    )
+
+    # 3) Excel
+    github_put_file(
+        token=token,
+        repo=repo,
+        path="data/latest_dashboard.xlsx",
+        content_bytes=xlsx_bytes,
+        message=f"Update latest Excel dashboard ({now})",
+        branch=branch,
+    )
+
+
+
 # ------------------ Helpers ------------------
 def to_num(series: pd.Series) -> pd.Series:
     s = series.astype(str)
@@ -410,6 +498,17 @@ st.subheader("Export")
 
 pdf_bytes = build_pdf_bytes(kpis, fx, funnel_png, realized_png, potential_png)
 xlsx_bytes = build_excel_bytes(kpis, fx, funnel_png, realized_png, potential_png)
+
+
+st.subheader("Save latest snapshot")
+
+if st.button("💾 Save latest dashboard to GitHub"):
+    try:
+        save_latest_to_github(kpis, pdf_bytes, xlsx_bytes)
+        st.success("Saved to GitHub: data/latest_kpis.json, latest_dashboard.pdf, latest_dashboard.xlsx")
+    except Exception as e:
+        st.error(str(e))
+
 
 export_col1, export_col2 = st.columns(2)
 export_col1.download_button(
