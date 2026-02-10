@@ -18,6 +18,44 @@ import base64
 import json
 import requests
 
+import base64
+import json
+import requests
+
+def github_get_file_bytes(token: str, repo: str, path: str, branch: str = "main") -> bytes:
+    """
+    Reads a file from GitHub repo (Contents API) and returns raw bytes.
+    """
+    api_url = f"https://api.github.com/repos/{repo}/contents/{path}"
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github+json",
+    }
+    r = requests.get(api_url, headers=headers, params={"ref": branch}, timeout=30)
+    if r.status_code != 200:
+        raise RuntimeError(f"GitHub GET failed ({r.status_code}): {r.text}")
+
+    data = r.json()
+    if data.get("encoding") != "base64":
+        raise RuntimeError(f"Unexpected encoding for {path}: {data.get('encoding')}")
+
+    content_b64 = data.get("content", "")
+    return base64.b64decode(content_b64)
+
+
+def load_latest_snapshot_from_github():
+    token = st.secrets.get("GITHUB_TOKEN")
+    repo = st.secrets.get("GITHUB_REPO")
+    branch = st.secrets.get("GITHUB_BRANCH", "main")
+    if not token or not repo:
+        return None
+
+    # KPIs JSON
+    kpis_bytes = github_get_file_bytes(token, repo, "data/latest_kpis.json", branch=branch)
+    payload = json.loads(kpis_bytes.decode("utf-8"))
+    return payload  # {"generated_at": "...", "kpis": {...}}
+
+
 def github_put_file(token: str, repo: str, path: str, content_bytes: bytes, message: str, branch: str = "main"):
     """
     Create or update a file in a GitHub repo using the Contents API.
@@ -453,8 +491,51 @@ with st.sidebar:
     campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"])
 
 if not orders_file or not campaigns_file:
-    st.info("Upload both CSV files to view the dashboard.")
+    st.subheader("Last saved snapshot")
+
+    try:
+        snap = load_latest_snapshot_from_github()
+    except Exception as e:
+        snap = None
+        st.warning(f"Couldn't load latest snapshot from GitHub: {e}")
+
+    if snap is None:
+        st.info("Upload both CSV files to view the dashboard (no saved snapshot found).")
+        st.stop()
+
+    k = snap["kpis"]
+    st.caption(f"Saved at: {snap.get('generated_at', 'unknown')}")
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Confirmed Profit (USD)", money(k["confirmed_profit_usd"]), f"{int(k['confirmed_units']):,} confirmed")
+    c2.metric("Delivered Profit (USD)", money(k["delivered_profit_usd"]), f"{int(k['delivered_units']):,} delivered")
+    c3.metric("Ad Spend (USD)", money(k["spend_usd"]))
+
+    c4, c5, c6 = st.columns(3)
+    c4.metric("Net Profit After Ads", money(k["net_profit_usd"]))
+    c5.metric("Potential Net Profit", money(k["potential_net_profit_usd"]))
+    c6.metric("ROAS (Realized)", fmt_ratio(k["roas_real"]), f"Potential: {fmt_ratio(k['roas_potential'])}")
+
+    st.divider()
+
+    # Also offer downloads of the last generated exports:
+    token = st.secrets.get("GITHUB_TOKEN")
+    repo = st.secrets.get("GITHUB_REPO")
+    branch = st.secrets.get("GITHUB_BRANCH", "main")
+
+    try:
+        last_pdf = github_get_file_bytes(token, repo, "data/latest_dashboard.pdf", branch=branch)
+        last_xlsx = github_get_file_bytes(token, repo, "data/latest_dashboard.xlsx", branch=branch)
+
+        d1, d2 = st.columns(2)
+        d1.download_button("⬇️ Download latest PDF", data=last_pdf, file_name="latest_dashboard.pdf", mime="application/pdf")
+        d2.download_button("⬇️ Download latest Excel", data=last_xlsx, file_name="latest_dashboard.xlsx",
+                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    except Exception as e:
+        st.warning(f"Could not load latest PDF/Excel from GitHub: {e}")
+
     st.stop()
+
 
 try:
     orders_df = pd.read_csv(orders_file, encoding="utf-8-sig")
