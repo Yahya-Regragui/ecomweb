@@ -148,8 +148,13 @@ def to_num(series: pd.Series) -> pd.Series:
     s = s.str.replace(r"[^0-9\.\-]", "", regex=True)
     return pd.to_numeric(s, errors="coerce").fillna(0)
 
-def money(x: float) -> str:
+def money_ccy(x: float, ccy: str) -> str:
+    if x is None:
+        return "N/A"
+    if ccy == "IQD":
+        return f"{x:,.0f} IQD"
     return f"${x:,.2f}"
+
 
 def pct(x: float) -> str:
     return f"{x*100:.1f}%"
@@ -254,6 +259,27 @@ def parse_inputs(orders: pd.DataFrame, campaigns: pd.DataFrame, iqd_per_usd: flo
 
     return orders, campaigns, kpis
 
+def kpis_in_currency(kpis: dict, fx: float, ccy: str) -> dict:
+    kk = dict(kpis)  # copy
+
+    if ccy == "IQD":
+        kk["confirmed_profit_disp"] = kpis["confirmed_profit_usd"] * fx
+        kk["delivered_profit_disp"] = kpis["delivered_profit_usd"] * fx
+        kk["expected_profit_disp"]  = kpis["expected_profit_usd"] * fx
+        kk["spend_disp"]            = kpis["spend_usd"] * fx
+
+        kk["net_profit_disp"]       = kk["delivered_profit_disp"] - kk["spend_disp"]
+        kk["potential_net_disp"]    = kk["confirmed_profit_disp"] - kk["spend_disp"]
+    else:
+        kk["confirmed_profit_disp"] = kpis["confirmed_profit_usd"]
+        kk["delivered_profit_disp"] = kpis["delivered_profit_usd"]
+        kk["expected_profit_disp"]  = kpis["expected_profit_usd"]
+        kk["spend_disp"]            = kpis["spend_usd"]
+
+        kk["net_profit_disp"]       = kpis["net_profit_usd"]
+        kk["potential_net_disp"]    = kpis["potential_net_profit_usd"]
+
+    return kk
 
 def make_charts_bytes(kpis: dict):
     # Return PNG bytes for 3 charts
@@ -486,8 +512,12 @@ st.caption("Drop Orders CSV + Campaigns CSV → dashboard updates instantly. Exp
 with st.sidebar:
     st.subheader("Inputs")
     fx = st.number_input("FX rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0)
+
+    currency = st.selectbox("Display currency (Orders)", ["USD", "IQD"], index=0)
+
     orders_file = st.file_uploader("Orders CSV (Taager File)", type=["csv"])
     campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"])
+
 
 both_uploaded = orders_file is not None and campaigns_file is not None
 one_uploaded = (orders_file is not None) ^ (campaigns_file is not None)
@@ -502,6 +532,8 @@ if both_uploaded:
         campaigns_df = pd.read_csv(campaigns_file, encoding="utf-8-sig")
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
         data_source = "uploads"
+        kpis_disp = kpis_in_currency(kpis, fx, currency)
+
     except Exception as e:
         st.error(str(e))
         st.stop()
@@ -523,6 +555,8 @@ else:
         campaigns_df = pd.read_csv(io.BytesIO(snap["campaigns_csv_bytes"]), encoding="utf-8-sig")
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
         data_source = "github"
+        kpis_disp = kpis_in_currency(kpis, fx, currency)
+
     except Exception as e:
         st.error(f"Loaded from GitHub but failed to parse: {e}")
         st.stop()
@@ -556,13 +590,13 @@ with tab_dashboard:
 
     # Dashboard cards
     col1, col2, col3 = st.columns(3)
-    col1.metric("Confirmed Profit (USD)", money(kpis["confirmed_profit_usd"]), f"{int(kpis['confirmed_units']):,} confirmed")
-    col2.metric("Delivered Profit (USD)", money(kpis["delivered_profit_usd"]), f"{int(kpis['delivered_units']):,} delivered")
-    col3.metric("Ad Spend (USD)", money(kpis["spend_usd"]))
+    col1.metric(f"Confirmed Profit ({currency})", money_ccy(kpis_disp["confirmed_profit_disp"], currency), f"{int(kpis['confirmed_units']):,} confirmed")
+    col2.metric(f"Delivered Profit ({currency})", money_ccy(kpis_disp["delivered_profit_disp"], currency), f"{int(kpis['delivered_units']):,} delivered")
+    col3.metric(f"Ad Spend ({currency})", money_ccy(kpis_disp["spend_disp"], currency))
 
-    col4, col5, col6 = st.columns(3)
-    col4.metric("Net Profit After Ads", money(kpis["net_profit_usd"]))
-    col5.metric("Potential Net Profit", money(kpis["potential_net_profit_usd"]))
+    col4.metric("Net Profit After Ads", money_ccy(kpis_disp["net_profit_disp"], currency))
+    col5.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
+
     col6.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]), f"Potential: {fmt_ratio(kpis['roas_potential'])}")
 
     st.divider()
@@ -624,6 +658,12 @@ with tab_orders:
     else:
         # Keep only relevant columns + add derived rates
         orders_view = orders_df.copy()
+        if currency == "IQD":
+            orders_view["confirmed_profit_disp"] = orders_view["confirmed_profit_iqd"]
+            orders_view["delivered_profit_disp"] = orders_view["delivered_profit_iqd"]
+        else:
+            orders_view["confirmed_profit_disp"] = orders_view["confirmed_profit_usd"]
+            orders_view["delivered_profit_disp"] = orders_view["delivered_profit_usd"]
 
         # Add rates (safe)
         orders_view["confirmation_rate"] = orders_view["confirmed_units"] / orders_view["requested_units"].replace({0: pd.NA})
@@ -635,7 +675,8 @@ with tab_orders:
             "كود_المنتج", "اسم_المنتج",  # if present in your CSV
             "requested_units", "confirmed_units", "delivered_units", "returned_units",
             "confirmation_rate", "delivery_rate", "return_rate",
-            "confirmed_profit_usd", "delivered_profit_usd",
+            "confirmed_profit_disp", "delivered_profit_disp",
+
         ]
         cols = [c for c in preferred_cols if c in orders_view.columns]
 
@@ -645,7 +686,8 @@ with tab_orders:
             min_delivered = st.number_input("Min delivered units", min_value=0, value=0, step=1)
             sort_by = st.selectbox(
                 "Sort by",
-                options=[c for c in ["delivered_profit_usd", "confirmed_profit_usd", "delivered_units", "confirmed_units"] if c in orders_view.columns],
+                options=[c for c in ["delivered_profit_disp", "confirmed_profit_disp", "delivered_units", "confirmed_units"] if c in orders_view.columns],
+
             )
             desc = st.checkbox("Sort descending", value=True)
 
