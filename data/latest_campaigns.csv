@@ -1,0 +1,221 @@
+"Reporting starts","Reporting ends","Campaign name","Campaign delivery",Results,"Result indicator","Cost per results","Ad set budget","Ad set budget type","Amount spent (USD)",Impressions,Reach,Ends,"Attribution setting"
+2026-02-10,2026-02-10,"Forchat Test Campaign 3",active,,,,3,Daily,0.24,211,187,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-10,2026-02-10,"Forchat Test Campaign 2",active,1,actions:offsite_conversion.fb_pixel_purchase,0.27,3,Daily,0.27,144,129,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-10,2026-02-10,"Forchat Test Campaign 1",active,,,,3,Daily,0.28,179,150,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-10,2026-02-10,"Ghasala Test Campaign 3",active,,,,3,Daily,1.67,669,596,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-10,2026-02-10,"Ghasala Test Campaign 2",active,,,,3,Daily,1.97,362,354,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-10,2026-02-10,"Ghasala Test Campaign 1",active,,,,3,Daily,1.69,320,295,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-10,2026-02-10,"Test Camera Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test 3sara Campaign Correct",inactive,,,,15,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Bachra Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Power Campaign",active,2,actions:offsite_conversion.fb_pixel_purchase,6.85,19.5,Daily,13.7,5413,5213,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-10,2026-02-10,"Minfakh Test Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Scale Brush Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Ghasala Test Campaign 3",active,,,,3,Daily,1.1,493,474,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-09,2026-02-09,"Ghasala Test Campaign 2",active,,,,3,Daily,1.09,318,303,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-09,2026-02-09,"Ghasala Test Campaign 1",active,,,,3,Daily,1.06,388,371,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-09,2026-02-09,"Test Camera Campaign",inactive,1,actions:offsite_conversion.fb_pixel_purchase,7.24,10,Daily,7.24,2434,1924,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-09,2026-02-09,"Test 3sara Campaign Correct",inactive,,,,15,Daily,1.88,313,233,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-09,2026-02-09,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,16.42,3919,3496,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-09,2026-02-09,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Bachra Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Power Campaign",active,8,actions:offsite_conversion.fb_pixel_purchase,2.50125,19.5,Daily,20.01,6190,5678,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-09,2026-02-09,"Minfakh Test Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Scale Brush Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Ghasala Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Ghasala Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Ghasala Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Camera Campaign",inactive,,,,10,Daily,4.17,1329,1168,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-08,2026-02-08,"Test 3sara Campaign Correct",inactive,,,,15,Daily,7.66,1170,843,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-08,2026-02-08,"Scale Power Campaign",inactive,2,actions:offsite_conversion.fb_pixel_purchase,6.26,"Using ad set budget",0,12.52,2130,1643,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-08,2026-02-08,"Test 3sara Campaign",inactive,4,actions:offsite_conversion.fb_pixel_purchase,2.3775,10,Daily,9.51,1493,727,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-08,2026-02-08,"Test Bachra Campaign",inactive,,,,10,Daily,6.74,1243,969,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-08,2026-02-08,"Test Power Campaign",active,6,actions:offsite_conversion.fb_pixel_purchase,2.26833333,19.5,Daily,13.61,2901,2426,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-08,2026-02-08,"Minfakh Test Campaign",inactive,,,,10,Daily,3.38,945,791,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-08,2026-02-08,"Scale Brush Campaign",inactive,2,actions:offsite_conversion.fb_pixel_purchase,8.445,"Using ad set budget",0,16.89,6204,5661,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-08,2026-02-08,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Ghasala Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Ghasala Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Ghasala Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Camera Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test 3sara Campaign Correct",inactive,,,,15,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Bachra Campaign",inactive,1,actions:offsite_conversion.fb_pixel_purchase,2.63,10,Daily,2.63,675,596,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-07,2026-02-07,"Test Power Campaign",active,1,actions:offsite_conversion.fb_pixel_purchase,7.88,19.5,Daily,7.88,1711,1448,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-07,2026-02-07,"Minfakh Test Campaign",inactive,,,,10,Daily,8.06,2412,1954,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-07,2026-02-07,"Scale Brush Campaign",inactive,2,actions:offsite_conversion.fb_pixel_purchase,13.24,"Using ad set budget",0,26.48,7009,5820,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-07,2026-02-07,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Ghasala Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Ghasala Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Ghasala Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Camera Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test 3sara Campaign Correct",inactive,,,,15,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Bachra Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Power Campaign",active,,,,19.5,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Minfakh Test Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Scale Brush Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Ghasala Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Ghasala Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Ghasala Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Camera Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test 3sara Campaign Correct",inactive,,,,15,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Bachra Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Power Campaign",active,,,,19.5,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Minfakh Test Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Scale Brush Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Ghasala Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Ghasala Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Ghasala Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Camera Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test 3sara Campaign Correct",inactive,,,,15,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Bachra Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Power Campaign",active,,,,19.5,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Minfakh Test Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Scale Brush Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Brush Campaign",inactive,,,,20,Daily,16.34,6022,5602,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-04,2026-02-04,"Test Massage Campaign Adv",inactive,,,,20,Daily,5.13,779,635,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-04,2026-02-04,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,5.74,1456,1245,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-04,2026-02-04,"Test Iron Campaign",inactive,,,,20,Daily,6.97,1099,936,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-04,2026-02-04,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Ghasala Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Ghasala Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Ghasala Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Camera Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test 3sara Campaign Correct",inactive,,,,15,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Bachra Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Power Campaign",active,,,,19.5,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Minfakh Test Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Scale Brush Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Ghasala Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Ghasala Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Ghasala Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Camera Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test 3sara Campaign Correct",inactive,,,,15,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Bachra Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Power Campaign",active,,,,19.5,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Minfakh Test Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Scale Brush Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Rokba Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Massage Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Miqchara 1",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Forchat Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Forchat Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Forchat Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Ghasala Test Campaign 3",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Ghasala Test Campaign 2",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Ghasala Test Campaign 1",active,,,,3,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Camera Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test 3sara Campaign Correct",inactive,,,,15,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Scale Power Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test 3sara Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Bachra Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Power Campaign",active,,,,19.5,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Minfakh Test Campaign",inactive,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Scale Brush Campaign",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Brush Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Massage Campaign Adv",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Advanced Khodar Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Iron Campaign",inactive,,,,20,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Khodar IRAQ Campaign",inactive,,,,20,Daily,0.17,53,46,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-01,2026-02-01,"Test Rokba Campaign",inactive,,,,10,Daily,0.01,4,4,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-01,2026-02-01,"Test Massage Campaign",inactive,,,,10,Daily,0.01,6,5,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-01,2026-02-01,"Test Miqchara 1",inactive,,,,10,Daily,0,11,9,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
