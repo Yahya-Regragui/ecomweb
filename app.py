@@ -119,7 +119,8 @@ def save_latest_to_github(kpis: dict, pdf_bytes: bytes, xlsx_bytes: bytes,
     if not token or not repo:
         raise RuntimeError("Missing GitHub secrets. Please set GITHUB_TOKEN and GITHUB_REPO in Streamlit Secrets.")
 
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 
     # 0) Save raw inputs (latest only)
     github_put_file(token, repo, "data/latest_orders.csv", orders_csv_bytes, f"Update latest Orders CSV ({now})", branch)
@@ -529,6 +530,15 @@ else:
 if one_uploaded and data_source == "github":
     st.info("Only one file uploaded → showing LAST SAVED data from GitHub. Upload the missing file to refresh.")
 
+# Show last upload date (from GitHub snapshot) + data source
+last_saved = None
+if data_source == "github" and snap is not None:
+    last_saved = snap.get("generated_at")
+
+if last_saved:
+    st.caption(f"Data source: {data_source} • Last saved to GitHub: {last_saved}")
+else:
+    st.caption(f"Data source: {data_source}")
 
 
 
@@ -539,6 +549,11 @@ if one_uploaded:
 tab_dashboard, tab_orders, tab_ads = st.tabs(["📊 Dashboard", "📦 Orders details", "📣 Ads details"])
 
 with tab_dashboard:
+    if data_source == "github" and snap is not None and snap.get("generated_at"):
+        st.info(f"Showing last saved snapshot from GitHub • {snap['generated_at']}")
+    elif data_source == "uploads":
+        st.success("Showing uploaded files (not yet saved).")
+
     # Dashboard cards
     col1, col2, col3 = st.columns(3)
     col1.metric("Confirmed Profit (USD)", money(kpis["confirmed_profit_usd"]), f"{int(kpis['confirmed_units']):,} confirmed")
