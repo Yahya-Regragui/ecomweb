@@ -486,7 +486,7 @@ st.caption("Drop Orders CSV + Campaigns CSV → dashboard updates instantly. Exp
 with st.sidebar:
     st.subheader("Inputs")
     fx = st.number_input("FX rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0)
-    orders_file = st.file_uploader("Orders CSV (Arabic headers)", type=["csv"])
+    orders_file = st.file_uploader("Orders CSV (Taager File)", type=["csv"])
     campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"])
 
 both_uploaded = orders_file is not None and campaigns_file is not None
