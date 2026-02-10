@@ -18,38 +18,62 @@ import base64
 import json
 import requests
 
+
+
 def github_get_file_bytes(token: str, repo: str, path: str, branch: str = "main") -> bytes:
     """
-    Reads a file from GitHub repo (Contents API) and returns raw bytes.
+    Download file bytes from GitHub.
+    - For small files: decode base64 from the Contents API response.
+    - For >1MB files: use the raw media type (content field can be empty / encoding "none").
     """
     api_url = f"https://api.github.com/repos/{repo}/contents/{path}"
-    headers = {
+    headers_json = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github+json",
     }
-    r = requests.get(api_url, headers=headers, params={"ref": branch}, timeout=30)
+
+    r = requests.get(api_url, headers=headers_json, params={"ref": branch}, timeout=30)
     if r.status_code != 200:
         raise RuntimeError(f"GitHub GET failed ({r.status_code}): {r.text}")
 
     data = r.json()
-    if data.get("encoding") != "base64":
-        raise RuntimeError(f"Unexpected encoding for {path}: {data.get('encoding')}")
+    enc = data.get("encoding")
 
-    content_b64 = data.get("content", "")
-    return base64.b64decode(content_b64)
+    # Small file path: content is base64
+    if enc == "base64":
+        return base64.b64decode(data.get("content", ""))
 
+    # Large file path: request raw content
+    headers_raw = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3.raw",
+    }
+    r2 = requests.get(api_url, headers=headers_raw, params={"ref": branch}, timeout=30)
+    if r2.status_code != 200:
+        raise RuntimeError(f"GitHub GET raw failed ({r2.status_code}): {r2.text}")
+    return r2.content
 
-def load_latest_snapshot_from_github():
+def load_latest_from_github():
     token = st.secrets.get("GITHUB_TOKEN")
     repo = st.secrets.get("GITHUB_REPO")
     branch = st.secrets.get("GITHUB_BRANCH", "main")
     if not token or not repo:
         return None
 
-    # KPIs JSON
+    # KPIs
     kpis_bytes = github_get_file_bytes(token, repo, "data/latest_kpis.json", branch=branch)
     payload = json.loads(kpis_bytes.decode("utf-8"))
-    return payload  # {"generated_at": "...", "kpis": {...}}
+
+    # CSVs
+    orders_bytes = github_get_file_bytes(token, repo, "data/latest_orders.csv", branch=branch)
+    campaigns_bytes = github_get_file_bytes(token, repo, "data/latest_campaigns.csv", branch=branch)
+
+    return {
+        "generated_at": payload.get("generated_at"),
+        "kpis": payload.get("kpis"),
+        "orders_csv_bytes": orders_bytes,
+        "campaigns_csv_bytes": campaigns_bytes,
+    }
 
 
 def github_put_file(token: str, repo: str, path: str, content_bytes: bytes, message: str, branch: str = "main"):
@@ -85,10 +109,8 @@ def github_put_file(token: str, repo: str, path: str, content_bytes: bytes, mess
     return r2.json()
 
 
-def save_latest_to_github(kpis: dict, pdf_bytes: bytes, xlsx_bytes: bytes):
-    """
-    Saves latest KPI snapshot + exports to GitHub.
-    """
+def save_latest_to_github(kpis: dict, pdf_bytes: bytes, xlsx_bytes: bytes,
+                          orders_csv_bytes: bytes, campaigns_csv_bytes: bytes):
     token = st.secrets.get("GITHUB_TOKEN", None)
     repo = st.secrets.get("GITHUB_REPO", None)
     branch = st.secrets.get("GITHUB_BRANCH", "main")
@@ -98,41 +120,20 @@ def save_latest_to_github(kpis: dict, pdf_bytes: bytes, xlsx_bytes: bytes):
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    # 1) KPIs JSON (pretty, readable)
-    kpis_payload = {
-        "generated_at": now,
-        "kpis": kpis,
-    }
-    kpis_bytes = json.dumps(kpis_payload, ensure_ascii=False, indent=2).encode("utf-8")
+    # 0) Save raw inputs (latest only)
+    github_put_file(token, repo, "data/latest_orders.csv", orders_csv_bytes, f"Update latest Orders CSV ({now})", branch)
+    github_put_file(token, repo, "data/latest_campaigns.csv", campaigns_csv_bytes, f"Update latest Campaigns CSV ({now})", branch)
 
-    github_put_file(
-        token=token,
-        repo=repo,
-        path="data/latest_kpis.json",
-        content_bytes=kpis_bytes,
-        message=f"Update latest KPIs ({now})",
-        branch=branch,
-    )
+    # 1) KPIs JSON
+    kpis_payload = {"generated_at": now, "kpis": kpis}
+    kpis_bytes = json.dumps(kpis_payload, ensure_ascii=False, indent=2).encode("utf-8")
+    github_put_file(token, repo, "data/latest_kpis.json", kpis_bytes, f"Update latest KPIs ({now})", branch)
 
     # 2) PDF
-    github_put_file(
-        token=token,
-        repo=repo,
-        path="data/latest_dashboard.pdf",
-        content_bytes=pdf_bytes,
-        message=f"Update latest PDF dashboard ({now})",
-        branch=branch,
-    )
+    github_put_file(token, repo, "data/latest_dashboard.pdf", pdf_bytes, f"Update latest PDF dashboard ({now})", branch)
 
     # 3) Excel
-    github_put_file(
-        token=token,
-        repo=repo,
-        path="data/latest_dashboard.xlsx",
-        content_bytes=xlsx_bytes,
-        message=f"Update latest Excel dashboard ({now})",
-        branch=branch,
-    )
+    github_put_file(token, repo, "data/latest_dashboard.xlsx", xlsx_bytes, f"Update latest Excel dashboard ({now})", branch)
 
 
 
@@ -502,22 +503,15 @@ if both_uploaded:
         st.error(str(e))
         st.stop()
 
-# CASE B: only one file uploaded → fallback snapshot
-elif one_uploaded:
-    st.warning("Only one file uploaded. Showing last saved dashboard until both files are provided.")
-    snap = load_latest_snapshot_from_github()
-    if snap is None:
-        st.info("Upload both files to generate the dashboard (no saved snapshot found).")
-        st.stop()
-    kpis = snap["kpis"]
+snap = load_latest_from_github()
+kpis = snap["kpis"]
 
-# CASE C: no files uploaded → fallback snapshot
-else:
-    snap = load_latest_snapshot_from_github()
-    if snap is None:
-        st.info("Upload both files to view the dashboard.")
-        st.stop()
-    kpis = snap["kpis"]
+orders_df = pd.read_csv(io.BytesIO(snap["orders_csv_bytes"]), encoding="utf-8-sig")
+campaigns_df = pd.read_csv(io.BytesIO(snap["campaigns_csv_bytes"]), encoding="utf-8-sig")
+
+# IMPORTANT: re-parse to ensure derived USD columns exist for detail tables
+orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
+
 
 if one_uploaded:
     st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
@@ -576,10 +570,16 @@ with tab_dashboard:
     st.subheader("Save latest snapshot")
     if st.button("💾 Save latest dashboard to GitHub"):
         try:
-            save_latest_to_github(kpis, pdf_bytes, xlsx_bytes)
-            st.success("Saved to GitHub: data/latest_kpis.json, latest_dashboard.pdf, latest_dashboard.xlsx")
+            if not both_uploaded:
+                st.error("To save EVERYTHING (including CSVs), please upload BOTH files first.")
+            else:
+                orders_bytes = orders_file.getvalue()
+                campaigns_bytes = campaigns_file.getvalue()
+                save_latest_to_github(kpis, pdf_bytes, xlsx_bytes, orders_bytes, campaigns_bytes)
+                st.success("Saved EVERYTHING to GitHub (CSV + KPIs + PDF + Excel).")
         except Exception as e:
             st.error(str(e))
+
 
 with tab_orders:
     st.subheader("Orders details")
