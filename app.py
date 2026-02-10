@@ -60,13 +60,14 @@ def load_latest_from_github():
     if not token or not repo:
         return None
 
-    # KPIs
-    kpis_bytes = github_get_file_bytes(token, repo, "data/latest_kpis.json", branch=branch)
-    payload = json.loads(kpis_bytes.decode("utf-8"))
+    try:
+        kpis_bytes = github_get_file_bytes(token, repo, "data/latest_kpis.json", branch=branch)
+        payload = json.loads(kpis_bytes.decode("utf-8"))
 
-    # CSVs
-    orders_bytes = github_get_file_bytes(token, repo, "data/latest_orders.csv", branch=branch)
-    campaigns_bytes = github_get_file_bytes(token, repo, "data/latest_campaigns.csv", branch=branch)
+        orders_bytes = github_get_file_bytes(token, repo, "data/latest_orders.csv", branch=branch)
+        campaigns_bytes = github_get_file_bytes(token, repo, "data/latest_campaigns.csv", branch=branch)
+    except Exception:
+        return None
 
     return {
         "generated_at": payload.get("generated_at"),
@@ -493,24 +494,42 @@ one_uploaded = (orders_file is not None) ^ (campaigns_file is not None)
 orders_df = None
 campaigns_df = None
 
-# CASE A: both files uploaded → live dashboard + details available
+# CASE A: both uploaded -> use uploads
 if both_uploaded:
     try:
         orders_df = pd.read_csv(orders_file, encoding="utf-8-sig")
         campaigns_df = pd.read_csv(campaigns_file, encoding="utf-8-sig")
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
+        data_source = "uploads"
     except Exception as e:
         st.error(str(e))
         st.stop()
 
-snap = load_latest_from_github()
-kpis = snap["kpis"]
+# CASE B/C: not both uploaded -> try GitHub
+else:
+    try:
+        snap = load_latest_from_github()
+    except Exception as e:
+        snap = None
+        st.warning(f"Could not load latest data from GitHub: {e}")
 
-orders_df = pd.read_csv(io.BytesIO(snap["orders_csv_bytes"]), encoding="utf-8-sig")
-campaigns_df = pd.read_csv(io.BytesIO(snap["campaigns_csv_bytes"]), encoding="utf-8-sig")
+    if snap is None:
+        st.info("Upload BOTH files once and click **Save latest dashboard to GitHub**. After that, reload will work without uploads.")
+        st.stop()
 
-# IMPORTANT: re-parse to ensure derived USD columns exist for detail tables
-orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
+    try:
+        orders_df = pd.read_csv(io.BytesIO(snap["orders_csv_bytes"]), encoding="utf-8-sig")
+        campaigns_df = pd.read_csv(io.BytesIO(snap["campaigns_csv_bytes"]), encoding="utf-8-sig")
+        orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
+        data_source = "github"
+    except Exception as e:
+        st.error(f"Loaded from GitHub but failed to parse: {e}")
+        st.stop()
+
+if one_uploaded and data_source == "github":
+    st.info("Only one file uploaded → showing LAST SAVED data from GitHub. Upload the missing file to refresh.")
+
+
 
 
 if one_uploaded:
@@ -571,7 +590,7 @@ with tab_dashboard:
     if st.button("💾 Save latest dashboard to GitHub"):
         try:
             if not both_uploaded:
-                st.error("To save EVERYTHING (including CSVs), please upload BOTH files first.")
+                st.error("To save EVERYTHING (CSV + KPIs + PDF + Excel), please upload BOTH files first.")
             else:
                 orders_bytes = orders_file.getvalue()
                 campaigns_bytes = campaigns_file.getvalue()
@@ -581,11 +600,12 @@ with tab_dashboard:
             st.error(str(e))
 
 
+
 with tab_orders:
     st.subheader("Orders details")
 
-    if not both_uploaded:
-        st.info("To see order-level details, upload BOTH files (Orders + Campaigns). The GitHub snapshot only stores KPIs + exports.")
+    if orders_df is None:
+        st.info("No orders data available yet.")
     else:
         # Keep only relevant columns + add derived rates
         orders_view = orders_df.copy()
@@ -639,8 +659,8 @@ with tab_orders:
 with tab_ads:
     st.subheader("Ads details")
 
-    if not both_uploaded:
-        st.info("To see ad-level details, upload BOTH files. (We don’t store raw CSVs in GitHub.)")
+    if campaigns_df is None:
+        st.info("No campaigns data available yet.")
     else:
         ads_view = campaigns_df.copy()
 
