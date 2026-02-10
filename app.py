@@ -490,51 +490,37 @@ with st.sidebar:
     orders_file = st.file_uploader("Orders CSV (Arabic headers)", type=["csv"])
     campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"])
 
-if not orders_file or not campaigns_file:
-    st.subheader("Last saved snapshot")
+both_uploaded = orders_file is not None and campaigns_file is not None
+one_uploaded = (orders_file is not None) ^ (campaigns_file is not None)
 
-    try:
-        snap = load_latest_snapshot_from_github()
-    except Exception as e:
-        snap = None
-        st.warning(f"Couldn't load latest snapshot from GitHub: {e}")
+# CASE A: both files uploaded → live dashboard
+if both_uploaded:
+    orders_df = pd.read_csv(orders_file, encoding="utf-8-sig")
+    campaigns_df = pd.read_csv(campaigns_file, encoding="utf-8-sig")
+    orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
 
+# CASE B: only one file uploaded → fallback to GitHub snapshot
+elif one_uploaded:
+    st.warning("Only one file uploaded. Showing last saved dashboard until both files are provided.")
+
+    snap = load_latest_snapshot_from_github()
     if snap is None:
-        st.info("Upload both CSV files to view the dashboard (no saved snapshot found).")
+        st.info("Upload both files to generate the dashboard.")
         st.stop()
 
-    k = snap["kpis"]
-    st.caption(f"Saved at: {snap.get('generated_at', 'unknown')}")
+    kpis = snap["kpis"]
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Confirmed Profit (USD)", money(k["confirmed_profit_usd"]), f"{int(k['confirmed_units']):,} confirmed")
-    c2.metric("Delivered Profit (USD)", money(k["delivered_profit_usd"]), f"{int(k['delivered_units']):,} delivered")
-    c3.metric("Ad Spend (USD)", money(k["spend_usd"]))
+# CASE C: no files uploaded → GitHub snapshot
+else:
+    snap = load_latest_snapshot_from_github()
+    if snap is None:
+        st.info("Upload both files to view the dashboard.")
+        st.stop()
 
-    c4, c5, c6 = st.columns(3)
-    c4.metric("Net Profit After Ads", money(k["net_profit_usd"]))
-    c5.metric("Potential Net Profit", money(k["potential_net_profit_usd"]))
-    c6.metric("ROAS (Realized)", fmt_ratio(k["roas_real"]), f"Potential: {fmt_ratio(k['roas_potential'])}")
+    kpis = snap["kpis"]
 
-    st.divider()
-
-    # Also offer downloads of the last generated exports:
-    token = st.secrets.get("GITHUB_TOKEN")
-    repo = st.secrets.get("GITHUB_REPO")
-    branch = st.secrets.get("GITHUB_BRANCH", "main")
-
-    try:
-        last_pdf = github_get_file_bytes(token, repo, "data/latest_dashboard.pdf", branch=branch)
-        last_xlsx = github_get_file_bytes(token, repo, "data/latest_dashboard.xlsx", branch=branch)
-
-        d1, d2 = st.columns(2)
-        d1.download_button("⬇️ Download latest PDF", data=last_pdf, file_name="latest_dashboard.pdf", mime="application/pdf")
-        d2.download_button("⬇️ Download latest Excel", data=last_xlsx, file_name="latest_dashboard.xlsx",
-                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    except Exception as e:
-        st.warning(f"Could not load latest PDF/Excel from GitHub: {e}")
-
-    st.stop()
+if one_uploaded:
+    st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
 
 
 try:
