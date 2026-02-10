@@ -18,10 +18,6 @@ import base64
 import json
 import requests
 
-import base64
-import json
-import requests
-
 def github_get_file_bytes(token: str, repo: str, path: str, branch: str = "main") -> bytes:
     """
     Reads a file from GitHub repo (Contents API) and returns raw bytes.
@@ -493,100 +489,193 @@ with st.sidebar:
 both_uploaded = orders_file is not None and campaigns_file is not None
 one_uploaded = (orders_file is not None) ^ (campaigns_file is not None)
 
-# CASE A: both files uploaded → live dashboard
+orders_df = None
+campaigns_df = None
+
+# CASE A: both files uploaded → live dashboard + details available
 if both_uploaded:
-    orders_df = pd.read_csv(orders_file, encoding="utf-8-sig")
-    campaigns_df = pd.read_csv(campaigns_file, encoding="utf-8-sig")
-    orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
-
-# CASE B: only one file uploaded → fallback to GitHub snapshot
-elif one_uploaded:
-    st.warning("Only one file uploaded. Showing last saved dashboard until both files are provided.")
-
-    snap = load_latest_snapshot_from_github()
-    if snap is None:
-        st.info("Upload both files to generate the dashboard.")
+    try:
+        orders_df = pd.read_csv(orders_file, encoding="utf-8-sig")
+        campaigns_df = pd.read_csv(campaigns_file, encoding="utf-8-sig")
+        orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
+    except Exception as e:
+        st.error(str(e))
         st.stop()
 
+# CASE B: only one file uploaded → fallback snapshot
+elif one_uploaded:
+    st.warning("Only one file uploaded. Showing last saved dashboard until both files are provided.")
+    snap = load_latest_snapshot_from_github()
+    if snap is None:
+        st.info("Upload both files to generate the dashboard (no saved snapshot found).")
+        st.stop()
     kpis = snap["kpis"]
 
-# CASE C: no files uploaded → GitHub snapshot
+# CASE C: no files uploaded → fallback snapshot
 else:
     snap = load_latest_snapshot_from_github()
     if snap is None:
         st.info("Upload both files to view the dashboard.")
         st.stop()
-
     kpis = snap["kpis"]
 
 if one_uploaded:
     st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
 
+# --- Tabs ---
+tab_dashboard, tab_orders, tab_ads = st.tabs(["📊 Dashboard", "📦 Orders details", "📣 Ads details"])
 
-try:
-    orders_df = pd.read_csv(orders_file, encoding="utf-8-sig")
-    campaigns_df = pd.read_csv(campaigns_file, encoding="utf-8-sig")
+with tab_dashboard:
+    # Dashboard cards
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Confirmed Profit (USD)", money(kpis["confirmed_profit_usd"]), f"{int(kpis['confirmed_units']):,} confirmed")
+    col2.metric("Delivered Profit (USD)", money(kpis["delivered_profit_usd"]), f"{int(kpis['delivered_units']):,} delivered")
+    col3.metric("Ad Spend (USD)", money(kpis["spend_usd"]))
 
-    orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
-except Exception as e:
-    st.error(str(e))
-    st.stop()
+    col4, col5, col6 = st.columns(3)
+    col4.metric("Net Profit After Ads", money(kpis["net_profit_usd"]))
+    col5.metric("Potential Net Profit", money(kpis["potential_net_profit_usd"]))
+    col6.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]), f"Potential: {fmt_ratio(kpis['roas_potential'])}")
 
-# Dashboard cards (web)
-col1, col2, col3 = st.columns(3)
-col1.metric("Confirmed Profit (USD)", money(kpis["confirmed_profit_usd"]), f"{int(kpis['confirmed_units']):,} confirmed")
-col2.metric("Delivered Profit (USD)", money(kpis["delivered_profit_usd"]), f"{int(kpis['delivered_units']):,} delivered")
-col3.metric("Ad Spend (USD)", money(kpis["spend_usd"]))
+    st.divider()
 
-col4, col5, col6 = st.columns(3)
-col4.metric("Net Profit After Ads", money(kpis["net_profit_usd"]))
-col5.metric("Potential Net Profit", money(kpis["potential_net_profit_usd"]))
-col6.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]), f"Potential: {fmt_ratio(kpis['roas_potential'])}")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Confirmation Rate", pct(kpis["confirmation_rate"]))
+    c2.metric("Delivery Rate", pct(kpis["delivery_rate"]))
+    c3.metric("Return Rate", pct(kpis["return_rate"]))
+    c4.metric("CPM", fmt_money_or_na(kpis["cpm"]))
 
-st.divider()
+    # Charts
+    funnel_png, realized_png, potential_png = make_charts_bytes(kpis)
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Confirmation Rate", pct(kpis["confirmation_rate"]))
-c2.metric("Delivery Rate", pct(kpis["delivery_rate"]))
-c3.metric("Return Rate", pct(kpis["return_rate"]))
-c4.metric("CPM", fmt_money_or_na(kpis["cpm"]))
+    st.subheader("Charts")
+    cc1, cc2 = st.columns(2)
+    cc1.image(funnel_png, caption="Order Funnel", use_container_width=True)
+    cc2.image(realized_png, caption="Realized Profit (USD)", use_container_width=True)
+    st.image(potential_png, caption="Potential Profit from Confirmed (USD)", use_container_width=True)
 
-# Charts
-funnel_png, realized_png, potential_png = make_charts_bytes(kpis)
+    # Exports
+    st.subheader("Export")
+    pdf_bytes = build_pdf_bytes(kpis, fx, funnel_png, realized_png, potential_png)
+    xlsx_bytes = build_excel_bytes(kpis, fx, funnel_png, realized_png, potential_png)
 
-st.subheader("Charts")
-cc1, cc2 = st.columns(2)
-cc1.image(funnel_png, caption="Order Funnel", use_container_width=True)
-cc2.image(realized_png, caption="Realized Profit (USD)", use_container_width=True)
-st.image(potential_png, caption="Potential Profit from Confirmed (USD)", use_container_width=True)
+    export_col1, export_col2 = st.columns(2)
+    export_col1.download_button(
+        "⬇️ Download PDF Dashboard",
+        data=pdf_bytes,
+        file_name=f"ecommerce_dashboard_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+        mime="application/pdf"
+    )
+    export_col2.download_button(
+        "⬇️ Download Excel Dashboard",
+        data=xlsx_bytes,
+        file_name=f"ecommerce_dashboard_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
-# Exports
-st.subheader("Export")
+    st.subheader("Save latest snapshot")
+    if st.button("💾 Save latest dashboard to GitHub"):
+        try:
+            save_latest_to_github(kpis, pdf_bytes, xlsx_bytes)
+            st.success("Saved to GitHub: data/latest_kpis.json, latest_dashboard.pdf, latest_dashboard.xlsx")
+        except Exception as e:
+            st.error(str(e))
 
-pdf_bytes = build_pdf_bytes(kpis, fx, funnel_png, realized_png, potential_png)
-xlsx_bytes = build_excel_bytes(kpis, fx, funnel_png, realized_png, potential_png)
+with tab_orders:
+    st.subheader("Orders details")
 
+    if not both_uploaded:
+        st.info("To see order-level details, upload BOTH files (Orders + Campaigns). The GitHub snapshot only stores KPIs + exports.")
+    else:
+        # Keep only relevant columns + add derived rates
+        orders_view = orders_df.copy()
 
-st.subheader("Save latest snapshot")
+        # Add rates (safe)
+        orders_view["confirmation_rate"] = orders_view["confirmed_units"] / orders_view["requested_units"].replace({0: pd.NA})
+        orders_view["delivery_rate"] = orders_view["delivered_units"] / orders_view["confirmed_units"].replace({0: pd.NA})
+        orders_view["return_rate"] = orders_view["returned_units"] / orders_view["delivered_units"].replace({0: pd.NA})
 
-if st.button("💾 Save latest dashboard to GitHub"):
-    try:
-        save_latest_to_github(kpis, pdf_bytes, xlsx_bytes)
-        st.success("Saved to GitHub: data/latest_kpis.json, latest_dashboard.pdf, latest_dashboard.xlsx")
-    except Exception as e:
-        st.error(str(e))
+        # Choose relevant columns that actually exist
+        preferred_cols = [
+            "كود_المنتج", "اسم_المنتج",  # if present in your CSV
+            "requested_units", "confirmed_units", "delivered_units", "returned_units",
+            "confirmation_rate", "delivery_rate", "return_rate",
+            "confirmed_profit_usd", "delivered_profit_usd",
+        ]
+        cols = [c for c in preferred_cols if c in orders_view.columns]
 
+        # Simple filters
+        with st.expander("Filters", expanded=False):
+            search = st.text_input("Search product (code or name)")
+            min_delivered = st.number_input("Min delivered units", min_value=0, value=0, step=1)
+            sort_by = st.selectbox(
+                "Sort by",
+                options=[c for c in ["delivered_profit_usd", "confirmed_profit_usd", "delivered_units", "confirmed_units"] if c in orders_view.columns],
+            )
+            desc = st.checkbox("Sort descending", value=True)
 
-export_col1, export_col2 = st.columns(2)
-export_col1.download_button(
-    "⬇️ Download PDF Dashboard",
-    data=pdf_bytes,
-    file_name=f"ecommerce_dashboard_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
-    mime="application/pdf"
-)
-export_col2.download_button(
-    "⬇️ Download Excel Dashboard",
-    data=xlsx_bytes,
-    file_name=f"ecommerce_dashboard_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+        filtered = orders_view
+        if search:
+            # search across code/name if present
+            mask = pd.Series(False, index=filtered.index)
+            if "كود_المنتج" in filtered.columns:
+                mask |= filtered["كود_المنتج"].astype(str).str.contains(search, case=False, na=False)
+            if "اسم_المنتج" in filtered.columns:
+                mask |= filtered["اسم_المنتج"].astype(str).str.contains(search, case=False, na=False)
+            filtered = filtered[mask]
+
+        if "delivered_units" in filtered.columns:
+            filtered = filtered[filtered["delivered_units"] >= min_delivered]
+
+        if sort_by in filtered.columns:
+            filtered = filtered.sort_values(by=sort_by, ascending=not desc)
+
+        st.caption(f"{len(filtered):,} rows")
+        st.dataframe(
+            filtered[cols],
+            use_container_width=True
+        )
+
+with tab_ads:
+    st.subheader("Ads details")
+
+    if not both_uploaded:
+        st.info("To see ad-level details, upload BOTH files. (We don’t store raw CSVs in GitHub.)")
+    else:
+        ads_view = campaigns_df.copy()
+
+        # Keep relevant columns only (if they exist)
+        preferred_cols = [
+            "Reporting starts", "Reporting ends",
+            "Campaign name", "Campaign delivery",
+            "Amount spent (USD)", "Impressions", "Reach",
+            "Results", "Cost per results", "Result indicator",
+        ]
+        cols = [c for c in preferred_cols if c in ads_view.columns]
+
+        # Add derived metrics
+        if "Amount spent (USD)" in ads_view.columns and "Impressions" in ads_view.columns:
+            ads_view["CPM (USD)"] = ads_view["Amount spent (USD)"] / ads_view["Impressions"].replace({0: pd.NA}) * 1000
+            cols.append("CPM (USD)") if "CPM (USD)" not in cols else None
+
+        with st.expander("Filters", expanded=False):
+            campaign_search = st.text_input("Search campaign name")
+            min_spend = st.number_input("Min spend (USD)", min_value=0.0, value=0.0, step=1.0)
+            sort_by = st.selectbox(
+                "Sort by",
+                options=[c for c in ["Amount spent (USD)", "Impressions", "Reach", "Results"] if c in ads_view.columns],
+            )
+            desc = st.checkbox("Sort descending", value=True, key="ads_desc")
+
+        filtered = ads_view
+        if campaign_search and "Campaign name" in filtered.columns:
+            filtered = filtered[filtered["Campaign name"].astype(str).str.contains(campaign_search, case=False, na=False)]
+
+        if "Amount spent (USD)" in filtered.columns:
+            filtered = filtered[filtered["Amount spent (USD)"] >= min_spend]
+
+        if sort_by in filtered.columns:
+            filtered = filtered.sort_values(by=sort_by, ascending=not desc)
+
+        st.caption(f"{len(filtered):,} rows")
+        st.dataframe(filtered[cols], use_container_width=True)
