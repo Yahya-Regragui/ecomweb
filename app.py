@@ -166,7 +166,10 @@ def fmt_ratio(x):
     return "N/A" if x is None else f"{x:.2f}"
 
 def fmt_money_or_na(x):
-    return "N/A" if x is None else money(x)
+    return "N/A" if x is None else money_ccy(x, "USD")
+
+def money(x: float) -> str:
+    return f"${x:,.2f}"
 
 def iqd_to_usd(x: float, iqd_per_usd: float) -> float:
     return x / iqd_per_usd if iqd_per_usd else 0.0
@@ -524,6 +527,7 @@ one_uploaded = (orders_file is not None) ^ (campaigns_file is not None)
 
 orders_df = None
 campaigns_df = None
+snap = None
 
 # CASE A: both uploaded -> use uploads
 if both_uploaded:
@@ -594,10 +598,11 @@ with tab_dashboard:
     col2.metric(f"Delivered Profit ({currency})", money_ccy(kpis_disp["delivered_profit_disp"], currency), f"{int(kpis['delivered_units']):,} delivered")
     col3.metric(f"Ad Spend ({currency})", money_ccy(kpis_disp["spend_disp"], currency))
 
+    col4, col5, col6 = st.columns(3)
     col4.metric("Net Profit After Ads", money_ccy(kpis_disp["net_profit_disp"], currency))
     col5.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
-
     col6.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]), f"Potential: {fmt_ratio(kpis['roas_potential'])}")
+
 
     st.divider()
 
