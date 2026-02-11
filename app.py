@@ -400,19 +400,81 @@ def product_deep_dive(orders_df: pd.DataFrame, campaigns_df: pd.DataFrame, fx: f
     net_profit_usd = delivered_profit_usd - spend_usd
     potential_net_usd = confirmed_profit_usd - spend_usd
 
-    # --- KPI Cards ---
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Spend", money_ccy(spend_usd * fx if currency == "IQD" else spend_usd, currency))
-    col2.metric("Delivered units", f"{int(delivered):,}")
-    col3.metric("Delivered profit", money_ccy(delivered_profit_usd * fx if currency == "IQD" else delivered_profit_usd, currency))
-    col4.metric("Net after ads", money_ccy(net_profit_usd * fx if currency == "IQD" else net_profit_usd, currency))
+    # --- KPI Cards (with tooltips) ---
+    def _disp_usd_to_currency(x_usd: float) -> float:
+        return x_usd * fx if currency == "IQD" else x_usd
 
-    col5, col6, col7, col8 = st.columns(4)
-    col5.metric("Requested", f"{int(requested):,}")
-    col6.metric("Confirmed", f"{int(confirmed):,}")
-    col7.metric("Potential net", money_ccy(potential_net_usd * fx if currency == "IQD" else potential_net_usd, currency))
+    spend_disp = _disp_usd_to_currency(spend_usd)
+    delivered_profit_disp = _disp_usd_to_currency(delivered_profit_usd)
+    net_after_ads_disp = _disp_usd_to_currency(net_profit_usd)
+    potential_net_disp = _disp_usd_to_currency(potential_net_usd)
+
     roas = safe_ratio(delivered_profit_usd, spend_usd)
-    col8.metric("ROAS", "N/A" if roas is None else f"{roas:.2f}")
+
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        _card(
+            "Spend",
+            money_ccy(spend_disp, currency),
+            "",
+            "neutral",
+            tip="Spend = Sum of Amount spent (USD) from campaigns for this SKU."
+        )
+
+    with c2:
+        _card(
+            "Delivered units",
+            f"{int(delivered):,}",
+            "",
+            "neutral",
+            tip="Delivered units = Sum of delivered_units from Orders for this SKU."
+        )
+
+    with c3:
+        _card(
+            "Delivered profit",
+            money_ccy(delivered_profit_disp, currency),
+            "",
+            _tone(delivered_profit_usd),
+            tip="Delivered profit = Sum of delivered_profit from Orders for this SKU."
+        )
+
+    with c4:
+        _card(
+            "Net after ads",
+            money_ccy(net_after_ads_disp, currency),
+            "",
+            _tone(net_profit_usd),
+            tip="Net after ads = Delivered profit − Spend."
+        )
+
+    c5, c6, c7, c8 = st.columns(4)
+    with c5:
+        _card("Requested", f"{int(requested):,}", "", "neutral",
+            tip="Requested = Sum of requested_units from Orders.")
+
+    with c6:
+        _card("Confirmed", f"{int(confirmed):,}", "", "neutral",
+            tip="Confirmed = Sum of confirmed_units from Orders.")
+
+    with c7:
+        _card(
+            "Potential net",
+            money_ccy(potential_net_disp, currency),
+            "",
+            _tone(potential_net_usd),
+            tip="Potential net = Confirmed profit − Spend."
+        )
+
+    with c8:
+        _card(
+            "ROAS",
+            "N/A" if roas is None else f"{roas:.2f}",
+            "",
+            "neutral",
+            tip="ROAS = Delivered profit ÷ Spend."
+        )
+
 
     st.divider()
 
@@ -1065,6 +1127,50 @@ st.markdown("""
   border-style: solid;
   border-color: rgba(10,12,16,0.98) transparent transparent transparent;
 }
+.kpi-title-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.kpi-tip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.80);
+  font-size:12px;
+  cursor: help;
+  position: relative;
+}
+.kpi-tip:hover{ border-color: rgba(255,255,255,0.40); }
+
+.kpi-tip[data-tip]:hover:after{
+  content: attr(data-tip);
+  position:absolute;
+  left:50%;
+  transform: translateX(-50%);
+  bottom:130%;
+  width:280px;
+  background: rgba(10,12,16,0.98);
+  border:1px solid rgba(255,255,255,0.16);
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:12px;
+  line-height:1.35;
+  color: rgba(255,255,255,0.92);
+  white-space: pre-wrap;
+  z-index:9999;
+  box-shadow:0 10px 30px rgba(0,0,0,0.45);
+}
+.kpi-tip[data-tip]:hover:before{
+  content:"";
+  position:absolute;
+  left:50%;
+  transform: translateX(-50%);
+  bottom:118%;
+  border-width:7px;
+  border-style:solid;
+  border-color: rgba(10,12,16,0.98) transparent transparent transparent;
+}
 
 </style>
 """, unsafe_allow_html=True)
@@ -1150,6 +1256,39 @@ if orders_df is not None:
 
 # --------------------------------------------------------------
 
+def _esc(s: str) -> str:
+    if s is None:
+        return ""
+    return (str(s)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&#39;")
+            )
+
+def _tone(v):
+    if v is None:
+        return "neutral"
+    return "good" if v >= 0 else "bad"
+
+def _card(title: str, value_str: str, sub: str = "", tone: str = "neutral", tip: str = ""):
+    tip_attr = f'data-tip="{_esc(tip)}"' if tip else ""
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+          <div class="kpi-title-row">
+            <div class="kpi-title">{_esc(title)}</div>
+            {"<span class='kpi-tip' " + tip_attr + ">ⓘ</span>" if tip else ""}
+          </div>
+          <div class="kpi-value {tone}">{_esc(value_str)}</div>
+          <div class="kpi-sub">{_esc(sub)}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 # Show last upload date (from GitHub snapshot) + data source
 last_saved = None
 if data_source == "github" and snap is not None:
@@ -1186,38 +1325,8 @@ with tab_dashboard:
     st.markdown("### Profit After Ads")
 
     # helpers
-    def _tone(v):
-        if v is None:
-            return "neutral"
-        return "good" if v >= 0 else "bad"
+    
 
-    def _esc(s: str) -> str:
-        # minimal escaping for HTML attributes
-        if s is None:
-            return ""
-        return (str(s)
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace('"', "&quot;")
-                .replace("'", "&#39;")
-                )
-
-    def _card(title: str, value_str: str, sub: str = "", tone: str = "neutral", tip: str = ""):
-        tip_attr = f'data-tip="{_esc(tip)}"' if tip else ""
-        st.markdown(
-            f"""
-            <div class="kpi-card">
-            <div class="kpi-title-row">
-                <div class="kpi-title">{_esc(title)}</div>
-                {"<span class='kpi-tip' " + tip_attr + ">ⓘ</span>" if tip else ""}
-            </div>
-            <div class="kpi-value {tone}">{_esc(value_str)}</div>
-            <div class="kpi-sub">{_esc(sub)}</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
 
 
 
