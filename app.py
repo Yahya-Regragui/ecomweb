@@ -1004,6 +1004,25 @@ def build_excel_bytes(kpis: dict, fx: float, funnel_png: bytes, realized_png: by
 # ------------------ Streamlit UI ------------------
 st.set_page_config(page_title="E-commerce Dashboard", layout="wide")
 
+st.markdown("""
+<style>
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 4px; }
+.kpi-card {
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 14px 14px 12px 14px;
+  background: rgba(255,255,255,0.03);
+}
+.kpi-title { font-size: 12px; opacity: 0.8; margin-bottom: 8px; }
+.kpi-value { font-size: 28px; font-weight: 700; line-height: 1.1; margin-bottom: 6px; }
+.kpi-sub { font-size: 12px; opacity: 0.75; }
+.good { color: #39d98a; }
+.bad  { color: #ff6b6b; }
+.neutral { color: rgba(255,255,255,0.92); }
+</style>
+""", unsafe_allow_html=True)
+
+
 st.title("E-commerce Dashboard")
 st.caption("Drop Orders CSV + Campaigns CSV → dashboard updates instantly. Export to PDF or Excel.")
 
@@ -1117,28 +1136,64 @@ with tab_dashboard:
     col2.metric(f"Delivered Profit ({currency})", money_ccy(kpis_disp["delivered_profit_disp"], currency), f"{int(kpis['delivered_units']):,} delivered")
     col3.metric(f"Ad Spend ({currency})", money_ccy(kpis_disp["spend_disp"], currency))
 
-    # --- Row 2: Net + Potential (Normal FX vs Taager FX) ---
-    col4, col5, col6, col7 = st.columns(4)
+    st.markdown("### Profit After Ads")
 
-    col4.metric("Net Profit After Ads", money_ccy(kpis_disp["net_profit_disp"], currency))
+    # helpers
+    def _tone(v):
+        if v is None:
+            return "neutral"
+        return "good" if v >= 0 else "bad"
 
-    # Net (Taager FX 1602) — safe even on reruns
-    if "net_profit_usd_taager" not in locals() or net_profit_usd_taager is None:
-        col5.metric("Net Profit (Taager FX 1602)", "N/A")
+    def _card(title: str, value_str: str, sub: str = "", tone: str = "neutral"):
+        st.markdown(
+            f"""
+            <div class="kpi-card">
+            <div class="kpi-title">{title}</div>
+            <div class="kpi-value {tone}">{value_str}</div>
+            <div class="kpi-sub">{sub}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # compute display values
+    net_disp = kpis_disp["net_profit_disp"]
+    pot_disp = kpis_disp["potential_net_disp"]
+
+    if net_profit_usd_taager is None:
+        net_taager_disp = None
     else:
-        net_profit_disp_taager = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
-        col5.metric("Net Profit (Taager FX 1602)", money_ccy(net_profit_disp_taager, currency))
+        net_taager_disp = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
 
-
-
-    col6.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
-
-    # Potential (Taager FX 1602) — safe even on reruns
-    if "potential_net_usd_taager" not in locals() or potential_net_usd_taager is None:
-        col7.metric("Potential Net (Taager FX 1602)", "N/A")
+    if potential_net_usd_taager is None:
+        pot_taager_disp = None
     else:
-        potential_net_disp_taager = potential_net_usd_taager * fx if currency == "IQD" else potential_net_usd_taager
-        col7.metric("Potential Net (Taager FX 1602)", money_ccy(potential_net_disp_taager, currency))
+        pot_taager_disp = potential_net_usd_taager * fx if currency == "IQD" else potential_net_usd_taager
+
+    # render 4 cards in a tight grid
+    st.markdown('<div class="kpi-grid">', unsafe_allow_html=True)
+
+    _card("Net (Delivered − Spend)",
+        money_ccy(net_disp, currency),
+        "Realized profitability",
+        _tone(net_disp))
+
+    _card("Net (Taager FX 1602)",
+        "N/A" if net_taager_disp is None else money_ccy(net_taager_disp, currency),
+        "Using payout FX",
+        _tone(net_taager_disp))
+
+    _card("Potential (Confirmed − Spend)",
+        money_ccy(pot_disp, currency),
+        "If all confirmed deliver",
+        _tone(pot_disp))
+
+    _card("Potential (Taager FX 1602)",
+        "N/A" if pot_taager_disp is None else money_ccy(pot_taager_disp, currency),
+        "Using payout FX",
+        _tone(pot_taager_disp))
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 
