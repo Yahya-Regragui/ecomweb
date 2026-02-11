@@ -18,7 +18,19 @@ import altair as alt
 import base64
 import json
 import requests
+import re
 
+def extract_sku_from_campaign_name(name: str):
+    """
+    Extract SKU from strings like: 'example name - 1234567'
+    Returns None if not found.
+    """
+    if name is None:
+        return None
+    s = str(name).strip()
+    # Grab last digits after a hyphen (handles spaces)
+    m = re.search(r"-\s*(\d+)\s*$", s)
+    return m.group(1) if m else None
 
 
 def github_get_file_bytes(token: str, repo: str, path: str, branch: str = "main") -> bytes:
@@ -77,59 +89,47 @@ def load_latest_from_github():
         "campaigns_csv_bytes": campaigns_bytes,
     }
 
-def campaigns_metric_explorer(campaigns_df: pd.DataFrame):
+def campaigns_metric_explorer_sku(campaigns_df: pd.DataFrame):
     df = campaigns_df.copy()
 
-    # Must-have columns
     required = ["Reporting starts", "Campaign name", "Campaign delivery"]
     for c in required:
         if c not in df.columns:
             st.error(f"Campaigns file missing column: {c}")
             return
 
-    # Parse date
     df["Reporting starts"] = pd.to_datetime(df["Reporting starts"], errors="coerce")
     df = df.dropna(subset=["Reporting starts"])
     df["day"] = df["Reporting starts"].dt.floor("D")
 
-    # Normalize delivery
     df["Campaign delivery"] = df["Campaign delivery"].astype(str).str.lower().str.strip()
 
     # Clean numeric columns if present
-    numeric_candidates = [
-        "Amount spent (USD)", "Impressions", "Reach", "Results", "Cost per results"
-    ]
+    numeric_candidates = ["Amount spent (USD)", "Impressions", "Reach", "Results"]
     for c in numeric_candidates:
         if c in df.columns:
             df[c] = to_num(df[c])
 
-    # ---- UI controls ----
+    # Build SKU
+    df["sku"] = df["Campaign name"].apply(extract_sku_from_campaign_name)
+
+    # ---- UI ----
     left, right = st.columns([1, 3], vertical_alignment="top")
 
     with left:
-        st.markdown("### Filters")
-
-        only_active = st.checkbox("Only active campaigns", value=True)
+        st.markdown("### Settings")
+        group_by = st.selectbox("Group by", ["SKU (product)", "Campaign"], index=0)
+        only_active = st.checkbox("Only active", value=True)
 
         metric_options = []
-        if "Results" in df.columns:
-            metric_options.append(("Results", "Results"))
-        if "Amount spent (USD)" in df.columns:
-            metric_options.append(("Spend (USD)", "Amount spent (USD)"))
-        if "Impressions" in df.columns:
-            metric_options.append(("Impressions", "Impressions"))
-        if "Reach" in df.columns:
-            metric_options.append(("Reach", "Reach"))
-
-        # Derived metrics (only if inputs exist)
+        if "Results" in df.columns: metric_options.append(("Results", "Results"))
+        if "Amount spent (USD)" in df.columns: metric_options.append(("Spend (USD)", "Amount spent (USD)"))
+        if "Impressions" in df.columns: metric_options.append(("Impressions", "Impressions"))
+        if "Reach" in df.columns: metric_options.append(("Reach", "Reach"))
         if "Amount spent (USD)" in df.columns and "Impressions" in df.columns:
             metric_options.append(("CPM (USD)", "DERIVED_CPM"))
         if "Amount spent (USD)" in df.columns and "Results" in df.columns:
             metric_options.append(("Cost per Result (USD)", "DERIVED_CPR"))
-
-        if not metric_options:
-            st.error("No usable metrics found in this campaigns file.")
-            return
 
         metric_label, metric_key = st.selectbox(
             "Metric",
@@ -138,59 +138,64 @@ def campaigns_metric_explorer(campaigns_df: pd.DataFrame):
             index=0
         )
 
-        top_n = st.slider("Top N campaigns", min_value=3, max_value=20, value=10, step=1)
+        top_n = st.slider("Top N", min_value=3, max_value=30, value=10, step=1)
 
-    # Apply active filter
+        if group_by == "SKU (product)":
+            include_unknown = st.checkbox("Include campaigns without SKU", value=False)
+
     df2 = df[df["Campaign delivery"].eq("active")].copy() if only_active else df.copy()
     if df2.empty:
-        st.info("No campaigns found after filtering.")
+        st.info("No data after filtering.")
         return
 
-    # Build a unified numeric column called "value"
+    # Choose grouping column
+    if group_by == "SKU (product)":
+        if not include_unknown:
+            df2 = df2.dropna(subset=["sku"])
+        df2["group"] = df2["sku"].fillna("UNKNOWN")
+    else:
+        df2["group"] = df2["Campaign name"].astype(str)
+
+    if df2.empty:
+        st.info("No data after SKU filtering.")
+        return
+
+    # Build daily aggregated "value"
     if metric_key == "DERIVED_CPM":
-        # CPM = spend / impressions * 1000
         tmp = (
-            df2.groupby(["day", "Campaign name"], as_index=False)[["Amount spent (USD)", "Impressions"]]
+            df2.groupby(["day", "group"], as_index=False)[["Amount spent (USD)", "Impressions"]]
             .sum()
         )
         tmp["value"] = tmp["Amount spent (USD)"] / tmp["Impressions"].replace({0: pd.NA}) * 1000
-        tmp["value"] = tmp["value"].astype(float)
-        daily = tmp[["day", "Campaign name", "value"]].dropna(subset=["value"])
+        daily = tmp[["day", "group", "value"]].dropna(subset=["value"])
 
     elif metric_key == "DERIVED_CPR":
-        # Cost per Result = spend / results
         tmp = (
-            df2.groupby(["day", "Campaign name"], as_index=False)[["Amount spent (USD)", "Results"]]
+            df2.groupby(["day", "group"], as_index=False)[["Amount spent (USD)", "Results"]]
             .sum()
         )
         tmp["value"] = tmp["Amount spent (USD)"] / tmp["Results"].replace({0: pd.NA})
-        tmp["value"] = tmp["value"].astype(float)
-        daily = tmp[["day", "Campaign name", "value"]].dropna(subset=["value"])
+        daily = tmp[["day", "group", "value"]].dropna(subset=["value"])
 
     else:
-        if metric_key not in df2.columns:
-            st.error(f"Metric column missing: {metric_key}")
-            return
-
         daily = (
-            df2.groupby(["day", "Campaign name"], as_index=False)[metric_key]
+            df2.groupby(["day", "group"], as_index=False)[metric_key]
             .sum()
             .rename(columns={metric_key: "value"})
         )
 
-    # Determine top N campaigns by total value in the selected metric
+    # Top N groups by total value
     top = (
-        daily.groupby("Campaign name", as_index=False)["value"]
+        daily.groupby("group", as_index=False)["value"]
         .sum()
         .sort_values("value", ascending=False)
         .head(top_n)
     )
-    top_names = top["Campaign name"].tolist()
+    top_groups = top["group"].tolist()
 
-    daily = daily[daily["Campaign name"].isin(top_names)].copy()
-    daily = daily.sort_values("day")
+    daily = daily[daily["group"].isin(top_groups)].sort_values("day")
 
-    # Date range control
+    # Date range
     min_d = daily["day"].min().date()
     max_d = daily["day"].max().date()
 
@@ -198,42 +203,43 @@ def campaigns_metric_explorer(campaigns_df: pd.DataFrame):
         st.markdown("### Date range")
         d_from, d_to = st.date_input("Range", value=(min_d, max_d))
 
-        st.markdown("### Campaigns")
+        st.markdown("### Selection")
         selected = st.multiselect(
-            "Select campaigns",
-            options=top_names,
-            default=top_names[:3] if len(top_names) >= 3 else top_names
+            "Select items",
+            options=top_groups,
+            default=top_groups[:3] if len(top_groups) >= 3 else top_groups
         )
 
     if not selected:
         with right:
-            st.info("Select at least 1 campaign.")
+            st.info("Select at least 1 item.")
         return
 
     daily = daily[(daily["day"].dt.date >= d_from) & (daily["day"].dt.date <= d_to)]
-    daily = daily[daily["Campaign name"].isin(selected)]
+    daily = daily[daily["group"].isin(selected)]
 
     if daily.empty:
         with right:
-            st.info("No data for the current selection.")
+            st.info("No data for this selection.")
         return
 
-    # ---- Interactive chart (Altair) ----
+    # Interactive chart
     with right:
-        st.markdown(f"### {metric_label} per day (interactive)")
+        title = f"{metric_label} per day — grouped by {'SKU' if group_by=='SKU (product)' else 'Campaign'}"
+        st.markdown(f"### {title}")
 
         nearest = alt.selection_point(nearest=True, on="mouseover", fields=["day"], empty=False)
 
         base = alt.Chart(daily).encode(
             x=alt.X("day:T", title="Day"),
             y=alt.Y("value:Q", title=metric_label),
-            color=alt.Color("Campaign name:N", legend=alt.Legend(title="Campaign")),
+            color=alt.Color("group:N", legend=alt.Legend(title="SKU" if group_by == "SKU (product)" else "Campaign")),
         )
 
         lines = base.mark_line(point=True).encode(
             tooltip=[
                 alt.Tooltip("day:T", title="Day"),
-                alt.Tooltip("Campaign name:N", title="Campaign"),
+                alt.Tooltip("group:N", title=("SKU" if group_by == "SKU (product)" else "Campaign")),
                 alt.Tooltip("value:Q", title=metric_label),
             ]
         )
@@ -243,11 +249,11 @@ def campaigns_metric_explorer(campaigns_df: pd.DataFrame):
         rule = alt.Chart(daily).mark_rule().encode(x="day:T").transform_filter(nearest)
 
         chart = (lines + selectors + points + rule).properties(height=430).interactive()
-
         st.altair_chart(chart, use_container_width=True)
 
-        with st.expander(f"Top {top_n} campaigns by {metric_label}", expanded=False):
-            top_view = top.rename(columns={"value": metric_label})
+        with st.expander(f"Top {top_n} by {metric_label}", expanded=False):
+            top_view = top.rename(columns={"group": ("SKU" if group_by == "SKU (product)" else "Campaign"),
+                                           "value": metric_label})
             st.dataframe(top_view, use_container_width=True)
 
 
@@ -1042,5 +1048,5 @@ with tab_campaigns:
     if campaigns_df is None:
         st.info("No campaigns data available yet.")
     else:
-        campaigns_metric_explorer(campaigns_df)
+        campaigns_metric_explorer_sku(campaigns_df)
 
