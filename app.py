@@ -12,6 +12,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.lib.utils import ImageReader
+import altair as alt
 
 
 import base64
@@ -148,29 +149,29 @@ def to_num(series: pd.Series) -> pd.Series:
     s = s.str.replace(r"[^0-9\.\-]", "", regex=True)
     return pd.to_numeric(s, errors="coerce").fillna(0)
 
-def plot_results_top10_active(campaigns_df: pd.DataFrame):
+def plot_results_top10_active_interactive(campaigns_df: pd.DataFrame):
     df = campaigns_df.copy()
 
-    # Safety checks
     required = ["Reporting starts", "Campaign name", "Campaign delivery", "Results"]
     for c in required:
         if c not in df.columns:
             st.error(f"Campaigns file missing column: {c}")
             return
 
-    # Parse date + clean Results
+    # Parse + clean
     df["Reporting starts"] = pd.to_datetime(df["Reporting starts"], errors="coerce")
     df = df.dropna(subset=["Reporting starts"])
-    df["day"] = df["Reporting starts"].dt.date
+    df["day"] = df["Reporting starts"].dt.floor("D")
     df["Results"] = to_num(df["Results"])
+    df["Campaign delivery"] = df["Campaign delivery"].astype(str).str.lower()
 
-    # Keep only active campaigns
-    active = df[df["Campaign delivery"].astype(str).str.lower().eq("active")].copy()
+    # Filter active
+    active = df[df["Campaign delivery"] == "active"].copy()
     if active.empty:
         st.info("No active campaigns found.")
         return
 
-    # Top 10 by total Results
+    # Pick top 10 by total results
     top10 = (
         active.groupby("Campaign name", as_index=False)["Results"]
         .sum()
@@ -179,38 +180,72 @@ def plot_results_top10_active(campaigns_df: pd.DataFrame):
     )
     top_names = top10["Campaign name"].tolist()
 
-    # Daily results
+    # Daily results for top 10
     daily = (
         active[active["Campaign name"].isin(top_names)]
         .groupby(["day", "Campaign name"], as_index=False)["Results"]
         .sum()
+        .rename(columns={"Results": "results"})
+        .sort_values("day")
     )
 
-    pivot = (
-        daily.pivot_table(index="day", columns="Campaign name", values="Results", aggfunc="sum")
-        .fillna(0)
-        .sort_index()
-    )
+    # ----- UI controls -----
+    left, right = st.columns([1, 3], vertical_alignment="top")
 
-    st.subheader("Results per day — Top 10 active campaigns")
-    st.caption("Top 10 selected by total Results over this date range.")
-    st.dataframe(top10, use_container_width=True)
+    with left:
+        st.markdown("### Campaigns")
+        selected = st.multiselect("Select campaigns", top_names, default=top_names[:3] if len(top_names) >= 3 else top_names)
 
-    # Line chart
-    fig = plt.figure(figsize=(11, 4))
-    ax = fig.add_subplot(111)
+        st.markdown("### Date filter")
+        min_d = daily["day"].min().date()
+        max_d = daily["day"].max().date()
+        d_from, d_to = st.date_input("Range", value=(min_d, max_d))
 
-    for col in pivot.columns:
-        ax.plot(pd.to_datetime(pivot.index), pivot[col].values, marker="o", linewidth=2, label=str(col))
+    if not selected:
+        with right:
+            st.info("Select at least 1 campaign.")
+        return
 
-    ax.set_title("Daily Results (Top 10 active campaigns)")
-    ax.set_xlabel("Day")
-    ax.set_ylabel("Results")
-    ax.grid(True, alpha=0.3)
-    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), borderaxespad=0)
+    # Apply filters
+    daily_f = daily[daily["Campaign name"].isin(selected)].copy()
+    daily_f = daily_f[(daily_f["day"].dt.date >= d_from) & (daily_f["day"].dt.date <= d_to)]
 
-    plt.tight_layout()
-    st.pyplot(fig, use_container_width=True)
+    if daily_f.empty:
+        with right:
+            st.info("No data in this date range.")
+        return
+
+    with right:
+        st.markdown("### Daily Results (interactive)")
+
+        # Interactive selection on hover
+        nearest = alt.selection_point(nearest=True, on="mouseover", fields=["day"], empty=False)
+
+        base = alt.Chart(daily_f).encode(
+            x=alt.X("day:T", title="Day"),
+            y=alt.Y("results:Q", title="Results"),
+            color=alt.Color("Campaign name:N", legend=alt.Legend(title="Campaign")),
+        )
+
+        lines = base.mark_line(point=True).encode(
+            tooltip=[
+                alt.Tooltip("day:T", title="Day"),
+                alt.Tooltip("Campaign name:N", title="Campaign"),
+                alt.Tooltip("results:Q", title="Results"),
+            ]
+        )
+
+        # Hover point + vertical rule
+        selectors = base.mark_point().encode(opacity=alt.value(0)).add_params(nearest)
+        points = base.mark_point(size=80).encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
+        rule = alt.Chart(daily_f).mark_rule().encode(x="day:T").transform_filter(nearest)
+
+        chart = (lines + selectors + points + rule).properties(height=420).interactive()
+
+        st.altair_chart(chart, use_container_width=True)
+
+        with st.expander("Top 10 (by total Results)", expanded=False):
+            st.dataframe(top10, use_container_width=True)
 
 
 def money_ccy(x: float, ccy: str) -> str:
@@ -579,7 +614,7 @@ st.caption("Drop Orders CSV + Campaigns CSV → dashboard updates instantly. Exp
 
 with st.sidebar:
     st.subheader("Inputs")
-    fx = st.number_input("FX rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0)
+    fx = st.number_input("FX rate (IQD per 1 USD)", min_value=1.0, value=1602.0, step=1.0)
 
     currency = st.selectbox("Display currency (Orders)", ["USD", "IQD"], index=0)
 
@@ -835,4 +870,4 @@ with tab_campaigns:
     if campaigns_df is None:
         st.info("No campaigns data available yet.")
     else:
-        plot_results_top10_active(campaigns_df)
+        plot_results_top10_active_interactive(campaigns_df)
