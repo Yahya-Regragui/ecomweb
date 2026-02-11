@@ -1160,15 +1160,17 @@ with tab_dashboard:
     net_disp = kpis_disp["net_profit_disp"]
     pot_disp = kpis_disp["potential_net_disp"]
 
+    # IMPORTANT: Taager FX numbers must use 1602 only (never the user FX input)
     if net_profit_usd_taager is None:
         net_taager_disp = None
     else:
-        net_taager_disp = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
+        net_taager_disp = net_profit_usd_taager * TAAGER_FX if currency == "IQD" else net_profit_usd_taager
 
     if potential_net_usd_taager is None:
         pot_taager_disp = None
     else:
-        pot_taager_disp = potential_net_usd_taager * fx if currency == "IQD" else potential_net_usd_taager
+        pot_taager_disp = potential_net_usd_taager * TAAGER_FX if currency == "IQD" else potential_net_usd_taager
+
 
     # render 4 cards in a tight grid
     st.markdown('<div class="kpi-grid">', unsafe_allow_html=True)
