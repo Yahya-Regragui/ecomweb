@@ -1116,29 +1116,29 @@ with tab_dashboard:
     # --- Row 2: Net + Potential (Normal FX vs Taager FX) ---
     col4, col5, col6, col7 = st.columns(4)
 
-    # 1) Net (normal, using selected FX)
     col4.metric("Net Profit After Ads", money_ccy(kpis_disp["net_profit_disp"], currency))
 
-    # 2) Net (Taager FX 1602)
+    # Net (Taager FX 1602)
     if net_profit_usd_taager is None:
         col5.metric("Net Profit (Taager FX 1602)", "N/A")
     else:
         net_profit_disp_taager = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
         col5.metric("Net Profit (Taager FX 1602)", money_ccy(net_profit_disp_taager, currency))
 
-    # 3) Potential (normal, using selected FX) ✅ this is the one you currently show
     col6.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
 
-    # 4) Potential (Taager FX 1602) ✅ add this one
+    # Potential (Taager FX 1602)
     if potential_net_usd_taager is None:
         col7.metric("Potential Net (Taager FX 1602)", "N/A")
     else:
         potential_net_disp_taager = potential_net_usd_taager * fx if currency == "IQD" else potential_net_usd_taager
         col7.metric("Potential Net (Taager FX 1602)", money_ccy(potential_net_disp_taager, currency))
 
+    # --- ROAS row (separate) ---
     roas1, roas2 = st.columns(2)
     roas1.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]))
     roas2.metric("ROAS (Potential)", fmt_ratio(kpis["roas_potential"]))
+
 
 
 
