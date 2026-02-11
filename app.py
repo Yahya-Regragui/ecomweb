@@ -45,6 +45,46 @@ def extract_sku_from_campaign_name(name: str):
 
     return sku
 
+def build_sku_to_name_map(orders_df: pd.DataFrame) -> dict:
+    """
+    Returns {sku: product_name} from orders file.
+    Picks the most frequent product name per SKU.
+    """
+    if orders_df is None or orders_df.empty:
+        return {}
+
+    # try common column names (Arabic + possible English)
+    sku_col = None
+    name_col = None
+
+    for c in ["كود_المنتج", "product_sku", "sku", "product_code"]:
+        if c in orders_df.columns:
+            sku_col = c
+            break
+
+    for c in ["اسم_المنتج", "product_name", "name"]:
+        if c in orders_df.columns:
+            name_col = c
+            break
+
+    if not sku_col or not name_col:
+        return {}
+
+    tmp = orders_df[[sku_col, name_col]].copy()
+    tmp[sku_col] = tmp[sku_col].astype(str).str.strip()
+    tmp[name_col] = tmp[name_col].astype(str).str.strip()
+
+    tmp = tmp[(tmp[sku_col] != "") & (tmp[name_col] != "")]
+
+    # most common name per sku
+    sku_name = (
+        tmp.groupby(sku_col)[name_col]
+        .agg(lambda s: s.value_counts().index[0])
+        .to_dict()
+    )
+    return sku_name
+
+
 def github_get_file_bytes(token: str, repo: str, path: str, branch: str = "main") -> bytes:
     """
     Download file bytes from GitHub.
@@ -101,7 +141,7 @@ def load_latest_from_github():
         "campaigns_csv_bytes": campaigns_bytes,
     }
 
-def campaigns_metric_explorer_sku(campaigns_df: pd.DataFrame):
+def campaigns_metric_explorer_sku(campaigns_df: pd.DataFrame, orders_df: pd.DataFrame):
     df = campaigns_df.copy()
 
     required = ["Reporting starts", "Campaign name", "Campaign delivery"]
@@ -124,6 +164,13 @@ def campaigns_metric_explorer_sku(campaigns_df: pd.DataFrame):
 
     # Build SKU
     df["sku"] = df["Campaign name"].apply(extract_sku_from_campaign_name)
+
+    sku_to_name = build_sku_to_name_map(orders_df)  # <-- uses orders file
+    df["product_name"] = df["sku"].map(sku_to_name)
+    df["label"] = df.apply(
+        lambda r: f"{r['product_name']} — {r['sku']}" if pd.notna(r["product_name"]) and r["product_name"] else (r["sku"] if r["sku"] else "UNKNOWN"),
+        axis=1
+    )
 
     # ---- UI ----
     left, right = st.columns([1, 3], vertical_alignment="top")
@@ -164,7 +211,7 @@ def campaigns_metric_explorer_sku(campaigns_df: pd.DataFrame):
     if group_by == "SKU (product)":
         if not include_unknown:
             df2 = df2.dropna(subset=["sku"])
-        df2["group"] = df2["sku"].fillna("UNKNOWN")
+        df2["group"] = df2["label"].fillna("UNKNOWN")
     else:
         df2["group"] = df2["Campaign name"].astype(str)
 
@@ -1060,5 +1107,6 @@ with tab_campaigns:
     if campaigns_df is None:
         st.info("No campaigns data available yet.")
     else:
-        campaigns_metric_explorer_sku(campaigns_df)
+        campaigns_metric_explorer_sku(campaigns_df, orders_df)
+
 
