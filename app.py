@@ -1019,6 +1019,53 @@ st.markdown("""
 .good { color: #39d98a; }
 .bad  { color: #ff6b6b; }
 .neutral { color: rgba(255,255,255,0.92); }
+            .kpi-title-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.kpi-tip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.80);
+  font-size:12px;
+  cursor: help;
+  position: relative;
+  flex: 0 0 auto;
+}
+.kpi-tip:hover{ border-color: rgba(255,255,255,0.40); color: rgba(255,255,255,0.95); }
+
+.kpi-tip[data-tip]:hover:after{
+  content: attr(data-tip);
+  position:absolute;
+  left:50%;
+  transform: translateX(-50%);
+  bottom: 130%;
+  width: 280px;
+  max-width: 320px;
+  background: rgba(10,12,16,0.98);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255,255,255,0.92);
+  white-space: pre-wrap;   /* allow line breaks */
+  z-index: 9999;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+.kpi-tip[data-tip]:hover:before{
+  content:"";
+  position:absolute;
+  left:50%;
+  transform: translateX(-50%);
+  bottom: 118%;
+  border-width: 7px;
+  border-style: solid;
+  border-color: rgba(10,12,16,0.98) transparent transparent transparent;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1144,17 +1191,35 @@ with tab_dashboard:
             return "neutral"
         return "good" if v >= 0 else "bad"
 
-    def _card(title: str, value_str: str, sub: str = "", tone: str = "neutral"):
+    def _esc(s: str) -> str:
+        # minimal escaping for HTML attributes
+        if s is None:
+            return ""
+        return (str(s)
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace('"', "&quot;")
+                .replace("'", "&#39;")
+                )
+
+    def _card(title: str, value_str: str, sub: str = "", tone: str = "neutral", tip: str = ""):
+        tip_attr = f'data-tip="{_esc(tip)}"' if tip else ""
         st.markdown(
             f"""
             <div class="kpi-card">
-            <div class="kpi-title">{title}</div>
-            <div class="kpi-value {tone}">{value_str}</div>
-            <div class="kpi-sub">{sub}</div>
+            <div class="kpi-title-row">
+                <div class="kpi-title">{_esc(title)}</div>
+                {"<span class='kpi-tip' " + tip_attr + ">ⓘ</span>" if tip else ""}
+            </div>
+            <div class="kpi-value {tone}">{_esc(value_str)}</div>
+            <div class="kpi-sub">{_esc(sub)}</div>
             </div>
             """,
             unsafe_allow_html=True
         )
+
+
 
     # compute display values
     net_disp = kpis_disp["net_profit_disp"]
@@ -1189,15 +1254,32 @@ with tab_dashboard:
     #     "Using payout FX",
     #     _tone(net_taager_disp))
 
-    _card("Potential (Confirmed − Spend)",
+    _card(
+        "Potential (Confirmed − Spend)",
         money_ccy(pot_disp, currency),
         "If all confirmed deliver",
-        _tone(pot_disp))
+        _tone(pot_disp),
+        tip=(
+            "Potential Net = Confirmed Profit − Ad Spend\n"
+            f"Confirmed Profit ({currency}) = {money_ccy(kpis_disp['confirmed_profit_disp'], currency)}\n"
+            f"Ad Spend ({currency}) = {money_ccy(kpis_disp['spend_disp'], currency)}\n"
+        )
+    )
 
-    _card("Potential (Taager FX 1602)",
-        "N/A" if pot_taager_disp is None else money_ccy(pot_taager_disp, currency),
+
+    _card(
+        "Potential (Taager FX 1602)",
+        "N/A" if pot_taager_disp is None else money_ccy(pot_taager_disp, "USD"),
         "Using payout FX",
-        _tone(pot_taager_disp))
+        _tone(pot_taager_disp),
+        tip=(
+            "Taager Potential (USD) = Potential Net (IQD) ÷ 1602\n"
+            "Potential Net (IQD) = (Confirmed Profit (IQD) − Ad Spend (IQD))\n"
+            f"Confirmed Profit (IQD) = {money_ccy(kpis['confirmed_profit_usd'] * fx, 'IQD')}\n"
+            f"Ad Spend (IQD) = {money_ccy(kpis['spend_usd'] * fx, 'IQD')}\n"
+        )
+    )
+
 
     st.markdown("</div>", unsafe_allow_html=True)
 
