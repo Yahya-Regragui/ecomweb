@@ -713,8 +713,6 @@ def parse_inputs(orders: pd.DataFrame, campaigns: pd.DataFrame, iqd_per_usd: flo
     cpm = None if impressions == 0 else (spend_usd / impressions * 1000)
     cost_per_reach = None if reach == 0 else (spend_usd / reach)
 
-    kpis = dict(...)
-    return orders, campaigns, kpis
 
 
     kpis = dict(
