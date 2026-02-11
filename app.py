@@ -148,6 +148,71 @@ def to_num(series: pd.Series) -> pd.Series:
     s = s.str.replace(r"[^0-9\.\-]", "", regex=True)
     return pd.to_numeric(s, errors="coerce").fillna(0)
 
+def plot_results_top10_active(campaigns_df: pd.DataFrame):
+    df = campaigns_df.copy()
+
+    # Safety checks
+    required = ["Reporting starts", "Campaign name", "Campaign delivery", "Results"]
+    for c in required:
+        if c not in df.columns:
+            st.error(f"Campaigns file missing column: {c}")
+            return
+
+    # Parse date + clean Results
+    df["Reporting starts"] = pd.to_datetime(df["Reporting starts"], errors="coerce")
+    df = df.dropna(subset=["Reporting starts"])
+    df["day"] = df["Reporting starts"].dt.date
+    df["Results"] = to_num(df["Results"])
+
+    # Keep only active campaigns
+    active = df[df["Campaign delivery"].astype(str).str.lower().eq("active")].copy()
+    if active.empty:
+        st.info("No active campaigns found.")
+        return
+
+    # Top 10 by total Results
+    top10 = (
+        active.groupby("Campaign name", as_index=False)["Results"]
+        .sum()
+        .sort_values("Results", ascending=False)
+        .head(10)
+    )
+    top_names = top10["Campaign name"].tolist()
+
+    # Daily results
+    daily = (
+        active[active["Campaign name"].isin(top_names)]
+        .groupby(["day", "Campaign name"], as_index=False)["Results"]
+        .sum()
+    )
+
+    pivot = (
+        daily.pivot_table(index="day", columns="Campaign name", values="Results", aggfunc="sum")
+        .fillna(0)
+        .sort_index()
+    )
+
+    st.subheader("Results per day — Top 10 active campaigns")
+    st.caption("Top 10 selected by total Results over this date range.")
+    st.dataframe(top10, use_container_width=True)
+
+    # Line chart
+    fig = plt.figure(figsize=(11, 4))
+    ax = fig.add_subplot(111)
+
+    for col in pivot.columns:
+        ax.plot(pd.to_datetime(pivot.index), pivot[col].values, marker="o", linewidth=2, label=str(col))
+
+    ax.set_title("Daily Results (Top 10 active campaigns)")
+    ax.set_xlabel("Day")
+    ax.set_ylabel("Results")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), borderaxespad=0)
+
+    plt.tight_layout()
+    st.pyplot(fig, use_container_width=True)
+
+
 def money_ccy(x: float, ccy: str) -> str:
     if x is None:
         return "N/A"
@@ -584,7 +649,9 @@ if one_uploaded:
     st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
 
 # --- Tabs ---
-tab_dashboard, tab_orders, tab_ads = st.tabs(["📊 Dashboard", "📦 Orders details", "📣 Ads details"])
+tab_dashboard, tab_orders, tab_ads, tab_campaigns = st.tabs(
+    ["📊 Dashboard", "📦 Orders details", "📣 Ads details", "📈 Campaigns analytics"]
+)
 
 with tab_dashboard:
     if data_source == "github" and snap is not None and snap.get("generated_at"):
@@ -761,3 +828,11 @@ with tab_ads:
 
         st.caption(f"{len(filtered):,} rows")
         st.dataframe(filtered[cols], use_container_width=True)
+
+with tab_campaigns:
+    st.subheader("Campaigns analytics")
+
+    if campaigns_df is None:
+        st.info("No campaigns data available yet.")
+    else:
+        plot_results_top10_active(campaigns_df)
