@@ -1024,14 +1024,13 @@ orders_df = None
 campaigns_df = None
 snap = None
 
-# ---------- Taager FX globals (always defined to avoid NameError) ----------
-TAAGER_FX = 1602.0  # IQD per 1 USD (Taager payout rate)
 
+
+
+# --- Taager FX (always defined) ---
+TAAGER_FX = 1602.0
 net_profit_usd_taager = None
 potential_net_usd_taager = None
-
-
-
 
 # CASE A: both uploaded -> use uploads
 if both_uploaded:
@@ -1123,22 +1122,25 @@ with tab_dashboard:
 
     col4.metric("Net Profit After Ads", money_ccy(kpis_disp["net_profit_disp"], currency))
 
-    # Net (Taager FX 1602)
-    if net_profit_usd_taager is None:
+    # Net (Taager FX 1602) — safe even on reruns
+    if "net_profit_usd_taager" not in locals() or net_profit_usd_taager is None:
         col5.metric("Net Profit (Taager FX 1602)", "N/A")
     else:
         net_profit_disp_taager = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
         col5.metric("Net Profit (Taager FX 1602)", money_ccy(net_profit_disp_taager, currency))
 
 
+
     col6.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
 
-    # Potential (Taager FX 1602)
-    if potential_net_usd_taager is None:
+    # Potential (Taager FX 1602) — safe even on reruns
+    if "potential_net_usd_taager" not in locals() or potential_net_usd_taager is None:
         col7.metric("Potential Net (Taager FX 1602)", "N/A")
     else:
         potential_net_disp_taager = potential_net_usd_taager * fx if currency == "IQD" else potential_net_usd_taager
         col7.metric("Potential Net (Taager FX 1602)", money_ccy(potential_net_disp_taager, currency))
+
+
 
 
     # --- ROAS row (separate) ---
