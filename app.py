@@ -1178,10 +1178,10 @@ with tab_dashboard:
         "Realized profitability",
         _tone(net_disp))
 
-    _card("Net (Taager FX 1602)",
-        "N/A" if net_taager_disp is None else money_ccy(net_taager_disp, currency),
-        "Using payout FX",
-        _tone(net_taager_disp))
+    # _card("Net (Taager FX 1602)",
+    #     "N/A" if net_taager_disp is None else money_ccy(net_taager_disp, currency),
+    #     "Using payout FX",
+    #     _tone(net_taager_disp))
 
     _card("Potential (Confirmed − Spend)",
         money_ccy(pot_disp, currency),
