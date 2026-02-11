@@ -1005,6 +1005,14 @@ orders_df = None
 campaigns_df = None
 snap = None
 
+# ---------- Taager FX globals (always defined to avoid NameError) ----------
+TAAGER_FX = 1602.0  # IQD per 1 USD (Taager payout rate)
+
+net_profit_usd_taager = None
+potential_net_usd_taager = None
+# -------------------------------------------------------------------------
+
+
 # CASE A: both uploaded -> use uploads
 if both_uploaded:
     try:
@@ -1013,37 +1021,6 @@ if both_uploaded:
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
         data_source = "uploads"
         kpis_disp = kpis_in_currency(kpis, fx, currency)
-        
-       # ---------- Taager FX KPIs (works for uploads + github) ----------
-        TAAGER_FX = 1602.0  # IQD per 1 USD
-
-        net_profit_usd_taager = None
-        potential_net_usd_taager = None
-
-        if orders_df is not None and campaigns_df is not None:
-            # Ensure numeric
-            for col in ["delivered_profit_iqd", "confirmed_profit_iqd"]:
-                if col in orders_df.columns:
-                    orders_df[col] = to_num(orders_df[col])
-
-            if "Amount spent (USD)" in campaigns_df.columns:
-                campaigns_df["Amount spent (USD)"] = to_num(campaigns_df["Amount spent (USD)"])
-
-            spend_usd = float(campaigns_df["Amount spent (USD)"].sum()) if "Amount spent (USD)" in campaigns_df.columns else 0.0
-
-            delivered_profit_usd_taager = (
-                float(orders_df["delivered_profit_iqd"].sum()) / TAAGER_FX
-                if "delivered_profit_iqd" in orders_df.columns else 0.0
-            )
-            confirmed_profit_usd_taager = (
-                float(orders_df["confirmed_profit_iqd"].sum()) / TAAGER_FX
-                if "confirmed_profit_iqd" in orders_df.columns else 0.0
-            )
-
-            net_profit_usd_taager = delivered_profit_usd_taager - spend_usd
-            potential_net_usd_taager = confirmed_profit_usd_taager - spend_usd
-        # --------------------------------------------------------------
-
 
 
     except Exception as e:
@@ -1075,6 +1052,31 @@ else:
 
 if one_uploaded and data_source == "github":
     st.info("Only one file uploaded → showing LAST SAVED data from GitHub. Upload the missing file to refresh.")
+
+# Ensure numeric
+if orders_df is not None:
+    for col in ["delivered_profit_iqd", "confirmed_profit_iqd"]:
+        if col in orders_df.columns:
+            orders_df[col] = to_num(orders_df[col])
+
+if campaigns_df is not None and "Amount spent (USD)" in campaigns_df.columns:
+    campaigns_df["Amount spent (USD)"] = to_num(campaigns_df["Amount spent (USD)"])
+
+if orders_df is not None and campaigns_df is not None:
+    spend_usd = float(campaigns_df["Amount spent (USD)"].sum()) if "Amount spent (USD)" in campaigns_df.columns else 0.0
+
+    delivered_profit_usd_taager = (
+        float(orders_df["delivered_profit_iqd"].sum()) / TAAGER_FX
+        if "delivered_profit_iqd" in orders_df.columns else 0.0
+    )
+    confirmed_profit_usd_taager = (
+        float(orders_df["confirmed_profit_iqd"].sum()) / TAAGER_FX
+        if "confirmed_profit_iqd" in orders_df.columns else 0.0
+    )
+
+    net_profit_usd_taager = delivered_profit_usd_taager - spend_usd
+    potential_net_usd_taager = confirmed_profit_usd_taager - spend_usd
+# --------------------------------------------------------------
 
 # Show last upload date (from GitHub snapshot) + data source
 last_saved = None
@@ -1125,6 +1127,7 @@ with tab_dashboard:
     else:
         potential_net_disp_taager = potential_net_usd_taager * fx if currency == "IQD" else potential_net_usd_taager
         col6.metric("Potential Net (Taager FX 1602)", money_ccy(potential_net_disp_taager, currency))
+
 
     col7.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]), f"Potential: {fmt_ratio(kpis['roas_potential'])}")
 
