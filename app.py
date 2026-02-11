@@ -990,7 +990,7 @@ st.caption("Drop Orders CSV + Campaigns CSV → dashboard updates instantly. Exp
 
 with st.sidebar:
     st.subheader("Inputs")
-    fx = st.number_input("FX rate (IQD per 1 USD)", min_value=1.0, value=1602.0, step=1.0)
+    fx = st.number_input("FX rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0)
 
     currency = st.selectbox("Display currency (Orders)", ["USD", "IQD"], index=0)
 
@@ -1013,6 +1013,13 @@ if both_uploaded:
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
         data_source = "uploads"
         kpis_disp = kpis_in_currency(kpis, fx, currency)
+        
+        TAAGER_FX = 1602.0  # IQD per 1 USD
+
+        # Net profit using Taager FX (what hits Payoneer)
+        delivered_profit_usd_taager = float(orders_df["delivered_profit_iqd"].sum()) / TAAGER_FX
+        net_profit_usd_taager = delivered_profit_usd_taager - float(campaigns_df["Amount spent (USD)"].sum())
+
 
     except Exception as e:
         st.error(str(e))
@@ -1077,10 +1084,18 @@ with tab_dashboard:
     col2.metric(f"Delivered Profit ({currency})", money_ccy(kpis_disp["delivered_profit_disp"], currency), f"{int(kpis['delivered_units']):,} delivered")
     col3.metric(f"Ad Spend ({currency})", money_ccy(kpis_disp["spend_disp"], currency))
 
-    col4, col5, col6 = st.columns(3)
+    col4, col5, col6, col7 = st.columns(4)
+
     col4.metric("Net Profit After Ads", money_ccy(kpis_disp["net_profit_disp"], currency))
-    col5.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
-    col6.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]), f"Potential: {fmt_ratio(kpis['roas_potential'])}")
+
+    # Taager FX KPI (display in selected currency too)
+    net_profit_disp_taager = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
+    col5.metric("Net Profit (Taager FX 1602)", money_ccy(net_profit_disp_taager, currency))
+
+    col6.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
+    col7.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]), f"Potential: {fmt_ratio(kpis['roas_potential'])}")
+
+    st.caption("Taager FX 1602 = payout rate to Payoneer (IQD → USD).")
 
 
     st.divider()
