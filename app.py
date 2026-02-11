@@ -22,16 +22,28 @@ import re
 
 def extract_sku_from_campaign_name(name: str):
     """
-    Extract SKU from strings like: 'example name - 1234567'
+    Extract SKU from campaign name like:
+    'anything - IQ010106MAGG99'
+    Works with letters+numbers+_ and trims spaces.
     Returns None if not found.
     """
     if name is None:
         return None
     s = str(name).strip()
-    # Grab last digits after a hyphen (handles spaces)
-    m = re.search(r"-\s*(\d+)\s*$", s)
-    return m.group(1) if m else None
 
+    # Take the LAST " - " segment (or last hyphen) as SKU
+    parts = re.split(r"\s*-\s*", s)
+    if len(parts) < 2:
+        return None
+
+    sku = parts[-1].strip()
+    # Optional: validate SKU shape (at least 6 chars, alnum/_ only)
+    if not re.fullmatch(r"[A-Za-z0-9_]+", sku):
+        return None
+    if len(sku) < 6:
+        return None
+
+    return sku
 
 def github_get_file_bytes(token: str, repo: str, path: str, branch: str = "main") -> bytes:
     """
