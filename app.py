@@ -316,6 +316,134 @@ def campaigns_metric_explorer_sku(campaigns_df: pd.DataFrame, orders_df: pd.Data
             st.dataframe(top_view, use_container_width=True)
 
 
+def product_deep_dive(orders_df: pd.DataFrame, campaigns_df: pd.DataFrame, fx: float, currency: str):
+    if orders_df is None or campaigns_df is None:
+        st.info("Upload BOTH Orders + Campaigns to use Product Deep Dive.")
+        return
+
+    # --- Build SKU map from orders ---
+    sku_to_name = build_sku_to_name_map(orders_df)
+
+    # detect SKU column in orders
+    sku_col = None
+    for c in ["كود_المنتج", "product_sku", "sku", "product_code"]:
+        if c in orders_df.columns:
+            sku_col = c
+            break
+    if not sku_col:
+        st.error("Orders file missing SKU column (expected كود_المنتج / sku / product_sku).")
+        return
+
+    # --- SKU selector (from orders list) ---
+    all_skus = sorted(orders_df[sku_col].astype(str).str.strip().unique().tolist())
+    selected_sku = st.selectbox("Select product (SKU)", all_skus)
+
+    product_name = sku_to_name.get(selected_sku, "")
+    st.subheader(f"{product_name} — {selected_sku}" if product_name else selected_sku)
+
+    # --- Orders slice for this SKU ---
+    o = orders_df[orders_df[sku_col].astype(str).str.strip() == str(selected_sku)].copy()
+    if o.empty:
+        st.warning("No orders found for this SKU in the Orders file.")
+        return
+
+    # Product KPIs from orders
+    requested = float(o["requested_units"].sum()) if "requested_units" in o.columns else 0.0
+    confirmed = float(o["confirmed_units"].sum()) if "confirmed_units" in o.columns else 0.0
+    delivered = float(o["delivered_units"].sum()) if "delivered_units" in o.columns else 0.0
+
+    delivered_profit_usd = float(o["delivered_profit_usd"].sum()) if "delivered_profit_usd" in o.columns else 0.0
+    confirmed_profit_usd = float(o["confirmed_profit_usd"].sum()) if "confirmed_profit_usd" in o.columns else 0.0
+
+    # --- Campaigns slice for this SKU ---
+    c = campaigns_df.copy()
+    if "Campaign name" not in c.columns:
+        st.error("Campaigns file missing 'Campaign name' column.")
+        return
+
+    c["sku"] = c["Campaign name"].apply(extract_sku_from_campaign_name)
+    c = c[c["sku"].astype(str) == str(selected_sku)].copy()
+
+    if "Amount spent (USD)" in c.columns:
+        c["Amount spent (USD)"] = to_num(c["Amount spent (USD)"])
+        spend_usd = float(c["Amount spent (USD)"].sum())
+    else:
+        spend_usd = 0.0
+
+    net_profit_usd = delivered_profit_usd - spend_usd
+    potential_net_usd = confirmed_profit_usd - spend_usd
+
+    # --- KPI Cards ---
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Spend", money_ccy(spend_usd * fx if currency == "IQD" else spend_usd, currency))
+    col2.metric("Delivered units", f"{int(delivered):,}")
+    col3.metric("Delivered profit", money_ccy(delivered_profit_usd * fx if currency == "IQD" else delivered_profit_usd, currency))
+    col4.metric("Net after ads", money_ccy(net_profit_usd * fx if currency == "IQD" else net_profit_usd, currency))
+
+    col5, col6, col7, col8 = st.columns(4)
+    col5.metric("Requested", f"{int(requested):,}")
+    col6.metric("Confirmed", f"{int(confirmed):,}")
+    col7.metric("Potential net", money_ccy(potential_net_usd * fx if currency == "IQD" else potential_net_usd, currency))
+    roas = safe_ratio(delivered_profit_usd, spend_usd)
+    col8.metric("ROAS", "N/A" if roas is None else f"{roas:.2f}")
+
+    st.divider()
+
+    # --- Daily trend: Orders vs Spend (interactive) ---
+    # Orders file must have a date column to do daily trend.
+    # We'll try common names; if none exists, we show tables only.
+    date_col = None
+    for dcol in ["order_date", "created_at", "date", "تاريخ_الطلب"]:
+        if dcol in o.columns:
+            date_col = dcol
+            break
+
+    if date_col and not c.empty and "Reporting starts" in c.columns:
+        o["day"] = pd.to_datetime(o[date_col], errors="coerce").dt.floor("D")
+        o = o.dropna(subset=["day"])
+
+        c["day"] = pd.to_datetime(c["Reporting starts"], errors="coerce").dt.floor("D")
+        c = c.dropna(subset=["day"])
+
+        daily_orders = o.groupby("day", as_index=False)["delivered_units"].sum().rename(columns={"delivered_units": "orders"})
+        daily_spend = c.groupby("day", as_index=False)["Amount spent (USD)"].sum().rename(columns={"Amount spent (USD)": "spend_usd"})
+
+        daily = pd.merge(daily_orders, daily_spend, on="day", how="outer").fillna(0).sort_values("day")
+
+        # Currency display
+        daily["spend_disp"] = daily["spend_usd"] * fx if currency == "IQD" else daily["spend_usd"]
+
+        st.subheader("Daily trend (Orders vs Spend)")
+
+        base = alt.Chart(daily).encode(x=alt.X("day:T", title="Day"))
+
+        orders_line = base.mark_line(point=True).encode(
+            y=alt.Y("orders:Q", title="Delivered units"),
+            tooltip=[alt.Tooltip("day:T", title="Day"), alt.Tooltip("orders:Q", title="Delivered units")]
+        )
+
+        spend_line = base.mark_line(point=True).encode(
+            y=alt.Y("spend_disp:Q", title=f"Spend ({currency})"),
+            tooltip=[alt.Tooltip("day:T", title="Day"), alt.Tooltip("spend_disp:Q", title=f"Spend ({currency})")]
+        )
+
+        st.altair_chart((orders_line + spend_line).properties(height=420).interactive(), use_container_width=True)
+    else:
+        st.info("Daily trend needs an order date column in Orders + 'Reporting starts' in Campaigns. Showing breakdown tables instead.")
+
+    # --- Breakdown tables ---
+    st.subheader("Campaigns for this product")
+    if c.empty:
+        st.info("No campaigns detected for this SKU (based on Campaign name SKU extraction).")
+    else:
+        show_cols = [x for x in ["Campaign name", "Campaign delivery", "Amount spent (USD)", "Results", "Impressions", "Reach"] if x in c.columns]
+        st.dataframe(c[show_cols].sort_values("Amount spent (USD)", ascending=False) if "Amount spent (USD)" in c.columns else c[show_cols],
+                     use_container_width=True)
+
+    st.subheader("Orders rows for this product")
+    st.dataframe(o, use_container_width=True)
+
+
 def github_put_file(token: str, repo: str, path: str, content_bytes: bytes, message: str, branch: str = "main"):
     """
     Create or update a file in a GitHub repo using the Contents API.
@@ -922,9 +1050,10 @@ if one_uploaded:
     st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
 
 # --- Tabs ---
-tab_dashboard, tab_orders, tab_ads, tab_campaigns = st.tabs(
-    ["📊 Dashboard", "📦 Orders details", "📣 Ads details", "📈 Campaigns analytics"]
+tab_dashboard, tab_orders, tab_ads, tab_campaigns, tab_product = st.tabs(
+    ["📊 Dashboard", "📦 Orders details", "📣 Ads details", "📈 Campaigns analytics", "📦 Product Deep Dive"]
 )
+
 
 with tab_dashboard:
     if data_source == "github" and snap is not None and snap.get("generated_at"):
@@ -1110,3 +1239,6 @@ with tab_campaigns:
         campaigns_metric_explorer_sku(campaigns_df, orders_df)
 
 
+with tab_product:
+    st.subheader("Product Deep Dive")
+    product_deep_dive(orders_df, campaigns_df, fx, currency)
