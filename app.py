@@ -1166,10 +1166,14 @@ with tab_dashboard:
     else:
         net_taager_disp = net_profit_usd_taager * TAAGER_FX if currency == "IQD" else net_profit_usd_taager
 
-    if potential_net_usd_taager is None:
-        pot_taager_disp = None
-    else:
-        pot_taager_disp = potential_net_usd_taager * TAAGER_FX if currency == "IQD" else potential_net_usd_taager
+    # Taager potential should ALWAYS be in USD using fixed 1602 rate
+
+    # Step 1: get potential in IQD
+    potential_iqd = kpis["potential_net_profit_usd"] * fx if currency == "USD" else kpis_disp["potential_net_disp"]
+
+    # Step 2: convert to USD using fixed 1602
+    pot_taager_disp = potential_iqd / TAAGER_FX if potential_iqd is not None else None
+
 
 
     # render 4 cards in a tight grid
