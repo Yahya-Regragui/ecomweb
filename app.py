@@ -85,6 +85,23 @@ def build_sku_to_name_map(orders_df: pd.DataFrame) -> dict:
     return sku_name
 
 
+def compute_taager_kpis(orders_df: pd.DataFrame, campaigns_df: pd.DataFrame, taager_fx: float = 1602.0):
+    if orders_df is None or campaigns_df is None:
+        return None, None
+
+    spend_usd = float(campaigns_df["Amount spent (USD)"].sum()) if "Amount spent (USD)" in campaigns_df.columns else 0.0
+
+    delivered_profit_iqd = float(orders_df["delivered_profit_iqd"].sum()) if "delivered_profit_iqd" in orders_df.columns else 0.0
+    confirmed_profit_iqd = float(orders_df["confirmed_profit_iqd"].sum()) if "confirmed_profit_iqd" in orders_df.columns else 0.0
+
+    delivered_profit_usd_taager = delivered_profit_iqd / taager_fx
+    confirmed_profit_usd_taager = confirmed_profit_iqd / taager_fx
+
+    net_profit_usd_taager = delivered_profit_usd_taager - spend_usd
+    potential_net_usd_taager = confirmed_profit_usd_taager - spend_usd
+    return net_profit_usd_taager, potential_net_usd_taager
+
+
 def github_get_file_bytes(token: str, repo: str, path: str, branch: str = "main") -> bytes:
     """
     Download file bytes from GitHub.
@@ -1012,7 +1029,8 @@ TAAGER_FX = 1602.0  # IQD per 1 USD (Taager payout rate)
 
 net_profit_usd_taager = None
 potential_net_usd_taager = None
-# -------------------------------------------------------------------------
+
+
 
 
 # CASE A: both uploaded -> use uploads
@@ -1021,8 +1039,10 @@ if both_uploaded:
         orders_df = pd.read_csv(orders_file, encoding="utf-8-sig")
         campaigns_df = pd.read_csv(campaigns_file, encoding="utf-8-sig")
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
+
         data_source = "uploads"
         kpis_disp = kpis_in_currency(kpis, fx, currency)
+        net_profit_usd_taager, potential_net_usd_taager = compute_taager_kpis(orders_df, campaigns_df, TAAGER_FX)
 
 
     except Exception as e:
@@ -1047,6 +1067,7 @@ else:
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
         data_source = "github"
         kpis_disp = kpis_in_currency(kpis, fx, currency)
+        net_profit_usd_taager, potential_net_usd_taager = compute_taager_kpis(orders_df, campaigns_df, TAAGER_FX)
 
     except Exception as e:
         st.error(f"Loaded from GitHub but failed to parse: {e}")
@@ -1061,23 +1082,7 @@ if orders_df is not None:
         if col in orders_df.columns:
             orders_df[col] = to_num(orders_df[col])
 
-if campaigns_df is not None and "Amount spent (USD)" in campaigns_df.columns:
-    campaigns_df["Amount spent (USD)"] = to_num(campaigns_df["Amount spent (USD)"])
 
-if orders_df is not None and campaigns_df is not None:
-    spend_usd = float(campaigns_df["Amount spent (USD)"].sum()) if "Amount spent (USD)" in campaigns_df.columns else 0.0
-
-    delivered_profit_usd_taager = (
-        float(orders_df["delivered_profit_iqd"].sum()) / TAAGER_FX
-        if "delivered_profit_iqd" in orders_df.columns else 0.0
-    )
-    confirmed_profit_usd_taager = (
-        float(orders_df["confirmed_profit_iqd"].sum()) / TAAGER_FX
-        if "confirmed_profit_iqd" in orders_df.columns else 0.0
-    )
-
-    net_profit_usd_taager = delivered_profit_usd_taager - spend_usd
-    potential_net_usd_taager = confirmed_profit_usd_taager - spend_usd
 # --------------------------------------------------------------
 
 # Show last upload date (from GitHub snapshot) + data source
@@ -1125,6 +1130,7 @@ with tab_dashboard:
         net_profit_disp_taager = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
         col5.metric("Net Profit (Taager FX 1602)", money_ccy(net_profit_disp_taager, currency))
 
+
     col6.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
 
     # Potential (Taager FX 1602)
@@ -1133,6 +1139,7 @@ with tab_dashboard:
     else:
         potential_net_disp_taager = potential_net_usd_taager * fx if currency == "IQD" else potential_net_usd_taager
         col7.metric("Potential Net (Taager FX 1602)", money_ccy(potential_net_disp_taager, currency))
+
 
     # --- ROAS row (separate) ---
     roas1, roas2 = st.columns(2)
