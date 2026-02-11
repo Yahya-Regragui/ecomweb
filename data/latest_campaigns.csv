@@ -1,243 +1,243 @@
-"Reporting starts","Reporting ends","Campaign name","Campaign delivery",Results,"Result indicator","Cost per results","Ad set budget","Ad set budget type","Amount spent (USD)",Impressions,Reach,Ends,"Attribution setting"
-2026-02-11,2026-02-11,"Forchat Test Campaign 3 - IQ040107ALUY99",active,2,actions:offsite_conversion.fb_pixel_purchase,1.145,4.5,Daily,2.29,1855,1791,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-11,2026-02-11,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,2.43,1198,1155,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-11,2026-02-11,"Forchat Test Campaign 1 - IQ040107ALUY99",active,1,actions:offsite_conversion.fb_pixel_purchase,1.44,3,Daily,1.44,630,624,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-11,2026-02-11,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,1,actions:offsite_conversion.fb_pixel_purchase,2.8,4.5,Daily,2.8,1329,1260,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-11,2026-02-11,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,2.26,449,438,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-11,2026-02-11,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,1,actions:offsite_conversion.fb_pixel_purchase,1.95,3,Daily,1.95,532,489,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-11,2026-02-11,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,11.11,4090,3798,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-11,2026-02-11,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Forchat Test Campaign 3 - IQ040107ALUY99",active,2,actions:offsite_conversion.fb_pixel_purchase,1.035,4.5,Daily,2.07,1756,1735,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-10,2026-02-10,"Forchat Test Campaign 2 - IQ040107ALUY99",active,1,actions:offsite_conversion.fb_pixel_purchase,2.05,4.5,Daily,2.05,1039,1000,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-10,2026-02-10,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,2.01,1213,1184,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-10,2026-02-10,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,2,actions:offsite_conversion.fb_pixel_purchase,1.6,4.5,Daily,3.2,1237,1119,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-10,2026-02-10,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,3.12,632,620,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-10,2026-02-10,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,3.08,867,788,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-10,2026-02-10,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Power Campaign - IQ010106MAGG99",active,4,actions:offsite_conversion.fb_pixel_purchase,5.43,19.5,Daily,21.72,8617,7934,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-10,2026-02-10,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,1.1,493,474,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-09,2026-02-09,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,1.09,318,303,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-09,2026-02-09,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,1.07,389,372,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-09,2026-02-09,"Test Camera Campaign - IQ050105DAWI99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,7.24,10,Daily,7.24,2434,1924,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-09,2026-02-09,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,1.88,313,233,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-09,2026-02-09,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,16.42,3919,3496,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-09,2026-02-09,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Power Campaign - IQ010106MAGG99",active,8,actions:offsite_conversion.fb_pixel_purchase,2.50375,19.5,Daily,20.03,6192,5684,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-09,2026-02-09,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,4.17,1329,1168,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-08,2026-02-08,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,7.66,1170,843,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-08,2026-02-08,"Scale Power Campaign - IQ010106MAGG99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,6.26,"Using ad set budget",0,12.52,2130,1643,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-08,2026-02-08,"Test 3sara Campaign - IQ030401SDAS99",inactive,4,actions:offsite_conversion.fb_pixel_purchase,2.3775,10,Daily,9.51,1493,727,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-08,2026-02-08,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,6.74,1243,969,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-08,2026-02-08,"Test Power Campaign - IQ010106MAGG99",active,6,actions:offsite_conversion.fb_pixel_purchase,2.26833333,19.5,Daily,13.61,2901,2426,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-08,2026-02-08,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,3.38,945,791,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-08,2026-02-08,"Scale Brush Campaign - IQ040104WIRE99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,8.445,"Using ad set budget",0,16.89,6204,5661,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-08,2026-02-08,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Bachra Campaign - IQ040304AZNN99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,2.63,10,Daily,2.63,675,596,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-07,2026-02-07,"Test Power Campaign - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,7.88,19.5,Daily,7.88,1711,1448,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-07,2026-02-07,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,8.06,2412,1954,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-07,2026-02-07,"Scale Brush Campaign - IQ040104WIRE99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,13.24,"Using ad set budget",0,26.48,7009,5820,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-07,2026-02-07,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,16.34,6022,5602,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-04,2026-02-04,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,5.13,779,635,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-04,2026-02-04,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,5.74,1456,1245,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-04,2026-02-04,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,6.97,1099,936,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-04,2026-02-04,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0.17,53,46,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-01,2026-02-01,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0.01,4,4,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-01,2026-02-01,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0.01,6,5,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-01,2026-02-01,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,11,9,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+"Reporting starts","Reporting ends","Campaign name","Campaign delivery",Results,"Result indicator","Cost per results","Ad set budget","Ad set budget type","Amount spent (USD)",Impressions,Reach,Ends,"Attribution setting",Outbound/linkClicks,purchase/view,check/views,videoplay/hook,"CTR (link click-through rate)","CTR (all)","Unique CTR (link click-through rate)","Unique outbound CTR (click-through rate)","CPM (cost per 1,000 impressions) (USD)",Frequency,"Link clicks"
+2026-02-11,2026-02-11,"Forchat Test Campaign 3 - IQ040107ALUY99",active,3,actions:offsite_conversion.fb_pixel_purchase,0.91,4.5,Daily,2.73,2168,2077,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,27.27272727,27.27272727,18.44005778,0.599631,0.691882,0.52961,0.52961,1.259225,1.043813,13
+2026-02-11,2026-02-11,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,2.79,1287,1249,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,16.57325861,0.3108,0.3108,0.320256,0.320256,2.167832,1.030424,4
+2026-02-11,2026-02-11,"Forchat Test Campaign 1 - IQ040107ALUY99",active,1,actions:offsite_conversion.fb_pixel_purchase,1.6,3,Daily,1.6,692,681,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,33.33333333,33.33333333,21.87958884,0.433526,1.011561,0.440529,0.440529,2.312139,1.016153,3
+2026-02-11,2026-02-11,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,1,actions:offsite_conversion.fb_pixel_purchase,3.08,4.5,Daily,3.08,1466,1351,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,8.33333333,8.33333333,14.803849,1.023192,1.773533,1.110289,1.110289,2.100955,1.085122,15
+2026-02-11,2026-02-11,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,2.34,488,476,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,33.82352941,1.844262,2.04918,1.890756,1.890756,4.795082,1.02521,9
+2026-02-11,2026-02-11,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,1,actions:offsite_conversion.fb_pixel_purchase,2.09,3,Daily,2.09,561,515,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,50,50,10.29126214,1.069519,1.426025,1.165049,1.165049,3.72549,1.08932,6
+2026-02-11,2026-02-11,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",,0,0,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Power Campaign - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,12.25,19.5,Daily,12.25,4348,3991,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,1.38888889,1.38888889,25.25682786,1.839926,2.575897,1.653721,1.653721,2.817387,1.089451,80
+2026-02-11,2026-02-11,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-11,2026-02-11,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Forchat Test Campaign 3 - IQ040107ALUY99",active,2,actions:offsite_conversion.fb_pixel_purchase,1.035,4.5,Daily,2.07,1756,1735,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,22.22222222,33.33333333,19.65417867,0.455581,0.797267,0.403458,0.403458,1.178815,1.012104,8
+2026-02-10,2026-02-10,"Forchat Test Campaign 2 - IQ040107ALUY99",active,1,actions:offsite_conversion.fb_pixel_purchase,2.05,4.5,Daily,2.05,1039,1000,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,33.33333333,33.33333333,16.4,0.673725,1.05871,0.7,0.7,1.973051,1.039,7
+2026-02-10,2026-02-10,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,2.01,1213,1184,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,22.55067568,0.247321,0.741962,0.253378,0.253378,1.657049,1.024493,3
+2026-02-10,2026-02-10,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,2,actions:offsite_conversion.fb_pixel_purchase,1.605,4.5,Daily,3.21,1238,1119,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,18.18181818,18.18181818,17.51563896,1.453958,2.504039,1.608579,1.608579,2.592892,1.106345,18
+2026-02-10,2026-02-10,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,3.12,632,620,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,31.61290323,0.791139,0.949367,0.806452,0.806452,4.936709,1.019355,5
+2026-02-10,2026-02-10,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,3.08,867,788,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,10.27918782,0.576701,0.807382,0.634518,0.634518,3.55248,1.100254,5
+2026-02-10,2026-02-10,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",,0,0,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Power Campaign - IQ010106MAGG99",active,4,actions:offsite_conversion.fb_pixel_purchase,5.43,19.5,Daily,21.72,8618,7945,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,3.07692308,4.61538462,22.22781624,1.752147,2.599211,1.787288,1.787288,2.520306,1.084707,151
+2026-02-10,2026-02-10,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",,0,0,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",,0,0,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-10,2026-02-10,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,1.1,493,474,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,13.29113924,1.622718,2.231237,1.265823,1.265823,2.231237,1.040084,8
+2026-02-09,2026-02-09,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,1.09,318,303,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,,,35.31353135,0.314465,0.314465,0.330033,0.330033,3.427673,1.049505,1
+2026-02-09,2026-02-09,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,1.07,389,372,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,7.25806452,1.542416,2.313625,1.612903,1.612903,2.750643,1.045699,6
+2026-02-09,2026-02-09,"Test Camera Campaign - IQ050105DAWI99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,7.24,10,Daily,7.24,2434,1924,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,1.5625,6.25,14.96881497,4.724733,4.930156,4.781705,4.781705,2.974528,1.265073,115
+2026-02-09,2026-02-09,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,1.88,313,233,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,24.03433476,6.389776,5.111821,5.579399,5.579399,6.00639,1.343348,20
+2026-02-09,2026-02-09,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,16.42,3919,3496,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,1.42857143,21.96796339,2.551671,3.036489,2.459954,2.459954,4.189844,1.120995,100
+2026-02-09,2026-02-09,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",,0,0,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Power Campaign - IQ010106MAGG99",active,8,actions:offsite_conversion.fb_pixel_purchase,2.50375,19.5,Daily,20.03,6192,5684,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,6.89655172,7.75862069,22.60731879,2.034884,2.713178,2.00563,2.00563,3.234819,1.089374,126
+2026-02-09,2026-02-09,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-09,2026-02-09,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,4.17,1329,1168,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,14.46917808,3.536494,4.063205,3.510274,3.510274,3.137698,1.137842,47
+2026-02-08,2026-02-08,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,7.66,1170,843,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,33.80782918,8.034188,7.521368,9.015421,9.015421,6.547009,1.3879,94
+2026-02-08,2026-02-08,"Scale Power Campaign - IQ010106MAGG99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,6.26,"Using ad set budget",0,12.52,2130,1643,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,2.7027027,2.7027027,26.47595861,7.41784,7.13615,7.729763,7.729763,5.877934,1.296409,158
+2026-02-08,2026-02-08,"Test 3sara Campaign - IQ030401SDAS99",inactive,4,actions:offsite_conversion.fb_pixel_purchase,2.3775,10,Daily,9.51,1493,727,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,4.16666667,5.20833333,0.27510316,15.606162,11.38647,22.696011,22.696011,6.369725,2.053645,233
+2026-02-08,2026-02-08,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,6.74,1243,969,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,38.90608875,7.964602,7.803701,7.636739,7.636739,5.422365,1.282766,99
+2026-02-08,2026-02-08,"Test Power Campaign - IQ010106MAGG99",active,6,actions:offsite_conversion.fb_pixel_purchase,2.26833333,19.5,Daily,13.61,2901,2426,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,8.95522388,8.95522388,24.3198681,2.861082,3.412616,3.050289,3.050289,4.691486,1.195796,83
+2026-02-08,2026-02-08,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,3.38,945,791,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,2.85714286,23.00884956,5.925926,7.513228,6.068268,6.068268,3.57672,1.19469,56
+2026-02-08,2026-02-08,"Scale Brush Campaign - IQ040104WIRE99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,8.445,"Using ad set budget",0,16.89,6204,5661,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,2.56410256,3.84615385,14.80303833,1.434558,1.724694,1.289525,1.289525,2.722437,1.095919,89
+2026-02-08,2026-02-08,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-08,2026-02-08,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Bachra Campaign - IQ040304AZNN99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,2.63,10,Daily,2.63,675,596,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,4.34782609,0,29.53020134,5.62963,5.925926,5.369128,5.369128,3.896296,1.13255,38
+2026-02-07,2026-02-07,"Test Power Campaign - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,7.88,19.5,Daily,7.88,1711,1448,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,3.03030303,12.12121212,25.89779006,2.630041,2.863822,2.762431,2.762431,4.605494,1.18163,45
+2026-02-07,2026-02-07,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,8.06,2412,1954,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",99.21875,0,4.3956044,25.23029683,5.306799,6.343284,5.475947,5.42477,3.341625,1.234391,128
+2026-02-07,2026-02-07,"Scale Brush Campaign - IQ040104WIRE99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,13.24,"Using ad set budget",0,26.48,7009,5820,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,1.83486239,8.25688073,18.38487973,2.025967,2.254245,1.890034,1.890034,3.778,1.204296,142
+2026-02-07,2026-02-07,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-07,2026-02-07,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-06,2026-02-06,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-05,2026-02-05,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,16.34,6022,5602,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,5.17241379,10.94252053,1.311857,1.477914,1.142449,1.142449,2.713384,1.074973,79
+2026-02-04,2026-02-04,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,5.13,779,635,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,5.55555556,23.93700787,7.958922,7.702182,8.661417,8.661417,6.585366,1.226772,62
+2026-02-04,2026-02-04,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,5.74,1456,1245,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,30.60240964,3.777473,3.914835,3.7751,3.7751,3.942308,1.169478,55
+2026-02-04,2026-02-04,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,6.97,1099,936,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,5.88235294,16.45299145,3.366697,3.548681,3.632479,3.632479,6.342129,1.174145,37
+2026-02-04,2026-02-04,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-04,2026-02-04,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-03,2026-02-03,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-02,2026-02-02,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Forchat Test Campaign 2 - IQ040107ALUY99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Forchat Test Campaign 1 - IQ040107ALUY99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Ghasala Test Campaign 3 - IQ030401SSDD99",active,,,,4.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Ghasala Test Campaign 2 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Ghasala Test Campaign 1 - IQ030401SSDD99",active,,,,3,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test Camera Campaign - IQ050105DAWI99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test 3sara Campaign Correct - IQ030401SDAS99",inactive,,,,15,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Scale Power Campaign - IQ010106MAGG99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test 3sara Campaign - IQ030401SDAS99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test Bachra Campaign - IQ040304AZNN99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test Power Campaign - IQ010106MAGG99",active,,,,19.5,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Minfakh Test Campaign - IQ050101JUMP99",inactive,,,,10,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Scale Brush Campaign - IQ040104WIRE99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test Brush Campaign - IQ040104WIRE99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test Massage Campaign Adv - IQ040108SODS99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test Advanced Khodar Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test Iron Campaign - IQ030303KAWI99",inactive,,,,20,Daily,0,0,0,Ongoing,-,,,,,,0,0,,0,0,
+2026-02-01,2026-02-01,"Test Khodar IRAQ Campaign - IQ030401ATTA99",inactive,,,,20,Daily,0.17,53,46,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,47.82608696,7.54717,11.320755,8.695652,8.695652,3.207547,1.152174,4
+2026-02-01,2026-02-01,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0.01,4,4,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",,0,0,25,,0,0,,2.5,1,
+2026-02-01,2026-02-01,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0.01,6,5,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",,0,0,60,,0,0,,1.666667,1.2,
+2026-02-01,2026-02-01,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,11,9,Ongoing,"7-day click, 1-day view, or 1-day engaged-view",100,0,0,100,9.090909,18.181818,11.111111,11.111111,0,1.222222,1
