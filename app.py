@@ -1014,11 +1014,36 @@ if both_uploaded:
         data_source = "uploads"
         kpis_disp = kpis_in_currency(kpis, fx, currency)
         
+       # ---------- Taager FX KPIs (works for uploads + github) ----------
         TAAGER_FX = 1602.0  # IQD per 1 USD
 
-        # Net profit using Taager FX (what hits Payoneer)
-        delivered_profit_usd_taager = float(orders_df["delivered_profit_iqd"].sum()) / TAAGER_FX
-        net_profit_usd_taager = delivered_profit_usd_taager - float(campaigns_df["Amount spent (USD)"].sum())
+        net_profit_usd_taager = None
+        potential_net_usd_taager = None
+
+        if orders_df is not None and campaigns_df is not None:
+            # Ensure numeric
+            for col in ["delivered_profit_iqd", "confirmed_profit_iqd"]:
+                if col in orders_df.columns:
+                    orders_df[col] = to_num(orders_df[col])
+
+            if "Amount spent (USD)" in campaigns_df.columns:
+                campaigns_df["Amount spent (USD)"] = to_num(campaigns_df["Amount spent (USD)"])
+
+            spend_usd = float(campaigns_df["Amount spent (USD)"].sum()) if "Amount spent (USD)" in campaigns_df.columns else 0.0
+
+            delivered_profit_usd_taager = (
+                float(orders_df["delivered_profit_iqd"].sum()) / TAAGER_FX
+                if "delivered_profit_iqd" in orders_df.columns else 0.0
+            )
+            confirmed_profit_usd_taager = (
+                float(orders_df["confirmed_profit_iqd"].sum()) / TAAGER_FX
+                if "confirmed_profit_iqd" in orders_df.columns else 0.0
+            )
+
+            net_profit_usd_taager = delivered_profit_usd_taager - spend_usd
+            potential_net_usd_taager = confirmed_profit_usd_taager - spend_usd
+        # --------------------------------------------------------------
+
 
 
     except Exception as e:
@@ -1088,12 +1113,21 @@ with tab_dashboard:
 
     col4.metric("Net Profit After Ads", money_ccy(kpis_disp["net_profit_disp"], currency))
 
-    # Taager FX KPI (display in selected currency too)
-    net_profit_disp_taager = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
-    col5.metric("Net Profit (Taager FX 1602)", money_ccy(net_profit_disp_taager, currency))
+    # Taager FX KPIs (delivered + confirmed)
+    if net_profit_usd_taager is None:
+        col5.metric("Net Profit (Taager FX 1602)", "N/A")
+    else:
+        net_profit_disp_taager = net_profit_usd_taager * fx if currency == "IQD" else net_profit_usd_taager
+        col5.metric("Net Profit (Taager FX 1602)", money_ccy(net_profit_disp_taager, currency))
 
-    col6.metric("Potential Net Profit", money_ccy(kpis_disp["potential_net_disp"], currency))
+    if potential_net_usd_taager is None:
+        col6.metric("Potential Net (Taager FX 1602)", "N/A")
+    else:
+        potential_net_disp_taager = potential_net_usd_taager * fx if currency == "IQD" else potential_net_usd_taager
+        col6.metric("Potential Net (Taager FX 1602)", money_ccy(potential_net_disp_taager, currency))
+
     col7.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]), f"Potential: {fmt_ratio(kpis['roas_potential'])}")
+
 
     st.caption("Taager FX 1602 = payout rate to Payoneer (IQD → USD).")
 
