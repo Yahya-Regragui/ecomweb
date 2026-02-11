@@ -336,10 +336,20 @@ def product_deep_dive(orders_df: pd.DataFrame, campaigns_df: pd.DataFrame, fx: f
 
     # --- SKU selector (from orders list) ---
     all_skus = sorted(orders_df[sku_col].astype(str).str.strip().unique().tolist())
-    selected_sku = st.selectbox("Select product (SKU)", all_skus)
+
+    def sku_label(sku: str) -> str:
+        name = sku_to_name.get(sku, "")
+        return f"{name} — {sku}" if name else str(sku)
+
+    selected_sku = st.selectbox(
+        "Select product",
+        options=all_skus,
+        format_func=sku_label
+    )
 
     product_name = sku_to_name.get(selected_sku, "")
-    st.subheader(f"{product_name} — {selected_sku}" if product_name else selected_sku)
+    st.subheader(f"{product_name} — {selected_sku}" if product_name else str(selected_sku))
+
 
     # --- Orders slice for this SKU ---
     o = orders_df[orders_df[sku_col].astype(str).str.strip() == str(selected_sku)].copy()
