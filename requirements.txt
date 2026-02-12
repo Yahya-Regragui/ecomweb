@@ -6,3 +6,4 @@ xlsxwriter
 requests
 altair
 openpyxl
+numpy
