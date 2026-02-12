@@ -828,15 +828,23 @@ def build_daily_table(
             return status_counts[cols].sum(axis=1)
 
         delivered = _sum_cols_like(["delivered"])
-        cancelled = _sum_cols_like(["cancel"])
+        # Cancelled bucket includes "Delivery Failed" as well
+        cancelled = _sum_cols_like(["cancel", "delivery failed"])
         returned = _sum_cols_like(["return", "returned"])
+        temp_suspended = _sum_cols_like(["temporary suspended"])
+        in_progress = _sum_cols_like(["order received", "delivery in progress"])
+
         base = base.merge(delivered.rename("Delivered"), left_on="day", right_index=True, how="left")
         base = base.merge(cancelled.rename("Cancelled"), left_on="day", right_index=True, how="left")
         base = base.merge(returned.rename("Returned"), left_on="day", right_index=True, how="left")
+        base = base.merge(temp_suspended.rename("Temporary Suspended"), left_on="day", right_index=True, how="left")
+        base = base.merge(in_progress.rename("In Progress"), left_on="day", right_index=True, how="left")
     else:
         base["Delivered"] = 0
         base["Cancelled"] = 0
         base["Returned"] = 0
+        base["Temporary Suspended"] = 0
+        base["In Progress"] = 0
 
     # Ads spend per day (Meta export)
     spend = pd.DataFrame({"day": [], "Ad_Spend_USD": []})
@@ -856,13 +864,13 @@ def build_daily_table(
     cal = pd.DataFrame({"day": days})
     out = cal.merge(base, on="day", how="left")
     out = out.merge(spend, on="day", how="left")
-    out[["Orders", "Profit_IQD", "COD_IQD", "Shipping_IQD", "Delivered", "Cancelled", "Returned"]] = out[
-        ["Orders", "Profit_IQD", "COD_IQD", "Shipping_IQD", "Delivered", "Cancelled", "Returned"]
+    out[["Orders", "Profit_IQD", "COD_IQD", "Shipping_IQD", "Delivered", "Cancelled", "Returned", "Temporary Suspended", "In Progress"]] = out[
+        ["Orders", "Profit_IQD", "COD_IQD", "Shipping_IQD", "Delivered", "Cancelled", "Returned", "Temporary Suspended", "In Progress"]
     ].fillna(0)
     out["Ad_Spend_USD"] = out["Ad_Spend_USD"].fillna(0)
 
     # Cast count columns to int (avoid 0.000000 display)
-    for _c in ["Orders", "Delivered", "Cancelled", "Returned"]:
+    for _c in ["Orders", "Delivered", "Cancelled", "Returned", "Temporary Suspended", "In Progress"]:
         if _c in out.columns:
             out[_c] = pd.to_numeric(out[_c], errors="coerce").fillna(0).round(0).astype(int)
 
@@ -888,6 +896,8 @@ def build_daily_table(
         "Delivered",
         "Cancelled",
         "Returned",
+        "Temporary Suspended",
+        "In Progress",
         "Ad Spend",
         "Profit",
         "Net Profit",
