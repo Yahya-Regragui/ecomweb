@@ -1,6 +1,7 @@
 import io
 import os
 from datetime import datetime
+from typing import Optional
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -148,6 +149,12 @@ def load_latest_from_github():
 
         orders_bytes = github_get_file_bytes(token, repo, "data/latest_orders.csv", branch=branch)
         campaigns_bytes = github_get_file_bytes(token, repo, "data/latest_campaigns.csv", branch=branch)
+        # Optional: daily orders (may not exist yet)
+        daily_orders_bytes = None
+        try:
+            daily_orders_bytes = github_get_file_bytes(token, repo, "data/latest_daily_orders.xlsx", branch=branch)
+        except Exception:
+            daily_orders_bytes = None
     except Exception:
         return None
 
@@ -156,6 +163,7 @@ def load_latest_from_github():
         "kpis": payload.get("kpis"),
         "orders_csv_bytes": orders_bytes,
         "campaigns_csv_bytes": campaigns_bytes,
+        "daily_orders_xlsx_bytes": daily_orders_bytes,
     }
 
 def campaigns_metric_explorer_sku(campaigns_df: pd.DataFrame, orders_df: pd.DataFrame):
@@ -567,7 +575,8 @@ def github_put_file(token: str, repo: str, path: str, content_bytes: bytes, mess
 
 
 def save_latest_to_github(kpis: dict, pdf_bytes: bytes, xlsx_bytes: bytes,
-                          orders_csv_bytes: bytes, campaigns_csv_bytes: bytes):
+                          orders_csv_bytes: bytes, campaigns_csv_bytes: bytes,
+                          daily_orders_xlsx_bytes: Optional[bytes] = None):
     token = st.secrets.get("GITHUB_TOKEN", None)
     repo = st.secrets.get("GITHUB_REPO", None)
     branch = st.secrets.get("GITHUB_BRANCH", "main")
@@ -581,6 +590,8 @@ def save_latest_to_github(kpis: dict, pdf_bytes: bytes, xlsx_bytes: bytes,
     # 0) Save raw inputs (latest only)
     github_put_file(token, repo, "data/latest_orders.csv", orders_csv_bytes, f"Update latest Orders CSV ({now})", branch)
     github_put_file(token, repo, "data/latest_campaigns.csv", campaigns_csv_bytes, f"Update latest Campaigns CSV ({now})", branch)
+    if daily_orders_xlsx_bytes:
+        github_put_file(token, repo, "data/latest_daily_orders.xlsx", daily_orders_xlsx_bytes, f"Update latest Daily Orders XLSX ({now})", branch)
 
     # 1) KPIs JSON
     kpis_payload = {"generated_at": now, "kpis": kpis}
@@ -603,6 +614,124 @@ def to_num(series: pd.Series) -> pd.Series:
     s = s.str.replace("٫", ".", regex=False)
     s = s.str.replace(r"[^0-9\.\-]", "", regex=True)
     return pd.to_numeric(s, errors="coerce").fillna(0)
+
+
+def parse_daily_orders(daily_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalize Taager daily orders export.
+    Expected columns (sample):
+    - Created At, Status, orders.export.cashOnDelivery, Shipping Cost, VAT Profit, Order Profit
+    - SKUs, Quantities, Prices
+    """
+    if daily_df is None or daily_df.empty:
+        return daily_df
+
+    df = daily_df.copy()
+
+    # Parse datetime + day
+    if "Created At" in df.columns:
+        df["Created At"] = pd.to_datetime(df["Created At"], errors="coerce")
+        df["day"] = df["Created At"].dt.floor("D")
+
+    # Clean numeric columns (strings with commas)
+    for c in ["orders.export.cashOnDelivery", "Shipping Cost", "VAT Profit", "Order Profit", "Prices"]:
+        if c in df.columns:
+            df[c] = to_num(df[c])
+
+    if "Quantities" in df.columns:
+        df["Quantities"] = to_num(df["Quantities"])
+
+    return df
+
+def build_daily_summary(daily_df: pd.DataFrame, campaigns_df: pd.DataFrame, fx: float, currency: str) -> pd.DataFrame:
+    """
+    Build day-level KPIs:
+    - orders_count
+    - profit (Order Profit)
+    - cash_on_delivery
+    - shipping_cost
+    - ads_spend
+    - net_after_ads
+    - status breakdown
+    """
+    if daily_df is None or daily_df.empty:
+        return pd.DataFrame()
+
+    df = parse_daily_orders(daily_df)
+
+    if "day" not in df.columns:
+        return pd.DataFrame()
+
+    # Orders count (prefer Store Order ID if available, else ID, else row count)
+    if "Store Order ID" in df.columns:
+        orders_count = df.groupby("day")["Store Order ID"].nunique()
+    elif "ID" in df.columns:
+        orders_count = df.groupby("day")["ID"].nunique()
+    else:
+        orders_count = df.groupby("day").size()
+
+    g = pd.DataFrame({"orders_count": orders_count}).reset_index()
+
+    # Aggregations
+    def _sum(col):
+        return df.groupby("day")[col].sum() if col in df.columns else None
+
+    for col, out_col in [
+        ("orders.export.cashOnDelivery", "cod_iqd"),
+        ("Order Profit", "profit_iqd"),
+        ("VAT Profit", "vat_profit_iqd"),
+        ("Shipping Cost", "shipping_iqd"),
+        ("Quantities", "items_qty"),
+    ]:
+        s_col = _sum(col)
+        if s_col is not None:
+            g[out_col] = s_col.values
+        else:
+            g[out_col] = 0.0
+
+    # Status counts (wide)
+    if "Status" in df.columns:
+        status_pivot = (
+            df.pivot_table(index="day", columns="Status", values="ID" if "ID" in df.columns else "Customer Name",
+                           aggfunc="count", fill_value=0)
+            .reset_index()
+        )
+        g = pd.merge(g, status_pivot, on="day", how="left").fillna(0)
+
+    # Ads spend by day
+    spend_usd_by_day = None
+    if campaigns_df is not None and not campaigns_df.empty and "Reporting starts" in campaigns_df.columns:
+        c = campaigns_df.copy()
+        c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
+        c = c.dropna(subset=["Reporting starts"])
+        c["day"] = c["Reporting starts"].dt.floor("D")
+        if "Amount spent (USD)" in c.columns:
+            c["Amount spent (USD)"] = to_num(c["Amount spent (USD)"])
+            spend_usd_by_day = c.groupby("day")["Amount spent (USD)"].sum().reset_index().rename(columns={"Amount spent (USD)": "spend_usd"})
+
+    if spend_usd_by_day is None:
+        g["spend_usd"] = 0.0
+    else:
+        g = pd.merge(g, spend_usd_by_day, on="day", how="left").fillna({"spend_usd": 0.0})
+
+    # Net after ads (profit - spend), displayed in selected currency
+    g["profit_usd"] = g["profit_iqd"].apply(lambda v: iqd_to_usd(v, fx))
+    g["net_usd"] = g["profit_usd"] - g["spend_usd"]
+
+    if currency == "IQD":
+        g["profit_disp"] = g["profit_iqd"]
+        g["spend_disp"] = g["spend_usd"] * fx
+        g["net_disp"] = g["profit_disp"] - g["spend_disp"]
+    else:
+        g["profit_disp"] = g["profit_usd"]
+        g["spend_disp"] = g["spend_usd"]
+        g["net_disp"] = g["net_usd"]
+
+    # Extra useful ratios
+    g["profit_per_order_disp"] = g["profit_disp"] / g["orders_count"].replace({0: pd.NA})
+    g["net_per_order_disp"] = g["net_disp"] / g["orders_count"].replace({0: pd.NA})
+
+    return g.sort_values("day")
 
 def plot_results_top10_active_interactive(campaigns_df: pd.DataFrame):
     df = campaigns_df.copy()
@@ -1187,6 +1316,7 @@ with st.sidebar:
 
     orders_file = st.file_uploader("Orders CSV (Taager File)", type=["csv"])
     campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"])
+    daily_orders_file = st.file_uploader("Daily Orders (Taager) XLSX", type=["xlsx"])
 
 
 both_uploaded = orders_file is not None and campaigns_file is not None
@@ -1195,6 +1325,7 @@ one_uploaded = (orders_file is not None) ^ (campaigns_file is not None)
 orders_df = None
 campaigns_df = None
 snap = None
+daily_orders_df = None
 
 
 
@@ -1209,6 +1340,8 @@ if both_uploaded:
     try:
         orders_df = pd.read_csv(orders_file, encoding="utf-8-sig")
         campaigns_df = pd.read_csv(campaigns_file, encoding="utf-8-sig")
+        if daily_orders_file is not None:
+            daily_orders_df = pd.read_excel(daily_orders_file)
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
 
         data_source = "uploads"
@@ -1235,6 +1368,8 @@ else:
     try:
         orders_df = pd.read_csv(io.BytesIO(snap["orders_csv_bytes"]), encoding="utf-8-sig")
         campaigns_df = pd.read_csv(io.BytesIO(snap["campaigns_csv_bytes"]), encoding="utf-8-sig")
+        if snap.get("daily_orders_xlsx_bytes"):
+            daily_orders_df = pd.read_excel(io.BytesIO(snap["daily_orders_xlsx_bytes"]))
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
         data_source = "github"
         kpis_disp = kpis_in_currency(kpis, fx, currency)
@@ -1305,8 +1440,8 @@ if one_uploaded:
     st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
 
 # --- Tabs ---
-tab_dashboard, tab_orders, tab_ads, tab_campaigns, tab_product = st.tabs(
-    ["📊 Dashboard", "📦 Orders details", "📣 Ads details", "📈 Campaigns analytics", "📦 Product Deep Dive"]
+tab_dashboard, tab_daily, tab_orders, tab_ads, tab_campaigns, tab_product = st.tabs(
+    ["📊 Dashboard", "📅 Daily performance", "📦 Orders details", "📣 Ads details", "📈 Campaigns analytics", "📦 Product Deep Dive"]
 )
 
 
@@ -1450,10 +1585,90 @@ with tab_dashboard:
             else:
                 orders_bytes = orders_file.getvalue()
                 campaigns_bytes = campaigns_file.getvalue()
-                save_latest_to_github(kpis, pdf_bytes, xlsx_bytes, orders_bytes, campaigns_bytes)
+                daily_bytes = daily_orders_file.getvalue() if daily_orders_file is not None else None
+                save_latest_to_github(kpis, pdf_bytes, xlsx_bytes, orders_bytes, campaigns_bytes, daily_bytes)
                 st.success("Saved EVERYTHING to GitHub (CSV + KPIs + PDF + Excel).")
         except Exception as e:
             st.error(str(e))
+
+
+
+with tab_daily:
+    st.subheader("Daily performance (Taager daily orders)")
+
+    if daily_orders_df is None or daily_orders_df is None or getattr(daily_orders_df, "empty", True):
+        st.info("Upload **Daily Orders (Taager) XLSX** to see daily KPIs.")
+    else:
+        daily_summary = build_daily_summary(daily_orders_df, campaigns_df, fx, currency)
+        if daily_summary.empty:
+            st.warning("Could not build daily summary (missing 'Created At' column).")
+        else:
+            # KPI row
+            total_orders = int(daily_summary["orders_count"].sum())
+            total_profit = float(daily_summary["profit_disp"].sum())
+            total_spend = float(daily_summary["spend_disp"].sum())
+            total_net = float(daily_summary["net_disp"].sum())
+
+            k1, k2, k3, k4 = st.columns(4)
+            k1.metric("Orders", f"{total_orders:,}")
+            k2.metric(f"Profit ({currency})", money_ccy(total_profit, currency))
+            k3.metric(f"Ad spend ({currency})", money_ccy(total_spend, currency))
+            k4.metric(f"Net after ads ({currency})", money_ccy(total_net, currency))
+
+            st.markdown("### Daily net & orders")
+
+            # Chart: net after ads + orders count (2 lines)
+            chart_df = daily_summary[["day", "orders_count", "net_disp", "profit_disp", "spend_disp"]].copy()
+            chart_df = chart_df.melt(id_vars=["day", "orders_count"], value_vars=["net_disp", "profit_disp", "spend_disp"],
+                                     var_name="metric", value_name="value")
+
+            metric_name = {
+                "net_disp": f"Net after ads ({currency})",
+                "profit_disp": f"Profit ({currency})",
+                "spend_disp": f"Ad spend ({currency})",
+            }
+            chart_df["metric"] = chart_df["metric"].map(metric_name)
+
+            # interactive lines (value) + tooltip includes orders_count
+            nearest = alt.selection_point(nearest=True, on="mouseover", fields=["day"], empty=False)
+
+            base = alt.Chart(chart_df).encode(
+                x=alt.X("day:T", title="Day"),
+                color=alt.Color("metric:N", legend=alt.Legend(title="Metric")),
+            )
+
+            lines = base.mark_line(point=True).encode(
+                y=alt.Y("value:Q", title=f"Amount ({currency})"),
+                tooltip=[
+                    alt.Tooltip("day:T", title="Day"),
+                    alt.Tooltip("metric:N", title="Metric"),
+                    alt.Tooltip("value:Q", title=f"Value ({currency})"),
+                    alt.Tooltip("orders_count:Q", title="Orders"),
+                ]
+            )
+
+            selectors = base.mark_point().encode(opacity=alt.value(0)).add_params(nearest)
+            rule = alt.Chart(chart_df).mark_rule().encode(x="day:T").transform_filter(nearest)
+
+            st.altair_chart((lines + selectors + rule).properties(height=420).interactive(), use_container_width=True)
+
+            st.markdown("### Daily table")
+            # Select columns to show
+            show_cols = ["day", "orders_count", "items_qty", "cod_iqd", "profit_disp", "spend_disp", "net_disp",
+                         "profit_per_order_disp", "net_per_order_disp"]
+            show_cols = [c for c in show_cols if c in daily_summary.columns]
+            view = daily_summary[show_cols].copy()
+
+            # Nice formatting
+            if currency == "IQD":
+                # cod_iqd is already IQD
+                pass
+
+            st.dataframe(view, use_container_width=True)
+
+            with st.expander("Raw daily orders rows", expanded=False):
+                st.dataframe(parse_daily_orders(daily_orders_df).sort_values("Created At" if "Created At" in daily_orders_df.columns else daily_orders_df.columns[0]),
+                             use_container_width=True)
 
 
 
