@@ -3,3 +3,6 @@ pandas
 matplotlib
 reportlab
 xlsxwriter
+requests
+altair
+openpyxl
