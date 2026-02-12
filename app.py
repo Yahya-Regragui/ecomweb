@@ -750,13 +750,13 @@ def build_daily_table(
     - Date
     - Orders (all)
     - Ad Spend
-    - Profit (sum of Order Profit)
+    - Profit (sum of Order Profit for delivered orders only)
     - Net Profit (Profit - Ad Spend)
 
     Extra insights:
     - Delivered, Cancelled, Returned
     - Delivery Rate %
-    - Avg Profit / Order
+    - Avg Profit / Delivered
     """
     if daily_df is None or daily_df.empty:
         return pd.DataFrame()
@@ -782,7 +782,17 @@ def build_daily_table(
     else:
         orders = dfm.groupby("day").size()
 
-    profit_iqd = dfm.groupby("day")["Order Profit"].sum() if "Order Profit" in dfm.columns else 0
+    # Profit should be counted ONLY for delivered orders (realized profit)
+    if "Order Profit" in dfm.columns and "Status" in dfm.columns:
+        _status = dfm["Status"].astype(str).str.strip().str.lower()
+        _del_mask = _status.str.contains("delivered")
+        profit_iqd = dfm[_del_mask].groupby("day")["Order Profit"].sum()
+    elif "Order Profit" in dfm.columns:
+        # Fallback: if Status is missing, use all rows
+        profit_iqd = dfm.groupby("day")["Order Profit"].sum()
+    else:
+        profit_iqd = 0
+
     cod_iqd = dfm.groupby("day")["orders.export.cashOnDelivery"].sum() if "orders.export.cashOnDelivery" in dfm.columns else 0
     ship_iqd = dfm.groupby("day")["Shipping Cost"].sum() if "Shipping Cost" in dfm.columns else 0
 
@@ -848,12 +858,12 @@ def build_daily_table(
         out["Ad Spend"] = out["Ad_Spend_USD"]
         out["Profit"] = out["Profit_IQD"] / fx if fx > 0 else np.nan
         out["Net Profit"] = out["Profit"] - out["Ad Spend"]
-        out["Avg Profit / Order"] = np.where(out["Orders"] > 0, out["Profit"] / out["Orders"], 0.0)
+        out["Avg Profit / Delivered"] = np.where(out["Delivered"] > 0, out["Profit"] / out["Delivered"], 0.0)
     else:
         out["Ad Spend"] = out["Ad_Spend_USD"] * fx
         out["Profit"] = out["Profit_IQD"]
         out["Net Profit"] = out["Profit"] - out["Ad Spend"]
-        out["Avg Profit / Order"] = np.where(out["Orders"] > 0, out["Profit"] / out["Orders"], 0.0)
+        out["Avg Profit / Delivered"] = np.where(out["Delivered"] > 0, out["Profit"] / out["Delivered"], 0.0)
 
     out["Delivery Rate %"] = np.where(out["Orders"] > 0, (out["Delivered"] / out["Orders"]) * 100, 0.0)
 
@@ -868,7 +878,7 @@ def build_daily_table(
         "Ad Spend",
         "Profit",
         "Net Profit",
-        "Avg Profit / Order",
+        "Avg Profit / Delivered",
         "Delivery Rate %",
     ]
     return out[cols]
