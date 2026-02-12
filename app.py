@@ -644,6 +644,18 @@ def parse_daily_orders(daily_df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
+
+def get_daily_order_id_col(df: pd.DataFrame) -> Optional[str]:
+    """Prefer Taager 'ID' (unique row/order identifier). Fallback to 'Store Order ID'."""
+    if df is None:
+        return None
+    if "ID" in df.columns:
+        return "ID"
+    if "Store Order ID" in df.columns:
+        return "Store Order ID"
+    return None
+
 def build_daily_summary(daily_df: pd.DataFrame, campaigns_df: pd.DataFrame, fx: float, currency: str) -> pd.DataFrame:
     """
     Build day-level KPIs:
@@ -776,7 +788,7 @@ def build_daily_table(
     dfm = df[(df["day"] >= start) & (df["day"] <= end)].copy()
 
     # Orders count (nunique if possible), excluding "Cancelled by You"
-    id_col = "Store Order ID" if "Store Order ID" in dfm.columns else ("ID" if "ID" in dfm.columns else None)
+    id_col = get_daily_order_id_col(dfm)
 
     if "Status" in dfm.columns:
         _status_all = dfm["Status"].astype(str).str.strip().str.lower()
@@ -926,7 +938,7 @@ def _explode_order_lines(dfm: pd.DataFrame) -> pd.DataFrame:
     Allocates order-level profit (Order Profit) across SKUs proportionally by quantity.
     """
     out_rows = []
-    id_col = "Store Order ID" if "Store Order ID" in dfm.columns else ("ID" if "ID" in dfm.columns else None)
+    id_col = get_daily_order_id_col(dfm)
 
     for _, r in dfm.iterrows():
         order_id = r.get(id_col) if id_col else None
@@ -1027,7 +1039,7 @@ def build_product_by_date_table(
     status_all = dfm["Status"].astype(str).str.strip().str.lower() if "Status" in dfm.columns else pd.Series("", index=dfm.index)
     excl_cancelled_by_you = status_all.str.contains("cancelled by you") if "Status" in dfm.columns else pd.Series(False, index=dfm.index)
 
-    id_col = "Store Order ID" if "Store Order ID" in dfm.columns else ("ID" if "ID" in dfm.columns else None)
+    id_col = get_daily_order_id_col(dfm)
     if id_col is None:
         # Worst-case fallback
         dfm["__rowid__"] = np.arange(len(dfm))
