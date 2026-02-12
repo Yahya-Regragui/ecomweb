@@ -1368,7 +1368,11 @@ else:
     try:
         orders_df = pd.read_csv(io.BytesIO(snap["orders_csv_bytes"]), encoding="utf-8-sig")
         campaigns_df = pd.read_csv(io.BytesIO(snap["campaigns_csv_bytes"]), encoding="utf-8-sig")
-        if snap.get("daily_orders_xlsx_bytes"):
+        # Prefer a freshly uploaded Daily Orders file (even if Orders/Campaigns are loaded from GitHub).
+        # This fixes the common case: user opens the app (GitHub snapshot loads) then uploads only daily_orders.xlsx.
+        if daily_orders_file is not None:
+            daily_orders_df = pd.read_excel(daily_orders_file)
+        elif snap.get("daily_orders_xlsx_bytes"):
             daily_orders_df = pd.read_excel(io.BytesIO(snap["daily_orders_xlsx_bytes"]))
         orders_df, campaigns_df, kpis = parse_inputs(orders_df, campaigns_df, fx)
         data_source = "github"
@@ -1596,7 +1600,7 @@ with tab_dashboard:
 with tab_daily:
     st.subheader("Daily performance (Taager daily orders)")
 
-    if daily_orders_df is None or daily_orders_df is None or getattr(daily_orders_df, "empty", True):
+    if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
         st.info("Upload **Daily Orders (Taager) XLSX** to see daily KPIs.")
     else:
         daily_summary = build_daily_summary(daily_orders_df, campaigns_df, fx, currency)
