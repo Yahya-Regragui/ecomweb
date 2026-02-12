@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 
@@ -20,84 +21,6 @@ import base64
 import json
 import requests
 import re
-import numpy as np
-
-def _to_float(x):
-    """Convert values like '65,000' or '6,500' to float."""
-    if pd.isna(x):
-        return np.nan
-    s = str(x).strip()
-    s = s.replace(",", "")
-    try:
-        return float(s)
-    except:
-        return np.nan
-
-
-def build_daily_profit_table(daily_orders_df: pd.DataFrame,
-                             campaigns_df: pd.DataFrame | None,
-                             fx_iqd_per_usd: float):
-    """
-    Returns a dataframe with: Date, Delivered Orders, Ad Spend (USD),
-    Total Profit (USD), Net Profit (USD)
-    """
-    if daily_orders_df is None or daily_orders_df.empty:
-        return pd.DataFrame()
-
-    d = daily_orders_df.copy()
-
-    # Parse date
-    d["Created At"] = pd.to_datetime(d["Created At"], errors="coerce")
-    d["Date"] = d["Created At"].dt.date
-
-    # Keep delivered only
-    d_del = d[d["Status"].astype(str).str.strip().str.lower() == "delivered"].copy()
-
-    # Profit in IQD (Taager)
-    d_del["Order Profit"] = d_del["Order Profit"].apply(_to_float)
-
-    daily_profit = (
-        d_del.groupby("Date", as_index=False)
-        .agg(
-            Delivered_Orders=("ID", "count"),
-            Profit_IQD=("Order Profit", "sum")
-        )
-    )
-
-    # Convert profit to USD
-    fx = float(fx_iqd_per_usd) if fx_iqd_per_usd else 0.0
-    if fx <= 0:
-        daily_profit["Profit_USD"] = np.nan
-    else:
-        daily_profit["Profit_USD"] = daily_profit["Profit_IQD"] / fx
-
-    # Ad spend per day from Meta export
-    daily_spend = None
-    if campaigns_df is not None and not campaigns_df.empty:
-        c = campaigns_df.copy()
-        if "Reporting starts" in c.columns and "Amount spent (USD)" in c.columns:
-            c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
-            c["Date"] = c["Reporting starts"].dt.date
-            c["Amount spent (USD)"] = pd.to_numeric(c["Amount spent (USD)"], errors="coerce").fillna(0)
-
-            daily_spend = (
-                c.groupby("Date", as_index=False)
-                .agg(Ad_Spend_USD=("Amount spent (USD)", "sum"))
-            )
-
-    # Merge
-    out = daily_profit[["Date", "Delivered_Orders", "Profit_USD"]].copy()
-
-    if daily_spend is not None:
-        out = out.merge(daily_spend, on="Date", how="left")
-    out["Ad_Spend_USD"] = out.get("Ad_Spend_USD", 0).fillna(0)
-
-    out["Net_Profit_USD"] = out["Profit_USD"] - out["Ad_Spend_USD"]
-
-    # Nice formatting / ordering
-    out = out.sort_values("Date", ascending=True)
-
-    return out
 
 def extract_sku_from_campaign_name(name: str):
     """
@@ -810,6 +733,146 @@ def build_daily_summary(daily_df: pd.DataFrame, campaigns_df: pd.DataFrame, fx: 
     g["net_per_order_disp"] = g["net_disp"] / g["orders_count"].replace({0: pd.NA})
 
     return g.sort_values("day")
+
+def build_daily_table(
+    daily_df: pd.DataFrame,
+    campaigns_df: pd.DataFrame,
+    fx_iqd_per_usd: float,
+    currency: str,
+    year: int,
+    month: int,
+) -> pd.DataFrame:
+    """
+    Daily table for a selected month/year.
+    Shows ALL days in the month (even if no data).
+
+    Columns (base):
+    - Date
+    - Orders (all)
+    - Ad Spend
+    - Profit (sum of Order Profit)
+    - Net Profit (Profit - Ad Spend)
+
+    Extra insights:
+    - Delivered, Cancelled, Returned
+    - Delivery Rate %
+    - Avg Profit / Order
+    """
+    if daily_df is None or daily_df.empty:
+        return pd.DataFrame()
+
+    fx = float(fx_iqd_per_usd) if fx_iqd_per_usd else 0.0
+
+    df = parse_daily_orders(daily_df)
+    if "day" not in df.columns:
+        return pd.DataFrame()
+
+    # Month window
+    start = pd.Timestamp(year=year, month=month, day=1)
+    end = (start + pd.offsets.MonthEnd(1)).normalize()
+    days = pd.date_range(start, end, freq="D")
+
+    # Filter daily orders to the month
+    dfm = df[(df["day"] >= start) & (df["day"] <= end)].copy()
+
+    # Orders count (nunique if possible)
+    id_col = "Store Order ID" if "Store Order ID" in dfm.columns else ("ID" if "ID" in dfm.columns else None)
+    if id_col:
+        orders = dfm.groupby("day")[id_col].nunique()
+    else:
+        orders = dfm.groupby("day").size()
+
+    profit_iqd = dfm.groupby("day")["Order Profit"].sum() if "Order Profit" in dfm.columns else 0
+    cod_iqd = dfm.groupby("day")["orders.export.cashOnDelivery"].sum() if "orders.export.cashOnDelivery" in dfm.columns else 0
+    ship_iqd = dfm.groupby("day")["Shipping Cost"].sum() if "Shipping Cost" in dfm.columns else 0
+
+    base = pd.DataFrame({
+        "day": orders.index,
+        "Orders": orders.values,
+        "Profit_IQD": profit_iqd.reindex(orders.index, fill_value=0).values if hasattr(profit_iqd, "reindex") else 0,
+        "COD_IQD": cod_iqd.reindex(orders.index, fill_value=0).values if hasattr(cod_iqd, "reindex") else 0,
+        "Shipping_IQD": ship_iqd.reindex(orders.index, fill_value=0).values if hasattr(ship_iqd, "reindex") else 0,
+    })
+
+    # Status breakdown (keep a few common statuses as extra insights)
+    if "Status" in dfm.columns and not dfm["Status"].isna().all():
+        s = dfm.copy()
+        s["Status"] = s["Status"].astype(str).str.strip()
+        status_counts = s.pivot_table(index="day", columns="Status", values=id_col if id_col else "Status", aggfunc="count", fill_value=0)
+        # Normalize some common buckets (best-effort)
+        def _sum_cols_like(patterns):
+            cols = []
+            for p in patterns:
+                cols += [c for c in status_counts.columns if p in str(c).lower()]
+            cols = list(dict.fromkeys(cols))
+            if not cols:
+                return pd.Series(0, index=status_counts.index)
+            return status_counts[cols].sum(axis=1)
+
+        delivered = _sum_cols_like(["delivered"])
+        cancelled = _sum_cols_like(["cancel"])
+        returned = _sum_cols_like(["return", "returned"])
+        base = base.merge(delivered.rename("Delivered"), left_on="day", right_index=True, how="left")
+        base = base.merge(cancelled.rename("Cancelled"), left_on="day", right_index=True, how="left")
+        base = base.merge(returned.rename("Returned"), left_on="day", right_index=True, how="left")
+    else:
+        base["Delivered"] = 0
+        base["Cancelled"] = 0
+        base["Returned"] = 0
+
+    # Ads spend per day (Meta export)
+    spend = pd.DataFrame({"day": [], "Ad_Spend_USD": []})
+    if campaigns_df is not None and not getattr(campaigns_df, "empty", True):
+        c = campaigns_df.copy()
+        if "Reporting starts" in c.columns:
+            c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
+            c["day"] = c["Reporting starts"].dt.floor("D")
+        elif "Date" in c.columns:
+            c["day"] = pd.to_datetime(c["Date"], errors="coerce").dt.floor("D")
+        if "Amount spent (USD)" in c.columns:
+            c["Amount spent (USD)"] = pd.to_numeric(c["Amount spent (USD)"], errors="coerce").fillna(0)
+            spend = c.groupby("day", as_index=False).agg(Ad_Spend_USD=("Amount spent (USD)", "sum"))
+        spend = spend[(spend["day"] >= start) & (spend["day"] <= end)].copy()
+
+    # Ensure full calendar days
+    cal = pd.DataFrame({"day": days})
+    out = cal.merge(base, on="day", how="left")
+    out = out.merge(spend, on="day", how="left")
+    out[["Orders", "Profit_IQD", "COD_IQD", "Shipping_IQD", "Delivered", "Cancelled", "Returned"]] = out[
+        ["Orders", "Profit_IQD", "COD_IQD", "Shipping_IQD", "Delivered", "Cancelled", "Returned"]
+    ].fillna(0)
+    out["Ad_Spend_USD"] = out["Ad_Spend_USD"].fillna(0)
+
+    # Currency conversion
+    if currency.upper() == "USD":
+        out["Ad Spend"] = out["Ad_Spend_USD"]
+        out["Profit"] = out["Profit_IQD"] / fx if fx > 0 else np.nan
+        out["Net Profit"] = out["Profit"] - out["Ad Spend"]
+        out["Avg Profit / Order"] = np.where(out["Orders"] > 0, out["Profit"] / out["Orders"], 0.0)
+    else:
+        out["Ad Spend"] = out["Ad_Spend_USD"] * fx
+        out["Profit"] = out["Profit_IQD"]
+        out["Net Profit"] = out["Profit"] - out["Ad Spend"]
+        out["Avg Profit / Order"] = np.where(out["Orders"] > 0, out["Profit"] / out["Orders"], 0.0)
+
+    out["Delivery Rate %"] = np.where(out["Orders"] > 0, (out["Delivered"] / out["Orders"]) * 100, 0.0)
+
+    out["Date"] = out["day"].dt.date
+    # Final columns (keep a clean table)
+    cols = [
+        "Date",
+        "Orders",
+        "Delivered",
+        "Cancelled",
+        "Returned",
+        "Ad Spend",
+        "Profit",
+        "Net Profit",
+        "Avg Profit / Order",
+        "Delivery Rate %",
+    ]
+    return out[cols]
+
 
 def plot_results_top10_active_interactive(campaigns_df: pd.DataFrame):
     df = campaigns_df.copy()
@@ -1675,38 +1738,95 @@ with tab_dashboard:
 
 
 
+
 with tab_daily:
-    st.subheader("Daily performance (Delivered only)")
+    st.subheader("Daily performance")
 
-    if daily_orders_df is None or daily_orders_df.empty:
-        st.info("Upload Daily Orders (Taager) XLSX to see the daily table.")
+    if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
+        st.info("Upload **Daily Orders (Taager) XLSX** to see the daily table.")
     else:
-        daily_table = build_daily_profit_table(
-            daily_orders_df=daily_orders_df,
-            campaigns_df=campaigns_df if "campaigns_df" in locals() else None,
-            fx_iqd_per_usd=fx  # <- use your existing FX variable (IQD per 1 USD)
-        )
-
-        if daily_table.empty:
-            st.warning("No delivered orders found in the Daily Orders file.")
+        # Month / year filter (based on daily orders dates)
+        dtmp = parse_daily_orders(daily_orders_df)
+        if "day" not in dtmp.columns or dtmp["day"].isna().all():
+            st.warning("Couldn't read dates from the Daily Orders file (missing or invalid **Created At**).")
         else:
-            # If you want it displayed in IQD when currency == "IQD"
-            if currency == "IQD":
-                daily_table["Profit"] = daily_table["Profit_USD"] * fx
-                daily_table["Ad Spend"] = daily_table["Ad_Spend_USD"] * fx
-                daily_table["Net Profit"] = daily_table["Net_Profit_USD"] * fx
-                daily_table = daily_table.drop(columns=["Profit_USD", "Ad_Spend_USD", "Net_Profit_USD"])
-                daily_table = daily_table.rename(columns={"Delivered_Orders": "Delivered Orders"})
-            else:
-                daily_table["Profit"] = daily_table["Profit_USD"]
-                daily_table["Ad Spend"] = daily_table["Ad_Spend_USD"]
-                daily_table["Net Profit"] = daily_table["Net_Profit_USD"]
-                daily_table = daily_table.drop(columns=["Profit_USD", "Ad_Spend_USD", "Net_Profit_USD"])
-                daily_table = daily_table.rename(columns={"Delivered_Orders": "Delivered Orders"})
+            available_days = pd.to_datetime(dtmp["day"].dropna().unique())
+            years = sorted({d.year for d in available_days})
+            # Default to latest month
+            latest = pd.Timestamp(max(available_days))
 
-            st.dataframe(daily_table, use_container_width=True)
+            c1, c2, c3 = st.columns([1, 1, 2])
+            with c1:
+                sel_year = st.selectbox("Year", years, index=years.index(latest.year))
+            with c2:
+                months = list(range(1, 13))
+                sel_month = st.selectbox("Month", months, index=months.index(latest.month))
+            with c3:
+                st.caption("Table includes **all days** in the selected month, even if there were 0 orders / 0 spend.")
 
+            daily_table = build_daily_table(
+                daily_df=daily_orders_df,
+                campaigns_df=campaigns_df,
+                fx_iqd_per_usd=fx,
+                currency=currency,
+                year=int(sel_year),
+                month=int(sel_month),
+            )
 
+            # Insights
+            total_orders = int(daily_table["Orders"].sum())
+            total_profit = float(daily_table["Profit"].sum())
+            total_spend = float(daily_table["Ad Spend"].sum())
+            total_net = float(daily_table["Net Profit"].sum())
+
+            k1, k2, k3, k4 = st.columns(4)
+            k1.metric("Orders", f"{total_orders:,}")
+            k2.metric(f"Profit ({currency})", f"{total_profit:,.2f}")
+            k3.metric(f"Ad Spend ({currency})", f"{total_spend:,.2f}")
+            k4.metric(f"Net Profit ({currency})", f"{total_net:,.2f}")
+
+            # Stylish + dynamic Net Profit
+            def _style_net(val):
+                try:
+                    v = float(val)
+                except:
+                    return ""
+                if v > 0:
+                    return "font-weight:700; color:#19a974;"  # green
+                if v < 0:
+                    return "font-weight:700; color:#ff4d4f;"  # red
+                return "font-weight:700;"
+
+            styled = (
+                daily_table.style
+                .format({
+                    "Ad Spend": "{:,.2f}",
+                    "Profit": "{:,.2f}",
+                    "Net Profit": "{:,.2f}",
+                    "Avg Profit / Order": "{:,.2f}",
+                    "Delivery Rate %": "{:,.1f}%",
+                })
+                .applymap(_style_net, subset=["Net Profit"])
+            )
+
+            st.dataframe(styled, use_container_width=True, height=520)
+
+            with st.expander("More insights (status mix + totals)"):
+                # Status mix per month
+                mix = {
+                    "Delivered %": (daily_table["Delivered"].sum() / total_orders * 100) if total_orders else 0,
+                    "Cancelled %": (daily_table["Cancelled"].sum() / total_orders * 100) if total_orders else 0,
+                    "Returned %": (daily_table["Returned"].sum() / total_orders * 100) if total_orders else 0,
+                    "Avg profit / order": (total_profit / total_orders) if total_orders else 0,
+                }
+                st.write(mix)
+
+                # Show the raw daily orders for the selected month (optional)
+                start_m = pd.Timestamp(year=int(sel_year), month=int(sel_month), day=1)
+                end_m = (start_m + pd.offsets.MonthEnd(1)).normalize()
+                raw_m = dtmp[(dtmp["day"] >= start_m) & (dtmp["day"] <= end_m)].copy()
+                st.caption(f"Raw rows in month: {len(raw_m):,}")
+                st.dataframe(raw_m, use_container_width=True, height=240)
 
 with tab_orders:
     st.subheader("Orders details")
