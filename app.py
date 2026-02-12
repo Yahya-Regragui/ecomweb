@@ -20,6 +20,84 @@ import base64
 import json
 import requests
 import re
+import numpy as np
+
+def _to_float(x):
+    """Convert values like '65,000' or '6,500' to float."""
+    if pd.isna(x):
+        return np.nan
+    s = str(x).strip()
+    s = s.replace(",", "")
+    try:
+        return float(s)
+    except:
+        return np.nan
+
+
+def build_daily_profit_table(daily_orders_df: pd.DataFrame,
+                             campaigns_df: pd.DataFrame | None,
+                             fx_iqd_per_usd: float):
+    """
+    Returns a dataframe with: Date, Delivered Orders, Ad Spend (USD),
+    Total Profit (USD), Net Profit (USD)
+    """
+    if daily_orders_df is None or daily_orders_df.empty:
+        return pd.DataFrame()
+
+    d = daily_orders_df.copy()
+
+    # Parse date
+    d["Created At"] = pd.to_datetime(d["Created At"], errors="coerce")
+    d["Date"] = d["Created At"].dt.date
+
+    # Keep delivered only
+    d_del = d[d["Status"].astype(str).str.strip().str.lower() == "delivered"].copy()
+
+    # Profit in IQD (Taager)
+    d_del["Order Profit"] = d_del["Order Profit"].apply(_to_float)
+
+    daily_profit = (
+        d_del.groupby("Date", as_index=False)
+        .agg(
+            Delivered_Orders=("ID", "count"),
+            Profit_IQD=("Order Profit", "sum")
+        )
+    )
+
+    # Convert profit to USD
+    fx = float(fx_iqd_per_usd) if fx_iqd_per_usd else 0.0
+    if fx <= 0:
+        daily_profit["Profit_USD"] = np.nan
+    else:
+        daily_profit["Profit_USD"] = daily_profit["Profit_IQD"] / fx
+
+    # Ad spend per day from Meta export
+    daily_spend = None
+    if campaigns_df is not None and not campaigns_df.empty:
+        c = campaigns_df.copy()
+        if "Reporting starts" in c.columns and "Amount spent (USD)" in c.columns:
+            c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
+            c["Date"] = c["Reporting starts"].dt.date
+            c["Amount spent (USD)"] = pd.to_numeric(c["Amount spent (USD)"], errors="coerce").fillna(0)
+
+            daily_spend = (
+                c.groupby("Date", as_index=False)
+                .agg(Ad_Spend_USD=("Amount spent (USD)", "sum"))
+            )
+
+    # Merge
+    out = daily_profit[["Date", "Delivered_Orders", "Profit_USD"]].copy()
+
+    if daily_spend is not None:
+        out = out.merge(daily_spend, on="Date", how="left")
+    out["Ad_Spend_USD"] = out.get("Ad_Spend_USD", 0).fillna(0)
+
+    out["Net_Profit_USD"] = out["Profit_USD"] - out["Ad_Spend_USD"]
+
+    # Nice formatting / ordering
+    out = out.sort_values("Date", ascending=True)
+
+    return out
 
 def extract_sku_from_campaign_name(name: str):
     """
@@ -1598,81 +1676,35 @@ with tab_dashboard:
 
 
 with tab_daily:
-    st.subheader("Daily performance (Taager daily orders)")
+    st.subheader("Daily performance (Delivered only)")
 
-    if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
-        st.info("Upload **Daily Orders (Taager) XLSX** to see daily KPIs.")
+    if daily_orders_df is None or daily_orders_df.empty:
+        st.info("Upload Daily Orders (Taager) XLSX to see the daily table.")
     else:
-        daily_summary = build_daily_summary(daily_orders_df, campaigns_df, fx, currency)
-        if daily_summary.empty:
-            st.warning("Could not build daily summary (missing 'Created At' column).")
+        daily_table = build_daily_profit_table(
+            daily_orders_df=daily_orders_df,
+            campaigns_df=campaigns_df if "campaigns_df" in locals() else None,
+            fx_iqd_per_usd=fx  # <- use your existing FX variable (IQD per 1 USD)
+        )
+
+        if daily_table.empty:
+            st.warning("No delivered orders found in the Daily Orders file.")
         else:
-            # KPI row
-            total_orders = int(daily_summary["orders_count"].sum())
-            total_profit = float(daily_summary["profit_disp"].sum())
-            total_spend = float(daily_summary["spend_disp"].sum())
-            total_net = float(daily_summary["net_disp"].sum())
-
-            k1, k2, k3, k4 = st.columns(4)
-            k1.metric("Orders", f"{total_orders:,}")
-            k2.metric(f"Profit ({currency})", money_ccy(total_profit, currency))
-            k3.metric(f"Ad spend ({currency})", money_ccy(total_spend, currency))
-            k4.metric(f"Net after ads ({currency})", money_ccy(total_net, currency))
-
-            st.markdown("### Daily net & orders")
-
-            # Chart: net after ads + orders count (2 lines)
-            chart_df = daily_summary[["day", "orders_count", "net_disp", "profit_disp", "spend_disp"]].copy()
-            chart_df = chart_df.melt(id_vars=["day", "orders_count"], value_vars=["net_disp", "profit_disp", "spend_disp"],
-                                     var_name="metric", value_name="value")
-
-            metric_name = {
-                "net_disp": f"Net after ads ({currency})",
-                "profit_disp": f"Profit ({currency})",
-                "spend_disp": f"Ad spend ({currency})",
-            }
-            chart_df["metric"] = chart_df["metric"].map(metric_name)
-
-            # interactive lines (value) + tooltip includes orders_count
-            nearest = alt.selection_point(nearest=True, on="mouseover", fields=["day"], empty=False)
-
-            base = alt.Chart(chart_df).encode(
-                x=alt.X("day:T", title="Day"),
-                color=alt.Color("metric:N", legend=alt.Legend(title="Metric")),
-            )
-
-            lines = base.mark_line(point=True).encode(
-                y=alt.Y("value:Q", title=f"Amount ({currency})"),
-                tooltip=[
-                    alt.Tooltip("day:T", title="Day"),
-                    alt.Tooltip("metric:N", title="Metric"),
-                    alt.Tooltip("value:Q", title=f"Value ({currency})"),
-                    alt.Tooltip("orders_count:Q", title="Orders"),
-                ]
-            )
-
-            selectors = base.mark_point().encode(opacity=alt.value(0)).add_params(nearest)
-            rule = alt.Chart(chart_df).mark_rule().encode(x="day:T").transform_filter(nearest)
-
-            st.altair_chart((lines + selectors + rule).properties(height=420).interactive(), use_container_width=True)
-
-            st.markdown("### Daily table")
-            # Select columns to show
-            show_cols = ["day", "orders_count", "items_qty", "cod_iqd", "profit_disp", "spend_disp", "net_disp",
-                         "profit_per_order_disp", "net_per_order_disp"]
-            show_cols = [c for c in show_cols if c in daily_summary.columns]
-            view = daily_summary[show_cols].copy()
-
-            # Nice formatting
+            # If you want it displayed in IQD when currency == "IQD"
             if currency == "IQD":
-                # cod_iqd is already IQD
-                pass
+                daily_table["Profit"] = daily_table["Profit_USD"] * fx
+                daily_table["Ad Spend"] = daily_table["Ad_Spend_USD"] * fx
+                daily_table["Net Profit"] = daily_table["Net_Profit_USD"] * fx
+                daily_table = daily_table.drop(columns=["Profit_USD", "Ad_Spend_USD", "Net_Profit_USD"])
+                daily_table = daily_table.rename(columns={"Delivered_Orders": "Delivered Orders"})
+            else:
+                daily_table["Profit"] = daily_table["Profit_USD"]
+                daily_table["Ad Spend"] = daily_table["Ad_Spend_USD"]
+                daily_table["Net Profit"] = daily_table["Net_Profit_USD"]
+                daily_table = daily_table.drop(columns=["Profit_USD", "Ad_Spend_USD", "Net_Profit_USD"])
+                daily_table = daily_table.rename(columns={"Delivered_Orders": "Delivered Orders"})
 
-            st.dataframe(view, use_container_width=True)
-
-            with st.expander("Raw daily orders rows", expanded=False):
-                st.dataframe(parse_daily_orders(daily_orders_df).sort_values("Created At" if "Created At" in daily_orders_df.columns else daily_orders_df.columns[0]),
-                             use_container_width=True)
+            st.dataframe(daily_table, use_container_width=True)
 
 
 
