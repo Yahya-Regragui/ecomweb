@@ -2059,11 +2059,27 @@ with tab_daily:
                                 sku_set.add(p)
                 sku_list = sorted(sku_set)
 
-                selected = st.multiselect(
-                    "Select product(s) (SKU)",
-                    options=sku_list,
-                    default=sku_list[:1] if sku_list else [],
+                # Map SKU -> Product Name using Orders file (best-effort)
+                sku_to_name = build_sku_to_name_map(orders_df) if "orders_df" in locals() and orders_df is not None else {}
+
+                # Group SKUs under their product names (fallback to SKU when name is unknown)
+                name_to_skus = {}
+                for sku in sku_list:
+                    name = sku_to_name.get(str(sku).strip())
+                    label = name if name else str(sku)
+                    name_to_skus.setdefault(label, []).append(str(sku).strip())
+
+                product_options = sorted(name_to_skus.keys())
+
+                selected_names = st.multiselect(
+                    "Select product(s)",
+                    options=product_options,
+                    default=product_options[:1] if product_options else [],
                 )
+
+                selected_skus = []
+                for n in selected_names:
+                    selected_skus.extend(name_to_skus.get(n, []))
 
                 daily_table = build_product_by_date_table(
                     daily_df=daily_orders_df,
@@ -2072,7 +2088,7 @@ with tab_daily:
                     currency=currency,
                     year=int(sel_year),
                     month=int(sel_month),
-                    selected_skus=selected,
+                    selected_skus=selected_skus,
                 )
 
             # Insights
