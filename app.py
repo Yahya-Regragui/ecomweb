@@ -775,12 +775,20 @@ def build_daily_table(
     # Filter daily orders to the month
     dfm = df[(df["day"] >= start) & (df["day"] <= end)].copy()
 
-    # Orders count (nunique if possible)
+    # Orders count (nunique if possible), excluding "Cancelled by You"
     id_col = "Store Order ID" if "Store Order ID" in dfm.columns else ("ID" if "ID" in dfm.columns else None)
-    if id_col:
-        orders = dfm.groupby("day")[id_col].nunique()
+
+    if "Status" in dfm.columns:
+        _status_all = dfm["Status"].astype(str).str.strip().str.lower()
+        _exclude = _status_all.str.contains("cancelled by you")
+        dfm_orders = dfm[~_exclude].copy()
     else:
-        orders = dfm.groupby("day").size()
+        dfm_orders = dfm
+
+    if id_col:
+        orders = dfm_orders.groupby("day")[id_col].nunique()
+    else:
+        orders = dfm_orders.groupby("day").size()
 
     # Profit should be counted ONLY for delivered orders (realized profit)
     if "Order Profit" in dfm.columns and "Status" in dfm.columns:
