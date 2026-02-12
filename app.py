@@ -1047,9 +1047,18 @@ def build_product_by_date_table(
         return out
 
     lines["sku"] = lines["sku"].astype(str).str.strip()
-    sel_set = {s.strip() for s in selected_skus if str(s).strip()}
+    # Normalize selected SKUs (sometimes a cell contains 'SKU1, SKU2' so split on commas)
+    _flat = []
+    for _s in (selected_skus or []):
+        if _s is None:
+            continue
+        for part in str(_s).split(","):
+            p = part.strip()
+            if p:
+                _flat.append(p)
+    sel_set = set(_flat)
     if sel_set:
-        lines = lines[lines["sku"].isin(sel_set)].copy()
+        lines = lines[lines["sku"].astype(str).str.strip().isin(sel_set)].copy()
 
     # Merge exclusion + status flags at order level (use dfm for order_id -> day/status)
     ord_map = dfm[[ "day", id_col, "Status"]].copy()
