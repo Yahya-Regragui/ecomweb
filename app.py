@@ -907,6 +907,238 @@ def build_daily_table(
     return out[cols]
 
 
+
+def _split_list_cell(val) -> list:
+    """Split Taager cells like 'SKU1, SKU2' into a list of strings."""
+    if pd.isna(val):
+        return []
+    s = str(val).strip()
+    if not s:
+        return []
+    # Taager exports often separate with commas
+    parts = [p.strip() for p in s.split(",")]
+    return [p for p in parts if p]
+
+
+def _explode_order_lines(dfm: pd.DataFrame) -> pd.DataFrame:
+    """
+    Explode Taager daily orders into order lines by SKU with quantities.
+    Allocates order-level profit (Order Profit) across SKUs proportionally by quantity.
+    """
+    out_rows = []
+    id_col = "Store Order ID" if "Store Order ID" in dfm.columns else ("ID" if "ID" in dfm.columns else None)
+
+    for _, r in dfm.iterrows():
+        order_id = r.get(id_col) if id_col else None
+        skus = _split_list_cell(r.get("SKUs"))
+        qtys = _split_list_cell(r.get("Quantities"))
+        # quantities might be numeric or missing
+        q = []
+        for x in qtys:
+            try:
+                q.append(float(str(x).replace(",", "").strip()))
+            except:
+                q.append(np.nan)
+
+        if not skus:
+            continue
+
+        # If quantities missing/mismatch, assume 1 for each SKU
+        if len(q) != len(skus) or all(pd.isna(v) for v in q):
+            q = [1.0] * len(skus)
+        q = [1.0 if pd.isna(v) else float(v) for v in q]
+        total_q = sum(q) if sum(q) > 0 else 1.0
+
+        order_profit = r.get("Order Profit", 0.0)
+        try:
+            order_profit = float(order_profit)
+        except:
+            order_profit = 0.0
+
+        for sku, qty in zip(skus, q):
+            out_rows.append({
+                "day": r.get("day"),
+                "order_id": order_id,
+                "sku": sku,
+                "qty": qty,
+                "profit_iqd_alloc": order_profit * (qty / total_q),
+                "Status": r.get("Status"),
+            })
+
+    return pd.DataFrame(out_rows)
+
+
+
+def _daily_meta_spend_usd(campaigns_df: pd.DataFrame, year: int, month: int) -> pd.Series:
+    """Return Meta spend per day (USD) for the given month, indexed by day (Timestamp)."""
+    if campaigns_df is None or getattr(campaigns_df, "empty", True):
+        return pd.Series(dtype=float)
+
+    df = campaigns_df.copy()
+    if "Reporting starts" not in df.columns or "Amount spent (USD)" not in df.columns:
+        return pd.Series(dtype=float)
+
+    df["Reporting starts"] = pd.to_datetime(df["Reporting starts"], errors="coerce")
+    df = df.dropna(subset=["Reporting starts"])
+    df["day"] = df["Reporting starts"].dt.floor("D")
+
+    start = pd.Timestamp(year=year, month=month, day=1)
+    end = (start + pd.offsets.MonthEnd(1)).normalize()
+    dfm = df[(df["day"] >= start) & (df["day"] <= end)].copy()
+
+    dfm["Amount spent (USD)"] = pd.to_numeric(dfm["Amount spent (USD)"], errors="coerce").fillna(0)
+    spend = dfm.groupby("day")["Amount spent (USD)"].sum()
+    return spend
+
+
+def build_product_by_date_table(
+    daily_df: pd.DataFrame,
+    campaigns_df: pd.DataFrame,
+    fx_iqd_per_usd: float,
+    currency: str,
+    year: int,
+    month: int,
+    selected_skus: list[str],
+) -> pd.DataFrame:
+    """
+    Daily table for selected product(s) (SKU) in a selected month/year.
+    Shows ALL days in the month (even if no data).
+
+    - Orders: count of orders containing selected SKU(s), excluding 'Cancelled by You'
+    - Profit: delivered-only allocated profit for selected SKU(s)
+    - Ad Spend: allocated by share of Orders that day (selected orders / total orders)
+    """
+    if daily_df is None or daily_df.empty:
+        return pd.DataFrame()
+
+    fx = float(fx_iqd_per_usd) if fx_iqd_per_usd else 0.0
+
+    df = parse_daily_orders(daily_df)
+    if "day" not in df.columns:
+        return pd.DataFrame()
+
+    start = pd.Timestamp(year=year, month=month, day=1)
+    end = (start + pd.offsets.MonthEnd(1)).normalize()
+    days = pd.date_range(start, end, freq="D")
+
+    dfm = df[(df["day"] >= start) & (df["day"] <= end)].copy()
+
+    # Status normalization + exclusion mask
+    status_all = dfm["Status"].astype(str).str.strip().str.lower() if "Status" in dfm.columns else pd.Series("", index=dfm.index)
+    excl_cancelled_by_you = status_all.str.contains("cancelled by you") if "Status" in dfm.columns else pd.Series(False, index=dfm.index)
+
+    id_col = "Store Order ID" if "Store Order ID" in dfm.columns else ("ID" if "ID" in dfm.columns else None)
+    if id_col is None:
+        # Worst-case fallback
+        dfm["__rowid__"] = np.arange(len(dfm))
+        id_col = "__rowid__"
+
+    # Total orders per day (for spend allocation)
+    dfm_orders_all = dfm[~excl_cancelled_by_you].copy()
+    total_orders_per_day = dfm_orders_all.groupby("day")[id_col].nunique()
+
+    # Explode to SKU lines for product filtering
+    lines = _explode_order_lines(dfm)
+    if lines.empty:
+        # Return empty calendar table
+        out = pd.DataFrame({"Date": days.date})
+        for c in ["Orders", "Delivered", "Cancelled", "Returned", "Temporary Suspended", "In Progress", "Ad Spend", "Profit", "Net Profit", "Avg Profit / Delivered", "Delivery Rate %"]:
+            out[c] = 0
+        return out
+
+    lines["sku"] = lines["sku"].astype(str).str.strip()
+    sel_set = {s.strip() for s in selected_skus if str(s).strip()}
+    if sel_set:
+        lines = lines[lines["sku"].isin(sel_set)].copy()
+
+    # Merge exclusion + status flags at order level (use dfm for order_id -> day/status)
+    ord_map = dfm[[ "day", id_col, "Status"]].copy()
+    ord_map = ord_map.rename(columns={id_col: "order_id"})
+    ord_map["status_clean"] = ord_map["Status"].astype(str).str.strip().str.lower()
+    ord_map["exclude_by_you"] = ord_map["status_clean"].str.contains("cancelled by you")
+
+    # status flags
+    ord_map["is_delivered"] = ord_map["status_clean"].str.contains("delivered")
+    ord_map["is_cancelled"] = ord_map["status_clean"].str.contains("cancel") | ord_map["status_clean"].str.contains("delivery failed")
+    ord_map["is_returned"] = ord_map["status_clean"].str.contains("return")
+    ord_map["is_temp_suspended"] = ord_map["status_clean"].str.contains("temporary suspended")
+    ord_map["is_in_progress"] = ord_map["status_clean"].str.contains("order received") | ord_map["status_clean"].str.contains("delivery in progress")
+
+    lines = lines.merge(ord_map[["order_id","day","exclude_by_you","is_delivered","is_cancelled","is_returned","is_temp_suspended","is_in_progress"]], on=["order_id","day"], how="left")
+
+    # Orders per day for selected SKU(s), excluding Cancelled by You
+    lines_ok = lines[~lines["exclude_by_you"].fillna(False)].copy()
+    orders_sel = lines_ok.groupby("day")["order_id"].nunique()
+
+    # Delivered profit (allocated) per day for selected SKU(s)
+    profit_iqd_sel = lines_ok[lines_ok["is_delivered"].fillna(False)].groupby("day")["profit_iqd_alloc"].sum()
+
+    # Status breakdown (count unique orders) for selected SKU(s)
+    delivered_sel = lines_ok[lines_ok["is_delivered"].fillna(False)].groupby("day")["order_id"].nunique()
+    cancelled_sel = lines_ok[lines_ok["is_cancelled"].fillna(False)].groupby("day")["order_id"].nunique()
+    returned_sel = lines_ok[lines_ok["is_returned"].fillna(False)].groupby("day")["order_id"].nunique()
+    temp_sel = lines_ok[lines_ok["is_temp_suspended"].fillna(False)].groupby("day")["order_id"].nunique()
+    inprog_sel = lines_ok[lines_ok["is_in_progress"].fillna(False)].groupby("day")["order_id"].nunique()
+
+    # Ad spend per day (USD), then allocate by share of orders
+    spend_usd = _daily_meta_spend_usd(campaigns_df, year, month)
+    # Align index to Timestamp days
+    share = (orders_sel / total_orders_per_day).replace([np.inf, -np.inf], np.nan).fillna(0)
+    spend_alloc_usd = spend_usd.mul(share, fill_value=0)
+
+    # Build calendar table
+    out = pd.DataFrame({"Date": days.date})
+    out["day"] = pd.to_datetime(out["Date"])
+
+    def _series_to_col(s, col):
+        if isinstance(s, (int, float)):
+            out[col] = 0
+        else:
+            out[col] = out["day"].map(s).fillna(0)
+
+    _series_to_col(orders_sel, "Orders")
+    _series_to_col(delivered_sel, "Delivered")
+    _series_to_col(cancelled_sel, "Cancelled")
+    _series_to_col(returned_sel, "Returned")
+    _series_to_col(temp_sel, "Temporary Suspended")
+    _series_to_col(inprog_sel, "In Progress")
+
+    # Profit / Spend / Net in currency
+    profit_usd = out["day"].map(profit_iqd_sel).fillna(0) / fx if fx > 0 else 0
+    out["Ad Spend"] = out["day"].map(spend_alloc_usd).fillna(0)
+
+    if currency == "IQD":
+        out["Profit"] = profit_usd * fx
+        out["Ad Spend"] = out["Ad Spend"] * fx
+    else:
+        out["Profit"] = profit_usd
+
+    out["Net Profit"] = out["Profit"] - out["Ad Spend"]
+
+    # Delivery rate & avg profit
+    out["Delivery Rate %"] = np.where(out["Orders"] > 0, (out["Delivered"] / out["Orders"]) * 100, 0)
+    out["Avg Profit / Delivered"] = np.where(out["Delivered"] > 0, out["Profit"] / out["Delivered"], 0)
+
+    # Ensure integer counts
+    for c in ["Orders","Delivered","Cancelled","Returned","Temporary Suspended","In Progress"]:
+        out[c] = out[c].astype(int)
+
+    out = out.drop(columns=["day"])
+    cols = [
+        "Date",
+        "Orders",
+        "Delivered",
+        "Cancelled",
+        "Returned",
+        "Temporary Suspended",
+        "In Progress",
+        "Ad Spend",
+        "Profit",
+        "Net Profit",
+        "Avg Profit / Delivered",
+        "Delivery Rate %",
+    ]
+    return out[cols]
 def plot_results_top10_active_interactive(campaigns_df: pd.DataFrame):
     df = campaigns_df.copy()
 
@@ -1797,14 +2029,51 @@ with tab_daily:
             with c3:
                 st.caption("Table includes **all days** in the selected month, even if there were 0 orders / 0 spend.")
 
-            daily_table = build_daily_table(
-                daily_df=daily_orders_df,
-                campaigns_df=campaigns_df,
-                fx_iqd_per_usd=fx,
-                currency=currency,
-                year=int(sel_year),
-                month=int(sel_month),
+            view_mode = st.radio(
+                "View",
+                ["Daily summary", "Product by date"],
+                horizontal=True,
             )
+
+            if view_mode == "Daily summary":
+                daily_table = build_daily_table(
+                    daily_df=daily_orders_df,
+                    campaigns_df=campaigns_df,
+                    fx_iqd_per_usd=fx,
+                    currency=currency,
+                    year=int(sel_year),
+                    month=int(sel_month),
+                )
+            else:
+                # Build SKU list for selector (from the selected month)
+                dsel = parse_daily_orders(daily_orders_df)
+                start = pd.Timestamp(year=int(sel_year), month=int(sel_month), day=1)
+                end = (start + pd.offsets.MonthEnd(1)).normalize()
+                dsel = dsel[(dsel["day"] >= start) & (dsel["day"] <= end)].copy()
+
+                sku_set = set()
+                if "SKUs" in dsel.columns:
+                    for v in dsel["SKUs"].dropna().astype(str):
+                        for p in [x.strip() for x in v.split(",")]:
+                            if p:
+                                sku_set.add(p)
+                sku_list = sorted(sku_set)
+
+                selected = st.multiselect(
+                    "Select product(s) (SKU)",
+                    options=sku_list,
+                    default=sku_list[:1] if sku_list else [],
+                )
+
+                daily_table = build_product_by_date_table(
+                    daily_df=daily_orders_df,
+                    campaigns_df=campaigns_df,
+                    fx_iqd_per_usd=fx,
+                    currency=currency,
+                    year=int(sel_year),
+                    month=int(sel_month),
+                    selected_skus=selected,
+                )
 
             # Insights
             total_orders = int(daily_table["Orders"].sum())
