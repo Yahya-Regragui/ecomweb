@@ -853,6 +853,11 @@ def build_daily_table(
     ].fillna(0)
     out["Ad_Spend_USD"] = out["Ad_Spend_USD"].fillna(0)
 
+    # Cast count columns to int (avoid 0.000000 display)
+    for _c in ["Orders", "Delivered", "Cancelled", "Returned"]:
+        if _c in out.columns:
+            out[_c] = pd.to_numeric(out[_c], errors="coerce").fillna(0).round(0).astype(int)
+
     # Currency conversion
     if currency.upper() == "USD":
         out["Ad Spend"] = out["Ad_Spend_USD"]
@@ -1810,10 +1815,14 @@ with tab_daily:
             styled = (
                 daily_table.style
                 .format({
+                    "Orders": "{:,.0f}",
+                    "Delivered": "{:,.0f}",
+                    "Cancelled": "{:,.0f}",
+                    "Returned": "{:,.0f}",
                     "Ad Spend": "{:,.2f}",
                     "Profit": "{:,.2f}",
                     "Net Profit": "{:,.2f}",
-                    "Avg Profit / Order": "{:,.2f}",
+                    "Avg Profit / Delivered": "{:,.2f}",
                     "Delivery Rate %": "{:,.1f}%",
                 })
                 .applymap(_style_net, subset=["Net Profit"])
