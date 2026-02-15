@@ -720,8 +720,7 @@ def render_fixed_quick_kpis(
             delivery_rate = (deliveries_count / orders_count * 100.0) if orders_count else 0.0
 
             summary_title = (
-                f"Summary — {orders_count} orders | {disp_money_iqd(orders_amount_iqd)} COD | "
-                f"{deliveries_count} delivered ({delivery_rate:.0f}%)"
+                f"Summary — Orders: {orders_count} | COD: {disp_money_iqd(orders_amount_iqd)} | Delivered: {deliveries_count} ({delivery_rate:.0f}%)"
             )
 
     # Expander (we'll pin it via JS+CSS)
@@ -762,7 +761,6 @@ def render_fixed_quick_kpis(
         max_day = df["day"].max().date()
         st.date_input(
             "Select day",
-            value=st.session_state.quick_kpi_day,
             min_value=min_day,
             max_value=max_day,
             key="quick_kpi_day",
