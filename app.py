@@ -647,87 +647,155 @@ def parse_daily_orders(daily_df: pd.DataFrame) -> pd.DataFrame:
 
 
 
-def render_fixed_quick_kpis(daily_orders_df: pd.DataFrame, orders_df: Optional[pd.DataFrame], fx: float, currency: str):
-    """Floating bottom-left accordion (expander) that stays across tabs."""
+def render_fixed_quick_kpis(
+    daily_orders_df: pd.DataFrame,
+    orders_df: Optional[pd.DataFrame],
+    fx: float,
+    currency: str,
+):
+    """Floating bottom-right accordion (expander) that stays across tabs."""
 
-    # We use an expander so Streamlit manages open/close state,
-    # then CSS (via :has(#quick-kpi-marker)) makes it fixed bottom-left.
-    with st.expander("📌 Quick KPIs (per day)", expanded=False):
-        # Marker used by CSS to select + position this expander
+    # Helper to display COD amounts in selected currency
+    def disp_money_iqd(iqd: float) -> str:
+        if currency == "USD":
+            return money_ccy(iqd_to_usd(iqd, fx), "USD")
+        return money_ccy(iqd, "IQD")
+
+    # Build a dynamic expander title (works even when collapsed)
+    if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
+        summary_title = "Summary — Upload Daily Orders (Taager) XLSX"
+        df = None
+        selected_day = None
+    else:
+        df = parse_daily_orders(daily_orders_df)
+        if "day" not in df.columns or df["day"].isna().all():
+            summary_title = "Summary — No usable date in Daily Orders"
+            selected_day = None
+        else:
+            min_day = df["day"].min().date()
+            max_day = df["day"].max().date()
+
+            if "quick_kpi_day" not in st.session_state:
+                st.session_state.quick_kpi_day = max_day
+
+            # Use last selected day for the summary title
+            selected_day = st.session_state.quick_kpi_day
+            # Clamp to available range (in case file changed)
+            if selected_day < min_day:
+                selected_day = min_day
+                st.session_state.quick_kpi_day = min_day
+            if selected_day > max_day:
+                selected_day = max_day
+                st.session_state.quick_kpi_day = max_day
+
+            d = df[df["day"] == pd.to_datetime(selected_day)].copy()
+
+            # Remove "Cancelled by You"
+            if "Status" in d.columns:
+                status_clean = d["Status"].astype(str).str.strip().str.lower()
+                d = d[~status_clean.str.contains("cancelled by you", na=False)].copy()
+
+            id_col = get_daily_order_id_col(d)
+            if id_col is None:
+                d["__rowid__"] = range(len(d))
+                id_col = "__rowid__"
+
+            cod_col = "orders.export.cashOnDelivery"
+            if cod_col in d.columns:
+                d[cod_col] = to_num(d[cod_col])
+            else:
+                d[cod_col] = 0.0
+
+            orders_count = int(d[id_col].nunique()) if len(d) else 0
+            orders_amount_iqd = float(d[cod_col].sum()) if len(d) else 0.0
+
+            delivered_mask = pd.Series(False, index=d.index)
+            if "Status" in d.columns:
+                delivered_mask = (
+                    d["Status"].astype(str).str.strip().str.lower().str.contains("delivered", na=False)
+                )
+            deliveries_count = int(d.loc[delivered_mask, id_col].nunique()) if len(d) else 0
+            deliveries_amount_iqd = float(d.loc[delivered_mask, cod_col].sum()) if len(d) else 0.0
+
+            delivery_rate = (deliveries_count / orders_count * 100.0) if orders_count else 0.0
+
+            summary_title = (
+                f"Summary — {orders_count} orders | {disp_money_iqd(orders_amount_iqd)} COD | "
+                f"{deliveries_count} delivered ({delivery_rate:.0f}%)"
+            )
+
+    # Expander (we'll pin it via JS+CSS)
+    with st.expander(summary_title, expanded=False):
+        # Marker: used by JS to locate the expander container and add a CSS class
         st.markdown('<div id="quick-kpi-marker"></div>', unsafe_allow_html=True)
+
         components.html(
             """
             <script>
             (function(){
               const marker = window.parent.document.getElementById('quick-kpi-marker');
               if (!marker) return;
-              const expander = marker.closest('div[data-testid="stExpander"]');
-              if (!expander) return;
-              expander.classList.add('kpi-fixed-expander');
+
+              // Walk up to the expander root container
+              let el = marker;
+              for (let i = 0; i < 20; i++) {
+                if (!el) break;
+                // Streamlit expander root usually carries data-testid="stExpander"
+                if (el.getAttribute && el.getAttribute('data-testid') === 'stExpander') break;
+                el = el.parentElement;
+              }
+              if (!el) return;
+
+              el.classList.add('kpi-fixed-expander');
             })();
             </script>
             """,
             height=0,
         )
 
-        if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
-            st.info("Upload Daily Orders (Taager) XLSX to enable Quick KPIs.")
+        if df is None or selected_day is None:
+            st.info("Upload Daily Orders (Taager) XLSX to enable this panel.")
             return
 
-        df = parse_daily_orders(daily_orders_df)
-        if "day" not in df.columns or df["day"].isna().all():
-            st.warning("No usable date column found in Daily Orders.")
-            return
-
-        # Default date = latest day in file
+        # Date filter (inside accordion)
         min_day = df["day"].min().date()
         max_day = df["day"].max().date()
-        default_day = st.session_state.get("quick_kpi_day", max_day)
-
-        selected_day = st.date_input(
+        st.date_input(
             "Select day",
-            value=default_day,
+            value=st.session_state.quick_kpi_day,
             min_value=min_day,
             max_value=max_day,
             key="quick_kpi_day",
         )
 
-        day_ts = pd.to_datetime(selected_day)
-        d = df[df["day"] == day_ts].copy()
+        # Recompute for selected day (so metrics + table follow the date input)
+        d = df[df["day"] == pd.to_datetime(st.session_state.quick_kpi_day)].copy()
 
-        # Exclude "Cancelled by You"
         if "Status" in d.columns:
             status_clean = d["Status"].astype(str).str.strip().str.lower()
             d = d[~status_clean.str.contains("cancelled by you", na=False)].copy()
 
         id_col = get_daily_order_id_col(d)
         if id_col is None:
-            d["__rowid__"] = np.arange(len(d))
+            d["__rowid__"] = range(len(d))
             id_col = "__rowid__"
 
-        # Amount column (COD in IQD)
         cod_col = "orders.export.cashOnDelivery"
         if cod_col in d.columns:
             d[cod_col] = to_num(d[cod_col])
         else:
             d[cod_col] = 0.0
 
-        # Orders KPIs
         orders_count = int(d[id_col].nunique()) if len(d) else 0
         orders_amount_iqd = float(d[cod_col].sum()) if len(d) else 0.0
 
-        # Deliveries KPIs
         delivered_mask = pd.Series(False, index=d.index)
         if "Status" in d.columns:
-            delivered_mask = d["Status"].astype(str).str.strip().str.lower().str.contains("delivered", na=False)
-
+            delivered_mask = (
+                d["Status"].astype(str).str.strip().str.lower().str.contains("delivered", na=False)
+            )
         deliveries_count = int(d.loc[delivered_mask, id_col].nunique()) if len(d) else 0
         deliveries_amount_iqd = float(d.loc[delivered_mask, cod_col].sum()) if len(d) else 0.0
-
-        def disp_money_iqd(iqd: float) -> str:
-            if currency == "USD":
-                return money_ccy(iqd_to_usd(iqd, fx), "USD")
-            return money_ccy(iqd, "IQD")
 
         c1, c2 = st.columns(2)
         with c1:
@@ -737,15 +805,14 @@ def render_fixed_quick_kpis(daily_orders_df: pd.DataFrame, orders_df: Optional[p
 
         st.divider()
 
-        # ---- Per product breakdown (selected day) ----
+        # Per product breakdown
         sku_to_name = build_sku_to_name_map(orders_df) if orders_df is not None else {}
-
         lines = _explode_order_lines(d)
+
         if lines is None or lines.empty:
-            st.info("No SKU lines found for this day (missing SKUs/Quantities).")
+            st.caption("No SKU lines found for this day.")
             return
 
-        # status per order id
         if "Status" in d.columns:
             tmp = d[[id_col, "Status"]].copy().rename(columns={id_col: "order_id"})
             tmp["status_clean"] = tmp["Status"].astype(str).str.strip().str.lower()
@@ -774,7 +841,6 @@ def render_fixed_quick_kpis(daily_orders_df: pd.DataFrame, orders_df: Optional[p
             .sort_values("Orders", ascending=False)
         )
 
-        # Convert profit display currency
         if currency == "USD":
             out["Profit"] = out["Profit_IQD"].apply(lambda v: iqd_to_usd(v, fx))
         else:
@@ -1766,14 +1832,13 @@ st.markdown(
     <style>
 
 /* Floating Quick KPIs expander (bottom-left) */
-.kpi-fixed-expander {
+div.kpi-fixed-expander {
   position: fixed !important;
   right: 16px;
   bottom: 16px;
   width: 360px;
   z-index: 9999;
 }
-
 div.kpi-fixed-expander details {
   background: rgba(20, 22, 26, 0.96);
   border: 1px solid rgba(255,255,255,0.08);
