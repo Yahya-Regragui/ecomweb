@@ -659,7 +659,7 @@ def render_fixed_quick_kpis(daily_orders_df: pd.DataFrame, orders_df: Optional[p
     with c0:
         st.markdown("📌 **Quick KPIs (per day)**")
     with c1:
-        btn_label = "Hide" if st.session_state.quick_kpi_open else "Show"
+        btn_label = "▴ Collapse" if st.session_state.quick_kpi_open else "▾ Expand"
         if st.button(btn_label, key="quick_kpi_toggle"):
             st.session_state.quick_kpi_open = not st.session_state.quick_kpi_open
             st.rerun()
@@ -2038,7 +2038,7 @@ else:
 if one_uploaded:
     st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
 
-# --- Sidebar: Quick KPIs accordion (persistent across all tabs) ---
+# --- Floating: Quick KPIs accordion (fixed bottom-left, persistent across all tabs) ---
 render_fixed_quick_kpis(daily_orders_df=daily_orders_df, orders_df=orders_df, fx=fx, currency=currency)
 
 
