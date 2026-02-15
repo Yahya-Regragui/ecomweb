@@ -2000,6 +2000,10 @@ else:
 if one_uploaded:
     st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
 
+# --- Sidebar: Quick KPIs accordion (persistent across all tabs) ---
+render_sidebar_quick_kpis(daily_orders_df=daily_orders_df, orders_df=orders_df, fx=fx, currency=currency)
+
+
 # --- Tabs ---
 tab_dashboard, tab_daily, tab_orders, tab_ads, tab_campaigns, tab_product = st.tabs(
     ["📊 Dashboard", "📅 Daily performance", "📦 Orders details", "📣 Ads details", "📈 Campaigns analytics", "📦 Product Deep Dive"]
