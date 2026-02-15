@@ -1766,13 +1766,14 @@ st.markdown(
     <style>
 
 /* Floating Quick KPIs expander (bottom-left) */
-div.kpi-fixed-expander {
-  position: fixed;
-  left: 16px;
+.kpi-fixed-expander {
+  position: fixed !important;
+  right: 16px;
   bottom: 16px;
   width: 360px;
   z-index: 9999;
 }
+
 div.kpi-fixed-expander details {
   background: rgba(20, 22, 26, 0.96);
   border: 1px solid rgba(255,255,255,0.08);
