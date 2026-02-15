@@ -646,6 +646,136 @@ def parse_daily_orders(daily_df: pd.DataFrame) -> pd.DataFrame:
 
 
 
+def render_sidebar_quick_kpis(daily_orders_df: Optional[pd.DataFrame], orders_df: Optional[pd.DataFrame], fx: float, currency: str):
+    """
+    Persistent sidebar accordion (shows on all tabs):
+    - Orders: count + COD amount
+    - Deliveries: count + COD amount
+    Expanded:
+    - Day selector
+    - Per-product breakdown (Orders, Delivered, Qty, Profit)
+    """
+    with st.sidebar:
+        with st.expander("📌 Quick KPIs (per day)", expanded=False):
+            if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
+                st.info("Upload **Daily Orders (Taager) XLSX** to enable this panel.")
+                return
+
+            df = parse_daily_orders(daily_orders_df)
+            if df is None or df.empty or "day" not in df.columns or df["day"].isna().all():
+                st.warning("Daily Orders file has no usable **Created At** to compute daily KPIs.")
+                return
+
+            # Day picker defaults to latest day in file
+            min_day = df["day"].min().date()
+            max_day = df["day"].max().date()
+            default_day = st.session_state.get("quick_kpi_day", max_day)
+
+            selected_day = st.date_input(
+                "Select day",
+                value=default_day,
+                min_value=min_day,
+                max_value=max_day,
+                key="quick_kpi_day",
+            )
+
+            day_ts = pd.to_datetime(selected_day)
+            d = df[df["day"] == day_ts].copy()
+
+            # Exclude "Cancelled by You"
+            if "Status" in d.columns:
+                status_clean = d["Status"].astype(str).str.strip().str.lower()
+                d = d[~status_clean.str.contains("cancelled by you", na=False)].copy()
+
+            id_col = get_daily_order_id_col(d)
+            if id_col is None:
+                d["__rowid__"] = np.arange(len(d))
+                id_col = "__rowid__"
+
+            cod_col = "orders.export.cashOnDelivery"
+            if cod_col in d.columns:
+                d[cod_col] = to_num(d[cod_col])
+            else:
+                d[cod_col] = 0.0
+
+            orders_count = int(d[id_col].nunique()) if len(d) else 0
+            orders_amount_iqd = float(d[cod_col].sum()) if len(d) else 0.0
+
+            delivered_mask = pd.Series(False, index=d.index)
+            if "Status" in d.columns:
+                delivered_mask = d["Status"].astype(str).str.strip().str.lower().str.contains("delivered", na=False)
+
+            deliveries_count = int(d.loc[delivered_mask, id_col].nunique()) if len(d) else 0
+            deliveries_amount_iqd = float(d.loc[delivered_mask, cod_col].sum()) if len(d) else 0.0
+
+            def disp_money_iqd(iqd: float) -> str:
+                if currency == "USD":
+                    return money_ccy(iqd_to_usd(iqd, fx), "USD")
+                return money_ccy(iqd, "IQD")
+
+            c1, c2 = st.columns(2)
+            with c1:
+                st.metric("Orders", f"{orders_count:,}", disp_money_iqd(orders_amount_iqd))
+            with c2:
+                st.metric("Deliveries", f"{deliveries_count:,}", disp_money_iqd(deliveries_amount_iqd))
+
+            st.divider()
+
+            # Per-product breakdown
+            lines = _explode_order_lines(d)
+            if lines is None or lines.empty:
+                st.caption("No per-product lines found for this day (missing SKUs/Quantities).")
+                return
+
+            # Map SKU -> product name from Orders CSV if available
+            sku_to_name = build_sku_to_name_map(orders_df) if orders_df is not None else {}
+
+            # Join delivery flag per order
+            if "Status" in d.columns:
+                tmp = d[[id_col, "Status"]].copy().rename(columns={id_col: "order_id"})
+                tmp["status_clean"] = tmp["Status"].astype(str).str.strip().str.lower()
+                tmp["is_delivered"] = tmp["status_clean"].str.contains("delivered", na=False)
+                tmp = tmp[["order_id", "is_delivered"]]
+            else:
+                tmp = pd.DataFrame({"order_id": [], "is_delivered": []})
+
+            lines = lines.merge(tmp, on="order_id", how="left")
+            lines["is_delivered"] = lines["is_delivered"].fillna(False)
+
+            lines["sku"] = lines["sku"].astype(str).str.strip()
+            lines["product_name"] = lines["sku"].map(sku_to_name).fillna("")
+            lines["Product"] = lines.apply(
+                lambda r: f"{r['product_name']} — {r['sku']}" if r["product_name"] else r["sku"],
+                axis=1
+            )
+
+            out = (
+                lines.groupby("Product", as_index=False)
+                .agg(
+                    Orders=("order_id", "nunique"),
+                    Delivered=("is_delivered", "sum"),
+                    Qty=("qty", "sum"),
+                    Profit_IQD=("profit_iqd_alloc", "sum"),
+                )
+                .sort_values("Orders", ascending=False)
+            )
+
+            if currency == "USD":
+                out["Profit"] = out["Profit_IQD"].apply(lambda v: iqd_to_usd(v, fx))
+                out = out.drop(columns=["Profit_IQD"])
+                out["Profit"] = out["Profit"].apply(lambda v: money_ccy(v, "USD"))
+            else:
+                out["Profit"] = out["Profit_IQD"].apply(lambda v: money_ccy(v, "IQD"))
+                out = out.drop(columns=["Profit_IQD"])
+
+            out["Orders"] = out["Orders"].astype(int)
+            out["Delivered"] = out["Delivered"].astype(int)
+
+            st.caption("Per product (selected day)")
+            st.dataframe(out, use_container_width=True)
+
+
+
 def get_daily_order_id_col(df: pd.DataFrame) -> Optional[str]:
     """Prefer Taager 'ID' (unique row/order identifier). Fallback to 'Store Order ID'."""
     if df is None:
@@ -1819,9 +1949,6 @@ if orders_df is not None:
         if col in orders_df.columns:
             orders_df[col] = to_num(orders_df[col])
 
-# Persistent sidebar accordion across all tabs/pages
-render_sidebar_quick_kpis(daily_orders_df=daily_orders_df, orders_df=orders_df, fx=fx, currency=currency)
-
 
 # --------------------------------------------------------------
 
@@ -1840,129 +1967,6 @@ def _tone(v):
     if v is None:
         return "neutral"
     return "good" if v >= 0 else "bad"
-
-
-# ---------------- Sidebar floating accordion (persistent across tabs) ----------------
-def render_sidebar_quick_kpis(daily_orders_df: Optional[pd.DataFrame],
-                             orders_df: Optional[pd.DataFrame],
-                             fx: float,
-                             currency: str):
-    """Persistent sidebar accordion.
-
-    Collapsed: Orders count+amount, Deliveries count+amount.
-    Expanded: date selector + per-product breakdown for that day.
-    """
-    with st.sidebar:
-        with st.expander("📌 Quick KPIs (per day)", expanded=False):
-            if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
-                st.info("Upload **Daily Orders (Taager) XLSX** to enable this panel.")
-                return
-
-            df = parse_daily_orders(daily_orders_df)
-            if "day" not in df.columns or df["day"].isna().all():
-                st.warning("Could not derive a day from the Daily Orders file.")
-                return
-
-            # Date filter shown *inside* the expander
-            min_day = df["day"].min().date()
-            max_day = df["day"].max().date()
-            selected_day = st.date_input(
-                "Select day",
-                value=st.session_state.get("quick_kpi_day", max_day),
-                min_value=min_day,
-                max_value=max_day,
-                key="quick_kpi_day",
-            )
-
-            day_ts = pd.to_datetime(selected_day)
-            d = df[df["day"] == day_ts].copy()
-
-            # Remove "Cancelled by You" (same business rule you used elsewhere)
-            if "Status" in d.columns:
-                s = d["Status"].astype(str).str.strip().str.lower()
-                d = d[~s.str.contains("cancelled by you", na=False)].copy()
-
-            id_col = get_daily_order_id_col(d)
-            if id_col is None:
-                d["__rowid__"] = np.arange(len(d))
-                id_col = "__rowid__"
-
-            cod_col = "orders.export.cashOnDelivery"
-            if cod_col in d.columns:
-                d[cod_col] = to_num(d[cod_col])
-            else:
-                d[cod_col] = 0.0
-
-            # Orders
-            orders_count = int(d[id_col].nunique()) if len(d) else 0
-            orders_amount_iqd = float(d[cod_col].sum()) if len(d) else 0.0
-
-            # Deliveries
-            delivered_mask = pd.Series(False, index=d.index)
-            if "Status" in d.columns:
-                delivered_mask = d["Status"].astype(str).str.strip().str.lower().str.contains("delivered", na=False)
-            deliveries_count = int(d.loc[delivered_mask, id_col].nunique()) if len(d) else 0
-            deliveries_amount_iqd = float(d.loc[delivered_mask, cod_col].sum()) if len(d) else 0.0
-
-            def disp_money_iqd(iqd: float) -> str:
-                if currency == "USD":
-                    return money_ccy(iqd_to_usd(iqd, fx), "USD")
-                return money_ccy(iqd, "IQD")
-
-            c1, c2 = st.columns(2)
-            with c1:
-                st.metric("Orders", f"{orders_count:,}", disp_money_iqd(orders_amount_iqd))
-            with c2:
-                st.metric("Deliveries", f"{deliveries_count:,}", disp_money_iqd(deliveries_amount_iqd))
-
-            st.divider()
-
-            # ---- per product breakdown ----
-            sku_to_name = build_sku_to_name_map(orders_df) if orders_df is not None else {}
-            lines = _explode_order_lines(d)
-            if lines is None or lines.empty:
-                st.info("No per-product lines found for this day (missing SKUs/Quantities).")
-                return
-
-            # Mark delivered per order
-            if "Status" in d.columns:
-                tmp = d[[id_col, "Status"]].copy().rename(columns={id_col: "order_id"})
-                tmp["is_delivered"] = tmp["Status"].astype(str).str.strip().str.lower().str.contains("delivered", na=False)
-            else:
-                tmp = pd.DataFrame({"order_id": [], "is_delivered": []})
-
-            lines = lines.merge(tmp[["order_id", "is_delivered"]], on="order_id", how="left")
-            lines["is_delivered"] = lines["is_delivered"].fillna(False)
-
-            lines["sku"] = lines["sku"].astype(str).str.strip()
-            lines["product_name"] = lines["sku"].map(sku_to_name).fillna("")
-            lines["Product"] = lines.apply(
-                lambda r: f"{r['product_name']} — {r['sku']}" if r["product_name"] else r["sku"],
-                axis=1,
-            )
-
-            out = (
-                lines.groupby("Product", as_index=False)
-                .agg(
-                    Orders=("order_id", "nunique"),
-                    Delivered=("is_delivered", "sum"),
-                    Qty=("qty", "sum"),
-                    Profit_IQD=("profit_iqd_alloc", "sum"),
-                )
-                .sort_values("Orders", ascending=False)
-            )
-
-            if currency == "USD":
-                out["Profit"] = out["Profit_IQD"].apply(lambda v: iqd_to_usd(v, fx))
-            else:
-                out["Profit"] = out["Profit_IQD"]
-            out = out.drop(columns=["Profit_IQD"])
-
-            out["Orders"] = out["Orders"].astype(int)
-            out["Delivered"] = out["Delivered"].astype(int)
-
-            st.caption("Per product (selected day)")
-            st.dataframe(out, use_container_width=True)
 
 def _card(title: str, value_str: str, sub: str = "", tone: str = "neutral", tip: str = ""):
     tip_attr = f'data-tip="{_esc(tip)}"' if tip else ""
