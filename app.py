@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 
+import streamlit.components.v1 as components
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, Table, TableStyle, PageBreak
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -654,6 +655,20 @@ def render_fixed_quick_kpis(daily_orders_df: pd.DataFrame, orders_df: Optional[p
     with st.expander("📌 Quick KPIs (per day)", expanded=False):
         # Marker used by CSS to select + position this expander
         st.markdown('<div id="quick-kpi-marker"></div>', unsafe_allow_html=True)
+        components.html(
+            """
+            <script>
+            (function(){
+              const marker = window.parent.document.getElementById('quick-kpi-marker');
+              if (!marker) return;
+              const expander = marker.closest('div[data-testid="stExpander"]');
+              if (!expander) return;
+              expander.classList.add('kpi-fixed-expander');
+            })();
+            </script>
+            """,
+            height=0,
+        )
 
         if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
             st.info("Upload Daily Orders (Taager) XLSX to enable Quick KPIs.")
@@ -1751,21 +1766,21 @@ st.markdown(
     <style>
 
 /* Floating Quick KPIs expander (bottom-left) */
-div[data-testid="stExpander"]:has(#quick-kpi-marker) {
+div.kpi-fixed-expander {
   position: fixed;
   left: 16px;
   bottom: 16px;
   width: 360px;
   z-index: 9999;
 }
-div[data-testid="stExpander"]:has(#quick-kpi-marker) details {
+div.kpi-fixed-expander details {
   background: rgba(20, 22, 26, 0.96);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.35);
   backdrop-filter: blur(6px);
 }
-div[data-testid="stExpander"]:has(#quick-kpi-marker) summary {
+div.kpi-fixed-expander summary {
   padding: 10px 12px !important;
 }
       /* Fixed KPI panel container */
