@@ -1,12 +1,12 @@
 "Reporting starts","Reporting ends","Campaign name","Campaign delivery",Results,"Result indicator","Cost per results","Ad set budget","Ad set budget type","Amount spent (USD)",Impressions,Reach,Ends,"Attribution setting"
-2026-02-17,2026-02-17,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,5.18,2167,1999,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-17,2026-02-17,"Test SSD Campaign 1 - IQ010106ORES99",active,1,actions:offsite_conversion.fb_pixel_purchase,6.94,"Using ad set budget",0,6.94,5051,4232,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-17,2026-02-17,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,6.07,6.25,Daily,6.07,2589,2364,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-17,2026-02-17,"Test SSD Campaign 1 - IQ010106ORES99",active,2,actions:offsite_conversion.fb_pixel_purchase,5.015,"Using ad set budget",0,10.03,6500,5349,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-17,2026-02-17,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-17,2026-02-17,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,4.29,1413,1275,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-17,2026-02-17,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,5.79,1982,1813,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-17,2026-02-17,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-17,2026-02-17,"Forchat ABO Campaign - Q040107ALUY99",active,1,actions:offsite_conversion.fb_pixel_purchase,9.19,"Using ad set budget",0,9.19,5133,4593,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-17,2026-02-17,"Forchat Test Campaign 3 - IQ040107ALUY99",active,1,actions:offsite_conversion.fb_pixel_purchase,10.46,13,Daily,10.46,12482,12305,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-17,2026-02-17,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,8.04,10,Daily,8.04,9839,9372,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-17,2026-02-17,"Forchat ABO Campaign - Q040107ALUY99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,10.65,"Using ad set budget",0,10.65,6218,5588,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-17,2026-02-17,"Forchat Test Campaign 3 - IQ040107ALUY99",active,2,actions:offsite_conversion.fb_pixel_purchase,6.445,13,Daily,12.89,15506,15420,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-17,2026-02-17,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,9.53,10,Daily,9.53,11993,11582,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-17,2026-02-17,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
 2026-02-17,2026-02-17,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-17,2026-02-17,"Forchat Test Campaign 1 - IQ040107ALUY99",inactive,,,,3,Daily,0,0,0,Ongoing,-
@@ -35,12 +35,12 @@
 2026-02-17,2026-02-17,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-17,2026-02-17,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-16,2026-02-16,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-16,2026-02-16,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,7.47,6.25,Daily,7.47,3272,2976,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-16,2026-02-16,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-16,2026-02-16,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,7.47,6.25,Daily,7.47,3273,2978,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-16,2026-02-16,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-16,2026-02-16,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,3.59,1744,1723,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-16,2026-02-16,"Forchat ABO Campaign - Q040107ALUY99",active,1,actions:offsite_conversion.fb_pixel_purchase,8.69,"Using ad set budget",0,8.69,5571,4883,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-16,2026-02-16,"Forchat ABO Campaign - Q040107ALUY99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,8.69,"Using ad set budget",0,8.69,5571,4883,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-16,2026-02-16,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,2.76,1836,1675,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-16,2026-02-16,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,5,actions:offsite_conversion.fb_pixel_purchase,1.72,10,Daily,8.6,10361,10168,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-16,2026-02-16,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,5,actions:offsite_conversion.fb_pixel_purchase,1.72,10,Daily,8.6,10361,10168,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-16,2026-02-16,"Forchat Test Campaign 3 - IQ040107ALUY99",active,2,actions:offsite_conversion.fb_pixel_purchase,7.53,13,Daily,15.06,16270,15465,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-16,2026-02-16,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-16,2026-02-16,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -71,11 +71,11 @@
 2026-02-16,2026-02-16,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-15,2026-02-15,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-15,2026-02-15,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,2,actions:offsite_conversion.fb_pixel_purchase,3.21,6.25,Daily,6.42,2253,2164,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-15,2026-02-15,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-15,2026-02-15,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-15,2026-02-15,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-15,2026-02-15,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-15,2026-02-15,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-15,2026-02-15,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-15,2026-02-15,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,2,actions:offsite_conversion.fb_pixel_purchase,3.695,10,Daily,7.39,7486,6906,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-15,2026-02-15,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,3.695,10,Daily,7.39,7486,6906,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-15,2026-02-15,"Forchat Test Campaign 3 - IQ040107ALUY99",active,5,actions:offsite_conversion.fb_pixel_purchase,2.858,13,Daily,14.29,14801,13753,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-15,2026-02-15,"Test blower Campaign - IQ050402POWR99",inactive,5,actions:offsite_conversion.fb_pixel_purchase,3.494,15.6,Daily,17.47,11068,9671,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-15,2026-02-15,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -106,11 +106,11 @@
 2026-02-15,2026-02-15,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,4,actions:offsite_conversion.fb_pixel_purchase,0.95,6.25,Daily,3.8,1144,1086,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-14,2026-02-14,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-14,2026-02-14,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-14,2026-02-14,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-14,2026-02-14,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-14,2026-02-14,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-14,2026-02-14,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Forchat Test Campaign 3 - IQ040107ALUY99",active,4,actions:offsite_conversion.fb_pixel_purchase,2.2875,13,Daily,9.15,7506,7295,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-14,2026-02-14,"Test blower Campaign - IQ050402POWR99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,4.52,15.6,Daily,9.04,4659,4142,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-14,2026-02-14,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -141,11 +141,11 @@
 2026-02-14,2026-02-14,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,3.3,6.25,Daily,3.3,935,846,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-13,2026-02-13,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-13,2026-02-13,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-13,2026-02-13,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-13,2026-02-13,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-13,2026-02-13,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-13,2026-02-13,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Forchat Test Campaign 3 - IQ040107ALUY99",active,2,actions:offsite_conversion.fb_pixel_purchase,3.735,13,Daily,7.47,5703,5493,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-13,2026-02-13,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -176,11 +176,11 @@
 2026-02-13,2026-02-13,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,2.62,6.25,Daily,2.62,593,546,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-12,2026-02-12,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-12,2026-02-12,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,1.34,342,313,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-12,2026-02-12,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-12,2026-02-12,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,1.21,3,Daily,1.21,650,615,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-12,2026-02-12,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-12,2026-02-12,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Forchat Test Campaign 3 - IQ040107ALUY99",active,1,actions:offsite_conversion.fb_pixel_purchase,5.82,13,Daily,5.82,4928,4852,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-12,2026-02-12,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0.03,1,1,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
@@ -211,11 +211,11 @@
 2026-02-12,2026-02-12,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-11,2026-02-11,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-11,2026-02-11,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-11,2026-02-11,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Forchat Test Campaign 3 - IQ040107ALUY99",active,3,actions:offsite_conversion.fb_pixel_purchase,1.51,13,Daily,4.53,3802,3628,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-11,2026-02-11,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,4.24,1925,1791,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
@@ -246,11 +246,11 @@
 2026-02-11,2026-02-11,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Forchat Test Campaign 3 - IQ040107ALUY99",active,2,actions:offsite_conversion.fb_pixel_purchase,1.035,13,Daily,2.07,1756,1735,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-10,2026-02-10,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,2.05,4.5,Daily,2.05,1039,1000,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
@@ -281,11 +281,11 @@
 2026-02-10,2026-02-10,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -316,11 +316,11 @@
 2026-02-09,2026-02-09,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -351,11 +351,11 @@
 2026-02-08,2026-02-08,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -386,11 +386,11 @@
 2026-02-07,2026-02-07,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -421,11 +421,11 @@
 2026-02-06,2026-02-06,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -456,11 +456,11 @@
 2026-02-05,2026-02-05,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -491,11 +491,11 @@
 2026-02-04,2026-02-04,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -526,11 +526,11 @@
 2026-02-03,2026-02-03,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -561,11 +561,11 @@
 2026-02-02,2026-02-02,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Test SSD Campaign 1 - IQ010106ORES99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,6.25,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Masaha Campaign 1. - IQ030107MASA99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Forchat ABO Campaign - Q040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Forchat ABO Campaign - Q040107ALUY99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Magsafe  Campaign 2 - IQ010106MAGG99",active,,,,10,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Magsafe  Campaign 2 - IQ010106MAGG99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Forchat Test Campaign 3 - IQ040107ALUY99",active,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Test blower Campaign - IQ050402POWR99",inactive,,,,15.6,Daily,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
