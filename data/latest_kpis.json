@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-02-17 21:45:38",
+  "generated_at": "2026-02-17 23:43:58",
   "kpis": {
     "requested_units": 162.0,
     "confirmed_units": 107.0,
-    "delivered_units": 69.0,
+    "delivered_units": 71.0,
     "returned_units": 0.0,
     "expected_delivered_units": 19.0,
     "confirmed_profit_usd": 953.4351221374044,
-    "delivered_profit_usd": 609.7328244274809,
+    "delivered_profit_usd": 621.5648854961831,
     "expected_profit_usd": 158.58778625954199,
-    "spend_usd": 509.20000000000005,
-    "impressions": 244327.0,
-    "reach": 224201.0,
-    "net_profit_usd": 100.53282442748082,
-    "potential_net_profit_usd": 444.23512213740435,
+    "spend_usd": 520.06,
+    "impressions": 253031.0,
+    "reach": 232543.0,
+    "net_profit_usd": 101.50488549618319,
+    "potential_net_profit_usd": 433.37512213740445,
     "confirmation_rate": 0.6604938271604939,
-    "delivery_rate": 0.6448598130841121,
+    "delivery_rate": 0.6635514018691588,
     "return_rate": 0.0,
-    "roas_real": 1.1974328837931674,
-    "roas_potential": 1.8724177575361436,
-    "cpm": 2.084092220671477,
-    "cost_per_reach": 0.0022711763105427722
+    "roas_real": 1.1951791822024058,
+    "roas_potential": 1.8333175443937324,
+    "cpm": 2.0553212847437665,
+    "cost_per_reach": 0.0022364035898737008
   }
 }
