@@ -20,6 +20,47 @@ import altair as alt
 
 import base64
 import json
+import math
+from datetime import date
+
+def _json_safe(x):
+    """Convert common non-JSON-serializable objects (pandas/numpy/datetime/Decimal/NaN) to safe types."""
+    # pandas Timestamp / datetime-like
+    if hasattr(x, "to_pydatetime"):
+        try:
+            x = x.to_pydatetime()
+        except Exception:
+            pass
+
+    if isinstance(x, (datetime, date)):
+        return x.isoformat()
+
+    # numpy scalars -> python scalars
+    try:
+        import numpy as _np
+        if isinstance(x, _np.generic):
+            return x.item()
+    except Exception:
+        pass
+
+    # Decimal -> float
+    try:
+        from decimal import Decimal
+        if isinstance(x, Decimal):
+            return float(x)
+    except Exception:
+        pass
+
+    # NaN / inf -> None
+    if isinstance(x, float) and (math.isnan(x) or math.isinf(x)):
+        return None
+
+    if isinstance(x, dict):
+        return {str(k): _json_safe(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple)):
+        return [_json_safe(v) for v in x]
+
+    return x
 import requests
 import re
 
@@ -2315,7 +2356,7 @@ def render_ai_summary(
         gen = st.button("Generate with ChatGPT", type="primary", key="btn_gen_ai")
         if gen:
             payload = _build_llm_payload(kpis=kpis, kpis_disp=kpis_disp, today_row=t, yesterday_row=y, currency=currency)
-            payload_json = json.dumps(payload, ensure_ascii=False)
+            payload_json = json.dumps(_json_safe(payload), ensure_ascii=False)
             with st.spinner("Generating..."):
                 out = chatgpt_generate_store_summary(payload_json, user_focus=user_focus)
             st.markdown(out)
