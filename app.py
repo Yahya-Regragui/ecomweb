@@ -2201,25 +2201,37 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
     client = OpenAI(api_key=api_key)
 
     system = (
-        "You are a performance analyst for a COD e-commerce store using Taager + Meta ads. "
-        "Write a concise, actionable daily summary. Use the provided JSON only; do not invent metrics. "
-        "Be direct and practical."
+        "You are a sharp ecommerce performance analyst for a COD store using Taager + Meta ads. "
+        "Write in a clear, direct style. Use numbers from the JSON payload. "
+        "Avoid vague advice. If you make an assumption, label it as an assumption."
     )
 
     focus = user_focus.strip()
     focus_line = f"Extra focus requested: {focus}" if focus else ""
 
     prompt = (
-        "Return Markdown with these sections exactly:\n"
-        "1) Today snapshot (3-6 bullets)\n"
-        "2) What changed vs yesterday (2-4 bullets)\n"
-        "3) Risks / issues to check (2-5 bullets)\n"
-        "4) What to do next (3-7 bullets, prioritized)\n\n"
-        "Rules:\n- If data is missing, say what's missing and what to upload/track.\n"
-        "- Prefer numeric references (values or deltas) when present.\n"
-        "- Do not mention that you are an AI model.\n\n"
-        f"{focus_line}\n\n"
-        "DATA (JSON):\n"
+        "You will receive store KPIs and recent-day metrics as JSON.\\n\\n"
+        "Return Markdown with EXACTLY these sections:\\n\\n"
+        "## Executive Summary\\n"
+        "(3–5 sentences, no bullets)\\n\\n"
+        "## Today (what happened)\\n"
+        "Short paragraph using today's numbers.\\n\\n"
+        "## Insights & actions (prioritized)\\n"
+        "Bullet list of the top 5 actions with reasoning and expected impact.\\n\\n"
+        "## Deep Dive Analysis\\n"
+        "Write a detailed narrative analysis (10–20 sentences) in paragraph form:\\n"
+        "- Explain what likely drove today's results\\n"
+        "- Interpret efficiency (spend → orders → deliveries → profit)\\n"
+        "- Discuss risks (delivery rate, return rate, rising CPA, fatigue)\\n"
+        "- Identify 2–3 hypotheses worth testing next\\n"
+        "- Give a mini-plan for the next 24–48h\\n\\n"
+        "Rules:\\n"
+        "- Use the provided JSON only; do not invent metrics.\\n"
+        "- If data is missing, say what's missing and what to upload/track.\\n"
+        "- Prefer numeric references (values or deltas) when present.\\n"
+        "- Do not mention that you are an AI model.\\n\\n"
+        f"{focus_line}\\n\\n"
+        "JSON:\\n"
         f"{payload_json}"
     )
 
@@ -2231,7 +2243,8 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
             ],
-            temperature=0.4,
+            temperature=0.6,
+            max_output_tokens=900,
         )
         # SDK returns a unified output; `.output_text` is the convenience accessor in recent versions
         txt = getattr(r, "output_text", None)
