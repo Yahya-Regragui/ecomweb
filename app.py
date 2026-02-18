@@ -2101,6 +2101,167 @@ def _card(title: str, value_str: str, sub: str = "", tone: str = "neutral", tip:
     )
 
 
+
+def render_ai_summary(
+    *,
+    kpis: dict,
+    kpis_disp: dict,
+    daily_orders_df: Optional[pd.DataFrame],
+    campaigns_df: Optional[pd.DataFrame],
+    orders_df: Optional[pd.DataFrame],
+    fx: float,
+    currency: str,
+    last_saved: Optional[str] = None,
+):
+    """Rule-based 'AI' summary (no external API)."""
+    st.subheader("AI Summary")
+    if last_saved:
+        st.caption(f"Last saved snapshot: {last_saved}")
+
+    # --- Overall snapshot (all-time, from Orders+Campaigns KPIs) ---
+    spend_usd = float(kpis.get("spend_usd", 0.0))
+    delivered_profit_usd = float(kpis.get("delivered_profit_usd", 0.0))
+    confirmed_profit_usd = float(kpis.get("confirmed_profit_usd", 0.0))
+    net_usd = float(kpis.get("net_profit_usd", delivered_profit_usd - spend_usd))
+
+    roas_real = kpis.get("roas_real")
+    roas_pot = kpis.get("roas_potential")
+    conf_rate = float(kpis.get("confirmation_rate", 0.0))
+    deliv_rate = float(kpis.get("delivery_rate", 0.0))
+    ret_rate = float(kpis.get("return_rate", 0.0))
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Spend (total)", money_ccy(kpis_disp.get("spend_disp", 0.0), currency))
+    c2.metric("Delivered profit (total)", money_ccy(kpis_disp.get("delivered_profit_disp", 0.0), currency))
+    c3.metric("Net after ads (total)", money_ccy(net_usd * fx, "IQD") if currency == "IQD" else money_ccy(net_usd, "USD"))
+    c4.metric("ROAS (delivered)", "N/A" if roas_real is None else f"{roas_real:.2f}")
+
+    st.markdown("### What happened today")
+    if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
+        st.info("Upload **Daily Orders (Taager) XLSX** to enable the 'today' summary + recommendations.")
+        return
+
+    ddf = parse_daily_orders(daily_orders_df)
+    if "day" not in ddf.columns or ddf["day"].isna().all():
+        st.warning("Couldn't read dates from the Daily Orders file (missing/invalid **Created At**).")
+        return
+
+    # Use latest available day in the file as 'today'
+    today = pd.Timestamp(ddf["day"].max()).normalize()
+    yesterday = (today - pd.Timedelta(days=1)).normalize()
+
+    daily_summary = build_daily_summary(ddf, campaigns_df if campaigns_df is not None else pd.DataFrame(), fx, currency)
+    if daily_summary is None or daily_summary.empty or "day" not in daily_summary.columns:
+        st.info("Not enough daily data to build a summary.")
+        return
+
+    def _row_for(day_ts: pd.Timestamp) -> dict:
+        r = daily_summary[daily_summary["day"] == day_ts]
+        return {} if r.empty else r.iloc[0].to_dict()
+
+    t = _row_for(today)
+    y = _row_for(yesterday)
+
+    orders_t = int(t.get("orders_count", 0) or 0)
+    profit_t = float(t.get("profit_disp", 0.0) or 0.0)
+    spend_t = float(t.get("spend_disp", 0.0) or 0.0)
+    net_t = float(t.get("net_disp", 0.0) or 0.0)
+
+    orders_y = int(y.get("orders_count", 0) or 0)
+    profit_y = float(y.get("profit_disp", 0.0) or 0.0)
+    spend_y = float(y.get("spend_disp", 0.0) or 0.0)
+    net_y = float(y.get("net_disp", 0.0) or 0.0)
+
+    tc1, tc2, tc3, tc4 = st.columns(4)
+    tc1.metric("Orders (today)", f"{orders_t:,}", f"{orders_t - orders_y:+,} vs yesterday")
+    tc2.metric(f"Profit (today) ({currency})", money_ccy(profit_t, currency), money_ccy(profit_t - profit_y, currency))
+    tc3.metric(f"Ad spend (today) ({currency})", money_ccy(spend_t, currency), money_ccy(spend_t - spend_y, currency))
+    tc4.metric(f"Net (today) ({currency})", money_ccy(net_t, currency), money_ccy(net_t - net_y, currency))
+
+    # Optional status breakdown
+    excluded = {
+        "day","orders_count","cod_iqd","profit_iqd","vat_profit_iqd","shipping_iqd","items_qty",
+        "spend_usd","profit_usd","net_usd","profit_disp","spend_disp","net_disp",
+        "profit_per_order_disp","net_per_order_disp"
+    }
+    status_cols = [c for c in daily_summary.columns if c not in excluded]
+    if status_cols:
+        with st.expander("Today's status breakdown (from Daily Orders export)", expanded=False):
+            st.dataframe(
+                daily_summary[daily_summary["day"].isin([today, yesterday])][["day"] + status_cols]
+                .sort_values("day", ascending=False),
+                use_container_width=True
+            )
+
+    st.markdown("### Insights & what to do next")
+    bullets = []
+
+    if spend_t > 0 and orders_t == 0:
+        bullets.append("🚨 You spent ads today but got **0 orders**. Check tracking/pixel, landing page, and pause the worst-performing ad sets until orders start coming again.")
+
+    if net_t < 0 and spend_t > 0:
+        bullets.append("⚠️ Net is **negative today**. Reduce budget on campaigns with high spend and low results, and shift budget to proven winners.")
+    elif net_t > 0 and orders_t > 0:
+        bullets.append("✅ Net is **positive today**. Consider scaling slowly (+10–20%) on the best campaigns, while monitoring cancellations/returns.")
+
+    if conf_rate < 0.35:
+        bullets.append("📞 **Low confirmation rate** overall. Improve follow-up speed, use WhatsApp scripts, and clarify the offer (COD, delivery, warranty).")
+    if deliv_rate < 0.6:
+        bullets.append("🚚 **Low delivery rate** overall. Review cancellation reasons, courier performance, and exclude problematic regions.")
+    if ret_rate > 0.12:
+        bullets.append("↩️ **High return rate** overall. Align creatives with reality, add FAQ, and set expectations to reduce returns.")
+
+    if roas_real is not None:
+        if roas_real < 1.0:
+            bullets.append("📉 ROAS (delivered) is **below 1.0**. Tighten targeting, refresh creatives, and stop non-performing campaigns.")
+        elif roas_real >= 1.5:
+            bullets.append("📈 ROAS (delivered) is healthy. Duplicate winners and test 1 variable at a time (creative/angle/audience).")
+
+    # Best SKUs today (delivered-profit)
+    try:
+        d_today = ddf[ddf["day"] == today].copy()
+        if "Status" in d_today.columns:
+            status_clean = d_today["Status"].astype(str).str.strip().str.lower()
+            d_today = d_today[~status_clean.str.contains("cancelled by you", na=False)].copy()
+        lines = _explode_order_lines(d_today)
+        if lines is not None and not lines.empty:
+            sku_to_name = build_sku_to_name_map(orders_df) if orders_df is not None else {}
+            lines["sku"] = lines["sku"].astype(str).str.strip()
+            lines["status_clean"] = lines["Status"].astype(str).str.strip().str.lower()
+            lines["is_delivered"] = lines["status_clean"].str.contains("delivered", na=False)
+            top = (
+                lines[lines["is_delivered"]]
+                .groupby("sku", as_index=False)["profit_iqd_alloc"]
+                .sum()
+                .sort_values("profit_iqd_alloc", ascending=False)
+                .head(3)
+            )
+            if not top.empty:
+                def _sku_label(sku):
+                    nm = sku_to_name.get(sku, "")
+                    return f"{nm} — {sku}" if nm else sku
+                winners = ", ".join([_sku_label(s) for s in top["sku"].tolist()])
+                bullets.append(f"🏆 Top delivered-profit SKUs today: {winners}. Consider increasing budget there (if delivery rate is also good).")
+    except Exception:
+        pass
+
+    if not bullets:
+        bullets.append("No strong signals detected yet. As more data comes in today, this section updates automatically.")
+
+    st.markdown("\n".join([f"- {b}" for b in bullets]))
+
+    st.divider()
+    st.markdown("### Quick checklist")
+    st.markdown(
+        """- ✅ Spend vs orders (if spend is high with no orders, pause + debug tracking)
+- ✅ Delivery/cancel trend (courier/regions/product expectations)
+- ✅ Refresh creatives regularly (new hook, new angle)
+- ✅ Scale winners slowly (+10–20%) and kill losers quickly
+"""
+    )
+
+
+
 # Show last upload date (from GitHub snapshot) + data source
 last_saved = None
 if data_source == "github" and snap is not None:
@@ -2121,8 +2282,8 @@ render_fixed_quick_kpis(daily_orders_df=daily_orders_df, orders_df=orders_df, fx
 
 
 # --- Tabs ---
-tab_dashboard, tab_daily, tab_orders, tab_ads, tab_campaigns, tab_product = st.tabs(
-    ["📊 Dashboard", "📅 Daily performance", "📦 Orders details", "📣 Ads details", "📈 Campaigns analytics", "📦 Product Deep Dive"]
+tab_dashboard, tab_ai, tab_daily, tab_orders, tab_ads, tab_campaigns, tab_product = st.tabs(
+    ["📊 Dashboard", "🤖 AI Summary", "📅 Daily performance", "📦 Orders details", "📣 Ads details", "📈 Campaigns analytics", "📦 Product Deep Dive"]
 )
 
 
@@ -2273,6 +2434,25 @@ with tab_dashboard:
             st.error(str(e))
 
 
+
+
+
+with tab_ai:
+    if data_source == "github" and snap is not None and snap.get("generated_at"):
+        st.info(f"Showing last saved snapshot from GitHub • {snap['generated_at']}")
+    elif data_source == "uploads":
+        st.success("Showing uploaded files (not yet saved).")
+
+    render_ai_summary(
+        kpis=kpis,
+        kpis_disp=kpis_disp,
+        daily_orders_df=daily_orders_df,
+        campaigns_df=campaigns_df,
+        orders_df=orders_df,
+        fx=fx,
+        currency=currency,
+        last_saved=last_saved,
+    )
 
 
 with tab_daily:
