@@ -23,6 +23,13 @@ import json
 import requests
 import re
 
+# --- Optional: ChatGPT / OpenAI API ---
+# Install: pip install openai
+try:
+    from openai import OpenAI
+except Exception:  # pragma: no cover
+    OpenAI = None
+
 def extract_sku_from_campaign_name(name: str):
     """
     Extract SKU from campaign name like:
@@ -2102,6 +2109,113 @@ def _card(title: str, value_str: str, sub: str = "", tone: str = "neutral", tip:
 
 
 
+
+def _safe_float(x, default=0.0):
+    try:
+        if x is None or (isinstance(x, float) and np.isnan(x)):
+            return default
+        return float(x)
+    except Exception:
+        return default
+
+def _safe_int(x, default=0):
+    try:
+        if x is None:
+            return default
+        return int(x)
+    except Exception:
+        return default
+
+def _build_llm_payload(*, kpis: dict, kpis_disp: dict, today_row: dict, yesterday_row: dict, currency: str):
+    """Small, structured payload for the LLM (keeps tokens down)."""
+    return {
+        "currency": currency,
+        "overall": {
+            "spend": kpis_disp.get("spend_disp"),
+            "delivered_profit": kpis_disp.get("delivered_profit_disp"),
+            "confirmed_profit": kpis_disp.get("confirmed_profit_disp"),
+            "net_after_ads": kpis.get("net_profit_usd"),
+            "roas_delivered": kpis.get("roas_real"),
+            "roas_potential": kpis.get("roas_potential"),
+            "confirmation_rate": kpis.get("confirmation_rate"),
+            "delivery_rate": kpis.get("delivery_rate"),
+            "return_rate": kpis.get("return_rate"),
+        },
+        "today": today_row,
+        "yesterday": yesterday_row,
+    }
+
+@st.cache_data(show_spinner=False)
+def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> str:
+    """Generate a narrative summary using OpenAI Responses API.
+
+    Cached by (payload_json, user_focus) so it updates when data changes.
+    """
+    api_key = st.secrets.get("OPENAI_API_KEY")
+    if not api_key:
+        return "⚠️ Missing **OPENAI_API_KEY** in Streamlit secrets. Add it to `.streamlit/secrets.toml` or your deployment secrets."
+    if OpenAI is None:
+        return "⚠️ `openai` Python package not installed. Run `pip install openai` in your environment."
+
+    client = OpenAI(api_key=api_key)
+
+    system = (
+        "You are a performance analyst for a COD e-commerce store using Taager + Meta ads. "
+        "Write a concise, actionable daily summary. Use the provided JSON only; do not invent metrics. "
+        "Be direct and practical."
+    )
+
+    focus = user_focus.strip()
+    focus_line = f"Extra focus requested: {focus}" if focus else ""
+
+    prompt = (
+        "Return Markdown with these sections exactly:\n"
+        "1) Today snapshot (3-6 bullets)\n"
+        "2) What changed vs yesterday (2-4 bullets)\n"
+        "3) Risks / issues to check (2-5 bullets)\n"
+        "4) What to do next (3-7 bullets, prioritized)\n\n"
+        "Rules:\n- If data is missing, say what's missing and what to upload/track.\n"
+        "- Prefer numeric references (values or deltas) when present.\n"
+        "- Do not mention that you are an AI model.\n\n"
+        f"{focus_line}\n\n"
+        "DATA (JSON):\n"
+        f"{payload_json}"
+    )
+
+    # Use Responses API (recommended over deprecated Assistants/ChatCompletions patterns)
+    try:
+        r = client.responses.create(
+            model=st.secrets.get("OPENAI_MODEL", "gpt-4.1-mini"),
+            input=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.4,
+        )
+        # SDK returns a unified output; `.output_text` is the convenience accessor in recent versions
+        txt = getattr(r, "output_text", None)
+        if txt:
+            return txt
+        # Fallback: best-effort extraction
+        if hasattr(r, "output") and r.output:
+            chunks = []
+            for item in r.output:
+                if isinstance(item, dict):
+                    # try common shape
+                    content = item.get("content")
+                    if isinstance(content, list):
+                        for c in content:
+                            if isinstance(c, dict) and c.get("type") in ("output_text", "text"):
+                                chunks.append(c.get("text", ""))
+                else:
+                    pass
+            out = "\n".join([c for c in chunks if c])
+            return out or "(No text returned)"
+        return "(No text returned)"
+    except Exception as e:
+        return f"⚠️ ChatGPT call failed: {e}"
+
+
 def render_ai_summary(
     *,
     kpis: dict,
@@ -2193,6 +2307,19 @@ def render_ai_summary(
                 use_container_width=True
             )
 
+    
+    st.markdown("### ChatGPT Summary")
+    with st.expander("Generate narrative summary with ChatGPT (optional)", expanded=False):
+        st.caption("Uses OpenAI API via your **OPENAI_API_KEY** secret. Output refreshes automatically when data changes (cached).")
+        user_focus = st.text_input("Optional focus (e.g., 'optimize spend', 'reduce cancellations', 'scale winners')", key="ai_focus")
+        gen = st.button("Generate with ChatGPT", type="primary", key="btn_gen_ai")
+        if gen:
+            payload = _build_llm_payload(kpis=kpis, kpis_disp=kpis_disp, today_row=t, yesterday_row=y, currency=currency)
+            payload_json = json.dumps(payload, ensure_ascii=False)
+            with st.spinner("Generating..."):
+                out = chatgpt_generate_store_summary(payload_json, user_focus=user_focus)
+            st.markdown(out)
+    
     st.markdown("### Insights & what to do next")
     bullets = []
 
