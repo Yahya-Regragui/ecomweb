@@ -2090,19 +2090,6 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   padding: 18px;
   margin: 10px 0 14px 0;
 }
-.ai-assistant-wrap .stButton > button{
-  min-height: 52px;
-  border-radius: 16px;
-  border: 1px solid rgba(110,166,216,0.38);
-  background: linear-gradient(180deg, rgba(39,83,117,0.92), rgba(27,54,78,0.88));
-  color: #eaf2f8;
-  font-weight: 700;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-}
-.ai-assistant-wrap .stButton > button:hover{
-  border-color: rgba(130,191,245,0.55);
-  background: linear-gradient(180deg, rgba(45,95,132,0.96), rgba(31,64,91,0.94));
-}
 .ai-assistant-wrap .stTextArea textarea{
   min-height: 140px !important;
   border-radius: 12px !important;
@@ -2113,6 +2100,40 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   border: 1px solid rgba(140,168,196,0.24);
   border-radius: 12px;
   background: rgba(8,14,26,0.28);
+}
+button.ai-btn-main,
+button.ai-btn-chip,
+button.ai-btn-ask,
+button.ai-btn-clear{
+  min-height: 52px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(110,166,216,0.38) !important;
+  background: linear-gradient(180deg, rgba(39,83,117,0.92), rgba(27,54,78,0.88)) !important;
+  color: #eaf2f8 !important;
+  font-weight: 700 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+button.ai-btn-main:hover,
+button.ai-btn-chip:hover,
+button.ai-btn-ask:hover,
+button.ai-btn-clear:hover{
+  border-color: rgba(130,191,245,0.55) !important;
+  background: linear-gradient(180deg, rgba(45,95,132,0.96), rgba(31,64,91,0.94)) !important;
+}
+button.ai-btn-ask{
+  background: linear-gradient(180deg, rgba(120,58,196,0.95), rgba(89,41,150,0.92)) !important;
+  border-color: rgba(170,111,245,0.52) !important;
+}
+button.ai-btn-ask:hover{
+  background: linear-gradient(180deg, rgba(136,68,221,0.98), rgba(101,47,171,0.96)) !important;
+  border-color: rgba(187,134,255,0.62) !important;
+}
+button.ai-btn-chip{
+  min-height: 48px !important;
+}
+button.ai-btn-clear{
+  min-height: 46px !important;
+  max-width: 220px !important;
 }
 .ai-output-wrap{
   white-space: pre-wrap;
@@ -3138,6 +3159,32 @@ def render_ai_summary(
     if clear_output:
         st.session_state.ai_last_output = ""
         st.session_state.ai_qa_history = []
+    components.html(
+        """
+        <script>
+        (function(){
+          const doc = window.parent.document;
+          if (!doc) return;
+          const buttons = doc.querySelectorAll('button');
+          const chipTexts = new Set([
+            'What are my top performing campaigns?',
+            'Analyze delivery issues',
+            'Which products should I scale?',
+            'Compare this week vs last week'
+          ]);
+          buttons.forEach((btn) => {
+            const t = (btn.innerText || '').trim();
+            if (!t) return;
+            if (t === 'Generate General Analysis') btn.classList.add('ai-btn-main');
+            if (t === 'Ask AI') btn.classList.add('ai-btn-ask');
+            if (t === 'Clear') btn.classList.add('ai-btn-clear');
+            if (chipTexts.has(t)) btn.classList.add('ai-btn-chip');
+          });
+        })();
+        </script>
+        """,
+        height=0,
+    )
     st.markdown("</div>", unsafe_allow_html=True)
 
 
