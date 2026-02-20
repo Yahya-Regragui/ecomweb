@@ -2525,7 +2525,6 @@ def render_ai_summary(
     last_saved: Optional[str] = None,
 ):
     """Rule-based 'AI' summary (no external API)."""
-    st.markdown("## AI Summary")
     if last_saved:
         st.markdown(
             f"<div class='ai-banner'>Showing last saved snapshot from GitHub • {last_saved}</div>",
@@ -2586,14 +2585,12 @@ def render_ai_summary(
         st.info("No valid dates found in Daily Orders.")
         return
 
-    cfg_col, _ = st.columns([1, 5])
-    with cfg_col:
-        include_latest_partial = st.checkbox(
-            "Use latest day",
-            value=False,
-            key="ai_include_latest_partial",
-            help="If off, AI uses the last completed day.",
-        )
+    include_latest_partial = st.checkbox(
+        "Use latest day",
+        value=False,
+        key="ai_include_latest_partial",
+        help="If off, AI uses the last completed day.",
+    )
 
     latest_day = pd.Timestamp(available_days[-1]).normalize()
     if include_latest_partial:
@@ -2669,22 +2666,6 @@ def render_ai_summary(
         unsafe_allow_html=True,
     )
 
-    # Optional status breakdown
-    excluded = {
-        "day","orders_count","cod_iqd","profit_iqd","vat_profit_iqd","shipping_iqd","items_qty",
-        "spend_usd","profit_usd","net_usd","profit_disp","spend_disp","net_disp",
-        "profit_per_order_disp","net_per_order_disp"
-    }
-    status_cols = [c for c in daily_summary.columns if c not in excluded]
-    if status_cols:
-        with st.expander("Status breakdown table", expanded=False):
-            st.dataframe(
-                daily_summary[daily_summary["day"].isin([today, yesterday])][["day"] + status_cols]
-                .sort_values("day", ascending=False),
-                use_container_width=True
-            )
-
-    st.markdown("### AI Assistant")
     api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
 
     if "ai_last_output" not in st.session_state:
@@ -2709,31 +2690,39 @@ def render_ai_summary(
         unsafe_allow_html=True,
     )
 
-    focus_presets = {
-        "None": "",
-        "Optimize spend efficiency": "optimize spend efficiency",
-        "Reduce cancellations": "reduce cancellations and improve confirmation",
-        "Scale winning products": "find winners to scale with low risk",
-        "Protect net profit": "protect net profit while maintaining growth",
-    }
-
-    ui1, ui2 = st.columns([3, 2])
-    with ui1:
+    st.markdown("<div class='ai-divider'></div>", unsafe_allow_html=True)
+    act1, act2 = st.columns([1, 3])
+    with act1:
         gen = st.button(
             "Generate General Analysis",
             type="primary",
             key="btn_gen_ai",
             disabled=not api_ready,
+            use_container_width=True,
         )
-    with ui2:
-        preset_label = st.selectbox("Focus preset", list(focus_presets.keys()), index=0, key="ai_focus_preset")
-    focus_text = st.text_input(
-        "Custom focus (optional)",
-        key="ai_focus",
-        placeholder="Example: prioritize campaigns with ROAS > 1.6 and high delivery rate",
-    ).strip()
-    selected_preset = focus_presets.get(preset_label, "")
-    user_focus = focus_text if focus_text else selected_preset
+    with act2:
+        st.caption("Get an overview of your store performance and recommendations")
+
+    with st.expander("Advanced focus (optional)", expanded=False):
+        focus_presets = {
+            "None": "",
+            "Optimize spend efficiency": "optimize spend efficiency",
+            "Reduce cancellations": "reduce cancellations and improve confirmation",
+            "Scale winning products": "find winners to scale with low risk",
+            "Protect net profit": "protect net profit while maintaining growth",
+        }
+        p1, p2 = st.columns([2, 3])
+        with p1:
+            preset_label = st.selectbox("Focus preset", list(focus_presets.keys()), index=0, key="ai_focus_preset")
+        with p2:
+            focus_text = st.text_input(
+                "Custom focus",
+                key="ai_focus",
+                placeholder="Example: prioritize campaigns with ROAS > 1.6 and high delivery rate",
+            ).strip()
+    selected_preset = focus_presets.get(st.session_state.get("ai_focus_preset", "None"), "")
+    focus_text_val = st.session_state.get("ai_focus", "").strip()
+    user_focus = focus_text_val if focus_text_val else selected_preset
 
     ai_question = st.text_area(
         "Ask anything",
@@ -3116,81 +3105,12 @@ def render_ai_summary(
     else:
         st.markdown("<div class='ai-empty'>Your AI-generated insights will appear here</div>", unsafe_allow_html=True)
 
-    if st.session_state.ai_qa_history:
-        with st.expander("Recent Q&A", expanded=False):
-            for item in reversed(st.session_state.ai_qa_history):
-                st.markdown(f"**{item['at']}**")
-                st.markdown(f"Q: {item['q']}")
-                render_ai_text(item["a"])
-                st.divider()
-    
-    st.markdown("#### Operational Guidance")
-    bullets = []
-
-    if spend_t > 0 and orders_t == 0:
-        bullets.append(f"You spent ads on {day_label} but got 0 orders. Check tracking, landing page, and pause worst ad sets.")
-
-    if net_t < 0 and spend_t > 0:
-        bullets.append(f"Net is negative on {day_label}. Reduce budget on high-spend low-result campaigns and shift budget to winners.")
-    elif net_t > 0 and orders_t > 0:
-        bullets.append(f"Net is positive on {day_label}. Scale winners gradually (+10% to +20%) while monitoring cancellations and returns.")
-
-    if conf_rate < 0.35:
-        bullets.append("Confirmation rate is low. Improve follow-up speed and improve offer clarity.")
-    if deliv_rate < 0.6:
-        bullets.append("Delivery rate is low. Review cancellation reasons, courier performance, and problematic regions.")
-    if ret_rate > 0.12:
-        bullets.append("Return rate is high. Align creatives with actual product experience and set clear expectations.")
-
-    if roas_real is not None:
-        if roas_real < 1.0:
-            bullets.append("Delivered ROAS is below 1.0. Tighten targeting, refresh creatives, and stop non-performing campaigns.")
-        elif roas_real >= 1.5:
-            bullets.append("Delivered ROAS is healthy. Duplicate winners and test one variable at a time.")
-
-    # Best SKUs today (delivered-profit)
-    try:
-        d_today = ddf[ddf["day"] == today].copy()
-        if "Status" in d_today.columns:
-            status_clean = d_today["Status"].astype(str).str.strip().str.lower()
-            d_today = d_today[~status_clean.str.contains("cancelled by you", na=False)].copy()
-        lines = _explode_order_lines(d_today)
-        if lines is not None and not lines.empty:
-            sku_to_name = build_sku_to_name_map(orders_df) if orders_df is not None else {}
-            lines["sku"] = lines["sku"].astype(str).str.strip()
-            lines["status_clean"] = lines["Status"].astype(str).str.strip().str.lower()
-            lines["is_delivered"] = lines["status_clean"].str.contains("delivered", na=False)
-            top = (
-                lines[lines["is_delivered"]]
-                .groupby("sku", as_index=False)["profit_iqd_alloc"]
-                .sum()
-                .sort_values("profit_iqd_alloc", ascending=False)
-                .head(3)
-            )
-            if not top.empty:
-                def _sku_label(sku):
-                    nm = sku_to_name.get(sku, "")
-                    return f"{nm} — {sku}" if nm else sku
-                winners = ", ".join([_sku_label(s) for s in top["sku"].tolist()])
-                bullets.append(f"Top delivered-profit SKUs on {day_label}: {winners}. Consider increasing budget there if delivery quality is stable.")
-    except Exception:
-        pass
-
-    if not bullets:
-        bullets.append(f"No strong signals detected for {day_label} yet. This section updates automatically as data changes.")
-
-    g1, g2 = st.columns([2, 1])
-    with g1:
-        st.markdown("\n".join([f"- {b}" for b in bullets]))
-    with g2:
-        st.markdown("**Checklist**")
-        st.markdown(
-            "- Spend vs orders\n"
-            "- Delivery and cancellation trend\n"
-            "- Creative refresh cadence\n"
-            "- Scale winners slowly\n"
-            "- Cut losers quickly\n"
-        )
+    tools_col, empty_col = st.columns([1, 6])
+    with tools_col:
+        clear_output = st.button("Clear", key="btn_ai_clear", use_container_width=True)
+    if clear_output:
+        st.session_state.ai_last_output = ""
+        st.session_state.ai_qa_history = []
 
 
 
