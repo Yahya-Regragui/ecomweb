@@ -2443,9 +2443,11 @@ def render_ai_summary(
     last_saved: Optional[str] = None,
 ):
     """Rule-based 'AI' summary (no external API)."""
-    st.subheader("AI Summary")
+    st.markdown("## AI Summary")
     if last_saved:
-        st.caption(f"Last saved snapshot: {last_saved}")
+        st.caption(f"Snapshot: {last_saved} | Currency: {currency}")
+    else:
+        st.caption(f"Currency: {currency}")
 
     # --- Overall snapshot (all-time, from Orders+Campaigns KPIs) ---
     spend_usd = float(kpis.get("spend_usd", 0.0))
@@ -2459,13 +2461,19 @@ def render_ai_summary(
     deliv_rate = float(kpis.get("delivery_rate", 0.0))
     ret_rate = float(kpis.get("return_rate", 0.0))
 
+    st.markdown("#### Store Overview")
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Spend (total)", money_ccy(kpis_disp.get("spend_disp", 0.0), currency))
-    c2.metric("Delivered profit (total)", money_ccy(kpis_disp.get("delivered_profit_disp", 0.0), currency))
-    c3.metric("Net after ads (total)", money_ccy(net_usd * fx, "IQD") if currency == "IQD" else money_ccy(net_usd, "USD"))
-    c4.metric("ROAS (delivered)", "N/A" if roas_real is None else f"{roas_real:.2f}")
+    c1.metric("Total spend", money_ccy(kpis_disp.get("spend_disp", 0.0), currency))
+    c2.metric("Delivered profit", money_ccy(kpis_disp.get("delivered_profit_disp", 0.0), currency))
+    c3.metric("Net after ads", money_ccy(net_usd * fx, "IQD") if currency == "IQD" else money_ccy(net_usd, "USD"))
+    c4.metric("Delivered ROAS", "N/A" if roas_real is None else f"{roas_real:.2f}")
 
-    st.markdown("### What happened (analysis day)")
+    h1, h2, h3 = st.columns(3)
+    h1.metric("Confirmation rate", f"{conf_rate:.1%}")
+    h2.metric("Delivery rate", f"{deliv_rate:.1%}")
+    h3.metric("Return rate", f"{ret_rate:.1%}")
+
+    st.markdown("#### Analysis Window")
     if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
         st.info("Upload **Daily Orders (Taager) XLSX** to enable analysis-day summary + recommendations.")
         return
@@ -2480,12 +2488,14 @@ def render_ai_summary(
         st.info("No valid dates found in Daily Orders.")
         return
 
-    include_latest_partial = st.checkbox(
-        "Include latest day (may be in progress)",
-        value=False,
-        key="ai_include_latest_partial",
-        help="Off = analyze last completed day by default. On = analyze latest available day.",
-    )
+    cfg_col, info_col = st.columns([1, 2])
+    with cfg_col:
+        include_latest_partial = st.checkbox(
+            "Use latest day",
+            value=False,
+            key="ai_include_latest_partial",
+            help="If off, AI uses the last completed day.",
+        )
 
     latest_day = pd.Timestamp(available_days[-1]).normalize()
     if include_latest_partial:
@@ -2501,7 +2511,16 @@ def render_ai_summary(
             st.caption("Only one day exists in the file, so the app is using that day.")
 
     compare_day = (analysis_day - pd.Timedelta(days=1)).normalize()
-    st.caption(f"Analysis day: {analysis_day.date()} ({analysis_mode}) • Compare to: {compare_day.date()}")
+    with info_col:
+        st.markdown(
+            f"""
+            <div class="ai-panel">
+              <p><strong>Analysis day:</strong> {analysis_day.date()} ({analysis_mode})</p>
+              <p><strong>Comparison day:</strong> {compare_day.date()}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     # Keep variable names used below; here "today" means selected analysis day.
     today = analysis_day
@@ -2531,11 +2550,12 @@ def render_ai_summary(
 
     day_label = str(today.date())
     prev_label = str(yesterday.date())
+    st.markdown("#### Day Comparison")
     tc1, tc2, tc3, tc4 = st.columns(4)
-    tc1.metric(f"Orders ({day_label})", f"{orders_t:,}", f"{orders_t - orders_y:+,} vs {prev_label}")
-    tc2.metric(f"Profit ({day_label}) ({currency})", money_ccy(profit_t, currency), money_ccy(profit_t - profit_y, currency))
-    tc3.metric(f"Ad spend ({day_label}) ({currency})", money_ccy(spend_t, currency), money_ccy(spend_t - spend_y, currency))
-    tc4.metric(f"Net ({day_label}) ({currency})", money_ccy(net_t, currency), money_ccy(net_t - net_y, currency))
+    tc1.metric("Orders", f"{orders_t:,}", f"{orders_t - orders_y:+,} vs {prev_label}")
+    tc2.metric("Profit", money_ccy(profit_t, currency), money_ccy(profit_t - profit_y, currency))
+    tc3.metric("Ad spend", money_ccy(spend_t, currency), money_ccy(spend_t - spend_y, currency))
+    tc4.metric("Net", money_ccy(net_t, currency), money_ccy(net_t - net_y, currency))
 
     # Optional status breakdown
     excluded = {
@@ -2545,7 +2565,7 @@ def render_ai_summary(
     }
     status_cols = [c for c in daily_summary.columns if c not in excluded]
     if status_cols:
-        with st.expander(f"Status breakdown ({day_label} vs {prev_label})", expanded=False):
+        with st.expander("Status breakdown table", expanded=False):
             st.dataframe(
                 daily_summary[daily_summary["day"].isin([today, yesterday])][["day"] + status_cols]
                 .sort_values("day", ascending=False),
@@ -2553,7 +2573,7 @@ def render_ai_summary(
             )
 
     
-    st.markdown("### AI Assistant")
+    st.markdown("#### Assistant Workspace")
     api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
 
     if "ai_last_output" not in st.session_state:
@@ -2564,11 +2584,7 @@ def render_ai_summary(
         st.session_state.ai_qa_history = []
 
     st.markdown(
-        f"""
-        <div class="ai-panel">
-          <p>Use this section to generate a brief or ask any question about your current data snapshot. API status: {"Connected" if api_ready else "Missing OPENAI_API_KEY"}.</p>
-        </div>
-        """,
+        f"<div class='ai-panel'><p>API status: {'Connected' if api_ready else 'Missing OPENAI_API_KEY'}</p></div>",
         unsafe_allow_html=True,
     )
 
@@ -2580,46 +2596,50 @@ def render_ai_summary(
         "Protect net profit": "protect net profit while maintaining growth",
     }
 
-    st.markdown("#### 1) Generate brief")
-    ui1, ui2 = st.columns([3, 1])
-    with ui1:
-        preset_label = st.selectbox("Focus preset", list(focus_presets.keys()), index=0, key="ai_focus_preset")
-        focus_text = st.text_input(
-            "Custom focus (optional)",
-            key="ai_focus",
-            placeholder="Example: prioritize campaigns with ROAS > 1.6 and high delivery rate",
-        ).strip()
+    gen = False
+    ask_ai = False
+    ai_question = ""
+    user_focus = ""
+    tab_brief, tab_qa = st.tabs(["Generate Brief", "Ask Question"])
 
-    selected_preset = focus_presets.get(preset_label, "")
-    user_focus = focus_text if focus_text else selected_preset
+    with tab_brief:
+        ui1, ui2 = st.columns([3, 1])
+        with ui1:
+            preset_label = st.selectbox("Focus preset", list(focus_presets.keys()), index=0, key="ai_focus_preset")
+            focus_text = st.text_input(
+                "Custom focus (optional)",
+                key="ai_focus",
+                placeholder="Example: prioritize campaigns with ROAS > 1.6 and high delivery rate",
+            ).strip()
+            selected_preset = focus_presets.get(preset_label, "")
+            user_focus = focus_text if focus_text else selected_preset
+        with ui2:
+            st.caption("Action")
+            gen = st.button(
+                "Generate brief",
+                type="primary",
+                key="btn_gen_ai",
+                use_container_width=True,
+                disabled=not api_ready,
+            )
 
-    with ui2:
-        st.caption("Action")
-        gen = st.button(
-            "Generate brief",
-            type="primary",
-            key="btn_gen_ai",
-            use_container_width=True,
-            disabled=not api_ready,
-        )
-
-    st.markdown("#### 2) Ask any question")
-    ask_q_col1, ask_q_col2 = st.columns([4, 1])
-    with ask_q_col1:
-        ai_question = st.text_area(
-            "Your question",
-            key="ai_free_question",
-            height=110,
-            placeholder="Example: Which products have negative lifetime net but positive 7-day trend, and what action should I take?",
-        ).strip()
-    with ask_q_col2:
-        st.caption("Action")
-        ask_ai = st.button(
-            "Ask AI",
-            key="btn_ask_ai",
-            use_container_width=True,
-            disabled=not api_ready,
-        )
+    with tab_qa:
+        ask_q_col1, ask_q_col2 = st.columns([4, 1])
+        with ask_q_col1:
+            ai_question = st.text_area(
+                "Your question",
+                key="ai_free_question",
+                height=130,
+                placeholder="Ask anything about performance, products, ads, trends, or risks.",
+            ).strip()
+        with ask_q_col2:
+            st.caption("Action")
+            ask_ai = st.button(
+                "Ask AI",
+                key="btn_ask_ai",
+                use_container_width=True,
+                disabled=not api_ready,
+            )
 
     if not api_ready:
         st.info("Add `OPENAI_API_KEY` in Streamlit secrets to enable AI brief generation.")
@@ -2960,44 +2980,50 @@ def render_ai_summary(
                 )
                 st.session_state.ai_qa_history = st.session_state.ai_qa_history[-10:]
 
-    st.markdown("#### 3) Results")
-    if st.session_state.ai_last_output:
-        if st.session_state.ai_last_run_at:
-            st.caption(f"Latest AI brief generated at {st.session_state.ai_last_run_at}")
-        render_ai_text(st.session_state.ai_last_output)
-    else:
-        st.caption("No AI brief generated yet.")
+    st.markdown("#### Outputs")
+    out_col, hist_col = st.columns([2, 1])
+    with out_col:
+        st.markdown("**Latest brief**")
+        if st.session_state.ai_last_output:
+            if st.session_state.ai_last_run_at:
+                st.caption(f"Generated at {st.session_state.ai_last_run_at}")
+            render_ai_text(st.session_state.ai_last_output)
+        else:
+            st.caption("No brief generated yet.")
 
-    if st.session_state.ai_qa_history:
-        st.markdown("#### Recent Q&A")
-        for item in reversed(st.session_state.ai_qa_history):
-            with st.expander(f"{item['at']} • {item['q'][:90]}", expanded=False):
-                st.markdown(f"**Q:** {item['q']}")
-                render_ai_text(item["a"])
+    with hist_col:
+        st.markdown("**Recent questions**")
+        if st.session_state.ai_qa_history:
+            for item in reversed(st.session_state.ai_qa_history):
+                with st.expander(f"{item['at']} • {item['q'][:55]}", expanded=False):
+                    st.markdown(f"**Q:** {item['q']}")
+                    render_ai_text(item["a"])
+        else:
+            st.caption("No questions yet.")
     
-    st.markdown("### Insights & what to do next")
+    st.markdown("#### Operational Guidance")
     bullets = []
 
     if spend_t > 0 and orders_t == 0:
-        bullets.append(f"🚨 You spent ads on **{day_label}** but got **0 orders**. Check tracking/pixel, landing page, and pause the worst-performing ad sets until orders start coming again.")
+        bullets.append(f"You spent ads on {day_label} but got 0 orders. Check tracking, landing page, and pause worst ad sets.")
 
     if net_t < 0 and spend_t > 0:
-        bullets.append(f"⚠️ Net is **negative on {day_label}**. Reduce budget on campaigns with high spend and low results, and shift budget to proven winners.")
+        bullets.append(f"Net is negative on {day_label}. Reduce budget on high-spend low-result campaigns and shift budget to winners.")
     elif net_t > 0 and orders_t > 0:
-        bullets.append(f"✅ Net is **positive on {day_label}**. Consider scaling slowly (+10–20%) on the best campaigns, while monitoring cancellations/returns.")
+        bullets.append(f"Net is positive on {day_label}. Scale winners gradually (+10% to +20%) while monitoring cancellations and returns.")
 
     if conf_rate < 0.35:
-        bullets.append("📞 **Low confirmation rate** overall. Improve follow-up speed, use WhatsApp scripts, and clarify the offer (COD, delivery, warranty).")
+        bullets.append("Confirmation rate is low. Improve follow-up speed and improve offer clarity.")
     if deliv_rate < 0.6:
-        bullets.append("🚚 **Low delivery rate** overall. Review cancellation reasons, courier performance, and exclude problematic regions.")
+        bullets.append("Delivery rate is low. Review cancellation reasons, courier performance, and problematic regions.")
     if ret_rate > 0.12:
-        bullets.append("↩️ **High return rate** overall. Align creatives with reality, add FAQ, and set expectations to reduce returns.")
+        bullets.append("Return rate is high. Align creatives with actual product experience and set clear expectations.")
 
     if roas_real is not None:
         if roas_real < 1.0:
-            bullets.append("📉 ROAS (delivered) is **below 1.0**. Tighten targeting, refresh creatives, and stop non-performing campaigns.")
+            bullets.append("Delivered ROAS is below 1.0. Tighten targeting, refresh creatives, and stop non-performing campaigns.")
         elif roas_real >= 1.5:
-            bullets.append("📈 ROAS (delivered) is healthy. Duplicate winners and test 1 variable at a time (creative/angle/audience).")
+            bullets.append("Delivered ROAS is healthy. Duplicate winners and test one variable at a time.")
 
     # Best SKUs today (delivered-profit)
     try:
@@ -3023,24 +3049,25 @@ def render_ai_summary(
                     nm = sku_to_name.get(sku, "")
                     return f"{nm} — {sku}" if nm else sku
                 winners = ", ".join([_sku_label(s) for s in top["sku"].tolist()])
-                bullets.append(f"🏆 Top delivered-profit SKUs on {day_label}: {winners}. Consider increasing budget there (if delivery rate is also good).")
+                bullets.append(f"Top delivered-profit SKUs on {day_label}: {winners}. Consider increasing budget there if delivery quality is stable.")
     except Exception:
         pass
 
     if not bullets:
         bullets.append(f"No strong signals detected for {day_label} yet. This section updates automatically as data changes.")
 
-    st.markdown("\n".join([f"- {b}" for b in bullets]))
-
-    st.divider()
-    st.markdown("### Quick checklist")
-    st.markdown(
-        """- ✅ Spend vs orders (if spend is high with no orders, pause + debug tracking)
-- ✅ Delivery/cancel trend (courier/regions/product expectations)
-- ✅ Refresh creatives regularly (new hook, new angle)
-- ✅ Scale winners slowly (+10–20%) and kill losers quickly
-"""
-    )
+    g1, g2 = st.columns([2, 1])
+    with g1:
+        st.markdown("\n".join([f"- {b}" for b in bullets]))
+    with g2:
+        st.markdown("**Checklist**")
+        st.markdown(
+            "- Spend vs orders\n"
+            "- Delivery and cancellation trend\n"
+            "- Creative refresh cadence\n"
+            "- Scale winners slowly\n"
+            "- Cut losers quickly\n"
+        )
 
 
 
