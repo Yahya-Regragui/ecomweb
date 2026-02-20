@@ -2718,6 +2718,58 @@ def render_ai_summary(
         unsafe_allow_html=True,
     )
 
+    show_daily_graph = st.toggle(
+        "Show daily graph",
+        value=False,
+        key="ai_show_daily_graph",
+        help="Display daily trends for orders, profit, ad spend, and net.",
+    )
+    if show_daily_graph:
+        daily_graph = daily_summary[["day", "orders_count", "profit_disp", "spend_disp", "net_disp"]].copy()
+        daily_graph = daily_graph.dropna(subset=["day"]).sort_values("day")
+        daily_graph["day"] = pd.to_datetime(daily_graph["day"], errors="coerce")
+        daily_graph = daily_graph.dropna(subset=["day"])
+
+        metric_labels = {
+            "orders_count": "Orders",
+            "profit_disp": f"Profit ({currency})",
+            "spend_disp": f"Ad spend ({currency})",
+            "net_disp": f"Net ({currency})",
+        }
+        graph_long = daily_graph.melt(id_vars=["day"], var_name="metric", value_name="value")
+        graph_long = graph_long[graph_long["metric"].isin(metric_labels.keys())].copy()
+        graph_long["metric_label"] = graph_long["metric"].map(metric_labels)
+
+        highlight_days = pd.DataFrame({"day": [today, yesterday]})
+
+        base = alt.Chart(graph_long).encode(
+            x=alt.X("day:T", title="Day"),
+            y=alt.Y("value:Q", title=None),
+        )
+
+        lines = base.mark_line(point=True).encode(
+            tooltip=[
+                alt.Tooltip("day:T", title="Day"),
+                alt.Tooltip("metric_label:N", title="Metric"),
+                alt.Tooltip("value:Q", title="Value", format=",.2f"),
+            ]
+        )
+
+        markers = alt.Chart(highlight_days).mark_rule(strokeDash=[4, 4], color="#9ca3af").encode(x="day:T")
+
+        chart = (
+            alt.layer(lines, markers)
+            .facet(
+                row=alt.Row("metric_label:N", title=None, header=alt.Header(labelFontSize=12, labelColor="#1f2937")),
+            )
+            .resolve_scale(y="independent")
+            .properties(height=90)
+            .interactive()
+        )
+
+        st.altair_chart(chart, use_container_width=True)
+        st.caption(f"Dashed lines mark {day_label} (analysis day) and {prev_label} (comparison day).")
+
     api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
 
     if "ai_last_output" not in st.session_state:
