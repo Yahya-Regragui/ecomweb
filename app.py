@@ -2284,6 +2284,8 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
         "3 steps max. Each step must include a measurable target.\n\n"
         "Rules:\n"
         "- Use the provided JSON only; do not invent metrics.\n"
+        "- In this app payload, `today` means the selected analysis day (usually the last completed day), not necessarily the calendar current day.\n"
+        "- `yesterday` means the day before that selected analysis day.\n"
         "- Always reference at least one metric when making a recommendation.\n"
         "- Treat allocated ad spend at the product level as an ESTIMATE based on `spend_allocation_method`.\n"
         "- If data is missing, say exactly what's missing and how to fix it.\n"
@@ -2362,9 +2364,9 @@ def render_ai_summary(
     c3.metric("Net after ads (total)", money_ccy(net_usd * fx, "IQD") if currency == "IQD" else money_ccy(net_usd, "USD"))
     c4.metric("ROAS (delivered)", "N/A" if roas_real is None else f"{roas_real:.2f}")
 
-    st.markdown("### What happened today")
+    st.markdown("### What happened (analysis day)")
     if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
-        st.info("Upload **Daily Orders (Taager) XLSX** to enable the 'today' summary + recommendations.")
+        st.info("Upload **Daily Orders (Taager) XLSX** to enable analysis-day summary + recommendations.")
         return
 
     ddf = parse_daily_orders(daily_orders_df)
@@ -2372,9 +2374,37 @@ def render_ai_summary(
         st.warning("Couldn't read dates from the Daily Orders file (missing/invalid **Created At**).")
         return
 
-    # Use latest available day in the file as 'today'
-    today = pd.Timestamp(ddf["day"].max()).normalize()
-    yesterday = (today - pd.Timedelta(days=1)).normalize()
+    available_days = sorted(pd.to_datetime(ddf["day"], errors="coerce").dropna().dt.normalize().unique())
+    if not available_days:
+        st.info("No valid dates found in Daily Orders.")
+        return
+
+    include_latest_partial = st.checkbox(
+        "Include latest day (may be in progress)",
+        value=False,
+        key="ai_include_latest_partial",
+        help="Off = analyze last completed day by default. On = analyze latest available day.",
+    )
+
+    latest_day = pd.Timestamp(available_days[-1]).normalize()
+    if include_latest_partial:
+        analysis_day = latest_day
+        analysis_mode = "latest available day (can be partial)"
+    else:
+        if len(available_days) >= 2:
+            analysis_day = pd.Timestamp(available_days[-2]).normalize()
+            analysis_mode = "last completed day"
+        else:
+            analysis_day = latest_day
+            analysis_mode = "latest available day (only one day in file)"
+            st.caption("Only one day exists in the file, so the app is using that day.")
+
+    compare_day = (analysis_day - pd.Timedelta(days=1)).normalize()
+    st.caption(f"Analysis day: {analysis_day.date()} ({analysis_mode}) • Compare to: {compare_day.date()}")
+
+    # Keep variable names used below; here "today" means selected analysis day.
+    today = analysis_day
+    yesterday = compare_day
 
     daily_summary = build_daily_summary(ddf, campaigns_df if campaigns_df is not None else pd.DataFrame(), fx, currency)
     if daily_summary is None or daily_summary.empty or "day" not in daily_summary.columns:
@@ -2398,11 +2428,13 @@ def render_ai_summary(
     spend_y = float(y.get("spend_disp", 0.0) or 0.0)
     net_y = float(y.get("net_disp", 0.0) or 0.0)
 
+    day_label = str(today.date())
+    prev_label = str(yesterday.date())
     tc1, tc2, tc3, tc4 = st.columns(4)
-    tc1.metric("Orders (today)", f"{orders_t:,}", f"{orders_t - orders_y:+,} vs yesterday")
-    tc2.metric(f"Profit (today) ({currency})", money_ccy(profit_t, currency), money_ccy(profit_t - profit_y, currency))
-    tc3.metric(f"Ad spend (today) ({currency})", money_ccy(spend_t, currency), money_ccy(spend_t - spend_y, currency))
-    tc4.metric(f"Net (today) ({currency})", money_ccy(net_t, currency), money_ccy(net_t - net_y, currency))
+    tc1.metric(f"Orders ({day_label})", f"{orders_t:,}", f"{orders_t - orders_y:+,} vs {prev_label}")
+    tc2.metric(f"Profit ({day_label}) ({currency})", money_ccy(profit_t, currency), money_ccy(profit_t - profit_y, currency))
+    tc3.metric(f"Ad spend ({day_label}) ({currency})", money_ccy(spend_t, currency), money_ccy(spend_t - spend_y, currency))
+    tc4.metric(f"Net ({day_label}) ({currency})", money_ccy(net_t, currency), money_ccy(net_t - net_y, currency))
 
     # Optional status breakdown
     excluded = {
@@ -2412,7 +2444,7 @@ def render_ai_summary(
     }
     status_cols = [c for c in daily_summary.columns if c not in excluded]
     if status_cols:
-        with st.expander("Today's status breakdown (from Daily Orders export)", expanded=False):
+        with st.expander(f"Status breakdown ({day_label} vs {prev_label})", expanded=False):
             st.dataframe(
                 daily_summary[daily_summary["day"].isin([today, yesterday])][["day"] + status_cols]
                 .sort_values("day", ascending=False),
@@ -2640,12 +2672,12 @@ def render_ai_summary(
     bullets = []
 
     if spend_t > 0 and orders_t == 0:
-        bullets.append("🚨 You spent ads today but got **0 orders**. Check tracking/pixel, landing page, and pause the worst-performing ad sets until orders start coming again.")
+        bullets.append(f"🚨 You spent ads on **{day_label}** but got **0 orders**. Check tracking/pixel, landing page, and pause the worst-performing ad sets until orders start coming again.")
 
     if net_t < 0 and spend_t > 0:
-        bullets.append("⚠️ Net is **negative today**. Reduce budget on campaigns with high spend and low results, and shift budget to proven winners.")
+        bullets.append(f"⚠️ Net is **negative on {day_label}**. Reduce budget on campaigns with high spend and low results, and shift budget to proven winners.")
     elif net_t > 0 and orders_t > 0:
-        bullets.append("✅ Net is **positive today**. Consider scaling slowly (+10–20%) on the best campaigns, while monitoring cancellations/returns.")
+        bullets.append(f"✅ Net is **positive on {day_label}**. Consider scaling slowly (+10–20%) on the best campaigns, while monitoring cancellations/returns.")
 
     if conf_rate < 0.35:
         bullets.append("📞 **Low confirmation rate** overall. Improve follow-up speed, use WhatsApp scripts, and clarify the offer (COD, delivery, warranty).")
@@ -2684,12 +2716,12 @@ def render_ai_summary(
                     nm = sku_to_name.get(sku, "")
                     return f"{nm} — {sku}" if nm else sku
                 winners = ", ".join([_sku_label(s) for s in top["sku"].tolist()])
-                bullets.append(f"🏆 Top delivered-profit SKUs today: {winners}. Consider increasing budget there (if delivery rate is also good).")
+                bullets.append(f"🏆 Top delivered-profit SKUs on {day_label}: {winners}. Consider increasing budget there (if delivery rate is also good).")
     except Exception:
         pass
 
     if not bullets:
-        bullets.append("No strong signals detected yet. As more data comes in today, this section updates automatically.")
+        bullets.append(f"No strong signals detected for {day_label} yet. This section updates automatically as data changes.")
 
     st.markdown("\n".join([f"- {b}" for b in bullets]))
 
