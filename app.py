@@ -2167,10 +2167,30 @@ def _safe_int(x, default=0):
     except Exception:
         return default
 
-def _build_llm_payload(*, kpis: dict, kpis_disp: dict, today_row: dict, yesterday_row: dict, currency: str):
-    """Small, structured payload for the LLM (keeps tokens down)."""
+
+def _build_llm_payload(
+    *,
+    kpis: dict,
+    kpis_disp: dict,
+    today_row: dict,
+    yesterday_row: dict,
+    currency: str,
+    windows: Optional[dict] = None,
+    products_top: Optional[list] = None,
+    campaigns_top: Optional[list] = None,
+    data_quality: Optional[dict] = None,
+    spend_allocation_method: str = "order_share",
+):
+    """
+    Structured payload for the LLM.
+
+    Keep it compact (numbers + small top lists) so it stays token-efficient,
+    but rich enough for product/ads/profit analysis.
+    """
     return {
         "currency": currency,
+        "spend_allocation_method": spend_allocation_method,
+        "data_quality": data_quality or {},
         "overall": {
             "spend": kpis_disp.get("spend_disp"),
             "delivered_profit": kpis_disp.get("delivered_profit_disp"),
@@ -2182,10 +2202,12 @@ def _build_llm_payload(*, kpis: dict, kpis_disp: dict, today_row: dict, yesterda
             "delivery_rate": kpis.get("delivery_rate"),
             "return_rate": kpis.get("return_rate"),
         },
+        "windows": windows or {},
         "today": today_row,
         "yesterday": yesterday_row,
+        "products_top": products_top or [],
+        "campaigns_top": campaigns_top or [],
     }
-
 @st.cache_data(show_spinner=False)
 def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> str:
     """Generate a narrative summary using OpenAI Responses API.
@@ -2210,28 +2232,33 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
     focus_line = f"Extra focus requested: {focus}" if focus else ""
 
     prompt = (
-        "You will receive store KPIs and recent-day metrics as JSON.\\n\\n"
-        "Return Markdown with EXACTLY these sections:\\n\\n"
-        "## Executive Summary\\n"
-        "(3–5 sentences, no bullets)\\n\\n"
-        "## Today (what happened)\\n"
-        "Short paragraph using today's numbers.\\n\\n"
-        "## Insights & actions (prioritized)\\n"
-        "Bullet list of the top 5 actions with reasoning and expected impact.\\n\\n"
-        "## Deep Dive Analysis\\n"
-        "Write a detailed narrative analysis (10–20 sentences) in paragraph form:\\n"
-        "- Explain what likely drove today's results\\n"
-        "- Interpret efficiency (spend → orders → deliveries → profit)\\n"
-        "- Discuss risks (delivery rate, return rate, rising CPA, fatigue)\\n"
-        "- Identify 2–3 hypotheses worth testing next\\n"
-        "- Give a mini-plan for the next 24–48h\\n\\n"
-        "Rules:\\n"
-        "- Use the provided JSON only; do not invent metrics.\\n"
-        "- If data is missing, say what's missing and what to upload/track.\\n"
-        "- Prefer numeric references (values or deltas) when present.\\n"
-        "- Do not mention that you are an AI model.\\n\\n"
-        f"{focus_line}\\n\\n"
-        "JSON:\\n"
+        "You will receive store KPIs, time-window summaries, top products, and top Meta campaigns as JSON.\n\n"
+        "Return Markdown with EXACTLY these sections (use the headings verbatim):\n\n"
+        "## Executive Summary\n"
+        "(3–5 sentences, no bullets. Mention: net after ads, delivery/return health, and what to do next.)\n\n"
+        "## Trend (today vs yesterday, and vs last 7 days)\n"
+        "Bullets with concrete deltas. Use `today`, `yesterday`, and `windows.last_7d` when available.\n\n"
+        "## Products (winners & losers)\n"
+        "- 3 winners: product, why (numbers), and what action to take\n"
+        "- 3 losers: product, what is wrong (numbers), and what action to take\n"
+        "Use `products_top` only. If it is empty, say product-level data is missing.\n\n"
+        "## Ads (scale / hold / cut)\n"
+        "- Scale: up to 3 campaigns with reasons\n"
+        "- Hold: up to 3 campaigns with reasons\n"
+        "- Cut/Pause: up to 3 campaigns with reasons\n"
+        "Use `campaigns_top` only. If it is empty, say campaign-level data is missing.\n\n"
+        "## Profit & operations\n"
+        "Discuss how delivery rate / cancellations / returns affect profit. Give 3 concrete operational actions.\n\n"
+        "## 24–48h plan\n"
+        "3 steps max. Each step must include a measurable target.\n\n"
+        "Rules:\n"
+        "- Use the provided JSON only; do not invent metrics.\n"
+        "- Always reference at least one metric when making a recommendation.\n"
+        "- Treat allocated ad spend at the product level as an ESTIMATE based on `spend_allocation_method`.\n"
+        "- If data is missing, say exactly what's missing and how to fix it.\n"
+        "- Do not mention that you are an AI model.\n\n"
+        f"{focus_line}\n\n"
+        "JSON:\n"
         f"{payload_json}"
     )
 
@@ -2367,8 +2394,210 @@ def render_ai_summary(
         st.caption("Uses OpenAI API via your **OPENAI_API_KEY** secret. Output refreshes automatically when data changes (cached).")
         user_focus = st.text_input("Optional focus (e.g., 'optimize spend', 'reduce cancellations', 'scale winners')", key="ai_focus")
         gen = st.button("Generate with ChatGPT", type="primary", key="btn_gen_ai")
+
         if gen:
-            payload = _build_llm_payload(kpis=kpis, kpis_disp=kpis_disp, today_row=t, yesterday_row=y, currency=currency)
+            # -------- Build a richer (but still compact) analysis bundle for ChatGPT --------
+            def _window_sum(start_day: pd.Timestamp, end_day: pd.Timestamp) -> dict:
+                w = daily_summary[(daily_summary["day"] >= start_day) & (daily_summary["day"] <= end_day)].copy()
+                if w.empty:
+                    return {}
+                out = {
+                    "start": str(pd.Timestamp(start_day).date()),
+                    "end": str(pd.Timestamp(end_day).date()),
+                    "days": int(w.shape[0]),
+                    "orders": _safe_int(w["orders_count"].sum()),
+                    "profit": _safe_float(w["profit_disp"].sum()),
+                    "spend": _safe_float(w["spend_disp"].sum()),
+                    "net": _safe_float(w["net_disp"].sum()),
+                }
+                # simple averages (guarded)
+                out["profit_per_order"] = _safe_float(out["profit"] / out["orders"]) if out["orders"] else None
+                out["net_per_order"] = _safe_float(out["net"] / out["orders"]) if out["orders"] else None
+                return out
+
+            # Time windows
+            last_7_start = (today - pd.Timedelta(days=6)).normalize()
+            last_14_start = (today - pd.Timedelta(days=13)).normalize()
+            mtd_start = today.replace(day=1).normalize()
+
+            windows = {
+                "today": _window_sum(today, today),
+                "yesterday": _window_sum(yesterday, yesterday),
+                "last_7d": _window_sum(last_7_start, today),
+                "last_14d": _window_sum(last_14_start, today),
+                "mtd": _window_sum(mtd_start, today),
+            }
+
+            # ---- Product leaderboard (last 7d) ----
+            products_top = []
+            sku_to_name = build_sku_to_name_map(orders_df) if orders_df is not None else {}
+
+            # daily orders window
+            d7 = ddf[(ddf["day"] >= last_7_start) & (ddf["day"] <= today)].copy()
+
+            # exclude "Cancelled by You" from order counts and SKU allocation base
+            if "Status" in d7.columns:
+                _s = d7["Status"].astype(str).str.strip().str.lower()
+                d7 = d7[~_s.str.contains("cancelled by you", na=False)].copy()
+
+            id_col = get_daily_order_id_col(d7)
+            if id_col and not d7.empty:
+                total_orders_by_day = d7.groupby("day")[id_col].nunique()
+            else:
+                total_orders_by_day = pd.Series(dtype=float)
+
+            lines = _explode_order_lines(d7) if not d7.empty else pd.DataFrame()
+            if lines is not None and not lines.empty and id_col:
+                # Delivered-only profit (estimated allocation by qty)
+                st_lower = lines["Status"].astype(str).str.lower()
+                delivered_mask = st_lower.str.contains("delivered", na=False)
+
+                profit_iqd_by_sku = (
+                    lines[delivered_mask]
+                    .groupby("sku")["profit_iqd_alloc"]
+                    .sum()
+                    .sort_values(ascending=False)
+                )
+
+                # Allocate spend to SKU by share of orders per day (estimate)
+                spend_usd_by_day = pd.Series(dtype=float)
+                if campaigns_df is not None and not getattr(campaigns_df, "empty", True) and "Reporting starts" in campaigns_df.columns:
+                    c = campaigns_df.copy()
+                    c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
+                    c = c.dropna(subset=["Reporting starts"])
+                    c["day"] = c["Reporting starts"].dt.floor("D")
+                    c = c[(c["day"] >= last_7_start) & (c["day"] <= today)].copy()
+                    if "Amount spent (USD)" in c.columns:
+                        c["Amount spent (USD)"] = pd.to_numeric(c["Amount spent (USD)"], errors="coerce").fillna(0)
+                        spend_usd_by_day = c.groupby("day")["Amount spent (USD)"].sum()
+
+                # sku order counts per day (distinct orders containing sku)
+                sku_orders_by_day = (
+                    lines.groupby(["day", "sku"])["order_id"]
+                    .nunique()
+                    .rename("sku_orders")
+                    .reset_index()
+                )
+
+                # merge total orders and spend
+                sku_orders_by_day["total_orders"] = sku_orders_by_day["day"].map(total_orders_by_day).fillna(0)
+                sku_orders_by_day["spend_usd_day"] = sku_orders_by_day["day"].map(spend_usd_by_day).fillna(0.0)
+                sku_orders_by_day["spend_usd_alloc"] = np.where(
+                    sku_orders_by_day["total_orders"] > 0,
+                    sku_orders_by_day["spend_usd_day"] * (sku_orders_by_day["sku_orders"] / sku_orders_by_day["total_orders"]),
+                    0.0
+                )
+                spend_usd_by_sku = sku_orders_by_day.groupby("sku")["spend_usd_alloc"].sum()
+
+                # Delivered orders per SKU (distinct)
+                delivered_orders_by_sku = (
+                    lines[delivered_mask]
+                    .groupby("sku")["order_id"]
+                    .nunique()
+                )
+
+                # Total orders per SKU (distinct)
+                orders_by_sku = lines.groupby("sku")["order_id"].nunique()
+
+                # Compose top list (limit 10) sorted by net (profit - spend)
+                all_skus = set(orders_by_sku.index) | set(profit_iqd_by_sku.index) | set(spend_usd_by_sku.index)
+                rows = []
+                for sku in all_skus:
+                    profit_iqd = float(profit_iqd_by_sku.get(sku, 0.0))
+                    spend_usd = float(spend_usd_by_sku.get(sku, 0.0))
+                    # display currency
+                    if currency == "IQD":
+                        profit_disp = profit_iqd
+                        spend_disp = spend_usd * fx
+                    else:
+                        profit_disp = iqd_to_usd(profit_iqd, fx)
+                        spend_disp = spend_usd
+                    net_disp = profit_disp - spend_disp
+                    orders_cnt = int(orders_by_sku.get(sku, 0) or 0)
+                    delivered_cnt = int(delivered_orders_by_sku.get(sku, 0) or 0)
+                    delivery_rate_sku = (delivered_cnt / orders_cnt) if orders_cnt else None
+                    rows.append({
+                        "sku": sku,
+                        "name": sku_to_name.get(sku) or None,
+                        "orders": orders_cnt,
+                        "delivered_orders": delivered_cnt,
+                        "delivery_rate": delivery_rate_sku,
+                        "profit": profit_disp,
+                        "spend": spend_disp,
+                        "net": net_disp,
+                        "net_per_delivered": (net_disp / delivered_cnt) if delivered_cnt else None,
+                    })
+                rows = sorted(rows, key=lambda r: (r.get("net", 0.0) if r.get("net") is not None else 0.0), reverse=True)
+                products_top = rows[:10]
+
+            # ---- Campaign leaderboard (last 7d) ----
+            campaigns_top = []
+            sku_match_rate = None
+            has_campaigns = campaigns_df is not None and not getattr(campaigns_df, "empty", True)
+            if has_campaigns and "Reporting starts" in campaigns_df.columns:
+                c = campaigns_df.copy()
+                c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
+                c = c.dropna(subset=["Reporting starts"])
+                c["day"] = c["Reporting starts"].dt.floor("D")
+                c = c[(c["day"] >= last_7_start) & (c["day"] <= today)].copy()
+
+                name_col = "Campaign name" if "Campaign name" in c.columns else ("Campaign" if "Campaign" in c.columns else None)
+                spend_col = "Amount spent (USD)" if "Amount spent (USD)" in c.columns else None
+                results_col = "Results" if "Results" in c.columns else None
+
+                if name_col and spend_col:
+                    c[spend_col] = pd.to_numeric(c[spend_col], errors="coerce").fillna(0)
+
+                    if results_col:
+                        c[results_col] = pd.to_numeric(c[results_col], errors="coerce").fillna(0)
+
+                    # SKU extraction quality (best-effort)
+                    try:
+                        extracted = c[name_col].apply(extract_sku_from_campaign_name)
+                        sku_match_rate = float((extracted.notna().mean() * 100.0)) if len(extracted) else None
+                    except Exception:
+                        sku_match_rate = None
+
+                    agg = c.groupby(name_col).agg(
+                        spend_usd=(spend_col, "sum"),
+                        results=(results_col, "sum") if results_col else (spend_col, "size"),
+                    ).reset_index().rename(columns={name_col: "campaign"})
+
+                    agg["cpr_usd"] = np.where(agg["results"] > 0, agg["spend_usd"] / agg["results"], np.nan)
+                    agg = agg.sort_values("spend_usd", ascending=False).head(10)
+
+                    campaigns_top = [
+                        {
+                            "campaign": r["campaign"],
+                            "spend_usd": float(r["spend_usd"]),
+                            "results": float(r["results"]) if results_col else None,
+                            "cpr_usd": None if pd.isna(r["cpr_usd"]) else float(r["cpr_usd"]),
+                        }
+                        for _, r in agg.iterrows()
+                    ]
+
+            data_quality = {
+                "has_daily_orders": daily_orders_df is not None and not getattr(daily_orders_df, "empty", True),
+                "has_campaigns": has_campaigns,
+                "has_orders_catalog": orders_df is not None and not getattr(orders_df, "empty", True),
+                "sku_match_rate_pct": sku_match_rate,
+                "notes": [
+                    "Product-level ad spend is allocated as an estimate using order share by day."
+                ],
+            }
+
+            payload = _build_llm_payload(
+                kpis=kpis,
+                kpis_disp=kpis_disp,
+                today_row=t,
+                yesterday_row=y,
+                currency=currency,
+                windows=windows,
+                products_top=products_top,
+                campaigns_top=campaigns_top,
+                data_quality=data_quality,
+                spend_allocation_method="order_share",
+            )
             payload_json = json.dumps(_json_safe(payload), ensure_ascii=False)
             with st.spinner("Generating..."):
                 out = chatgpt_generate_store_summary(payload_json, user_focus=user_focus)
