@@ -1,10 +1,10 @@
 "Reporting starts","Reporting ends","Campaign name","Campaign delivery",Results,"Result indicator","Cost per results","Ad set budget","Ad set budget type","Amount spent (USD)",Impressions,Reach,Ends,"Attribution setting"
-2026-02-20,2026-02-20,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,2,actions:offsite_conversion.fb_pixel_purchase,3.28,12.5,Daily,6.56,3081,2947,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-20,2026-02-20,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,3.39,1328,1234,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-20,2026-02-20,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,5,actions:offsite_conversion.fb_pixel_purchase,1.662,12.5,Daily,8.31,3703,3559,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-20,2026-02-20,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,6.25,2899,2394,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-20,2026-02-20,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-20,2026-02-20,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0.91,439,411,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-20,2026-02-20,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,2.65,1579,1402,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-20,2026-02-20,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-20,2026-02-20,"Forchat New Campaign - IQ040107ALUY99",active,5,actions:offsite_conversion.fb_pixel_purchase,2.376,"Using ad set budget",0,11.88,9018,8818,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-20,2026-02-20,"Forchat New Campaign - IQ040107ALUY99",active,6,actions:offsite_conversion.fb_pixel_purchase,2.61333333,"Using ad set budget",0,15.68,12173,11955,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-20,2026-02-20,"Forchat Test Campaign 3 - IQ040107ALUY99",inactive,,,,13,Daily,0,0,0,Ongoing,-
 2026-02-20,2026-02-20,"Test blower Campaign 2 - IQ050402POWR99",inactive,,,,"Using ad set budget",0,0.02,8,8,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-20,2026-02-20,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -39,17 +39,17 @@
 2026-02-20,2026-02-20,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-20,2026-02-20,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-20,2026-02-20,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-19,2026-02-19,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-19,2026-02-19,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,5,actions:offsite_conversion.fb_pixel_purchase,2.062,12.5,Daily,10.31,5039,4854,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-19,2026-02-19,"Test Heat Massage Campaign - IQ040108QTMM99",active,1,actions:offsite_conversion.fb_pixel_purchase,2.29,3,Daily,2.29,997,948,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-19,2026-02-19,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-19,2026-02-19,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,5,actions:offsite_conversion.fb_pixel_purchase,2.062,12.5,Daily,10.31,5043,4855,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-19,2026-02-19,"Test Heat Massage Campaign - IQ040108QTMM99",active,1,actions:offsite_conversion.fb_pixel_purchase,2.29,3,Daily,2.29,998,948,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-19,2026-02-19,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-19,2026-02-19,"Forchat New Campaign - IQ040107ALUY99",active,3,actions:offsite_conversion.fb_pixel_purchase,1.9,"Using ad set budget",0,5.7,4548,4543,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-19,2026-02-19,"Forchat New Campaign - IQ040107ALUY99",active,3,actions:offsite_conversion.fb_pixel_purchase,1.9,"Using ad set budget",0,5.7,4550,4543,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-19,2026-02-19,"Test Ordinary Campaign 2 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
-2026-02-19,2026-02-19,"Test blower Campaign 2 - IQ050402POWR99",inactive,,,,"Using ad set budget",0,3.49,2279,2145,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-19,2026-02-19,"Test blower Campaign 2 - IQ050402POWR99",inactive,,,,"Using ad set budget",0,3.5,2280,2145,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-19,2026-02-19,"Forchat Test Campaign 3 - IQ040107ALUY99",inactive,,,,13,Daily,0.12,186,186,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
-2026-02-19,2026-02-19,"Test Translate Campaign - IQ010102MKIO99",inactive,,,,"Using ad set budget",0,8.26,2479,1906,Ongoing,-
+2026-02-19,2026-02-19,"Test Translate Campaign - IQ010102MKIO99",inactive,,,,"Using ad set budget",0,8.28,2482,1906,Ongoing,-
 2026-02-19,2026-02-19,"Forchat Test Campaign 2 - IQ040107ALUY99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
-2026-02-19,2026-02-19,"Test SSD Campaign 1 - IQ010106ORES99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,9.48,"Using ad set budget",0,9.48,3761,3162,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-19,2026-02-19,"Test SSD Campaign 1 - IQ010106ORES99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,9.48,"Using ad set budget",0,9.48,3762,3162,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-19,2026-02-19,"Forchat Test Campaign 1 - IQ040107ALUY99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-19,2026-02-19,"Test Masaha Campaign 1. - IQ030107MASA99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
 2026-02-19,2026-02-19,"Ghasala Test Campaign 3 - IQ030401SSDD99",inactive,,,,4.5,Daily,0,0,0,Ongoing,-
@@ -79,8 +79,8 @@
 2026-02-19,2026-02-19,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-19,2026-02-19,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-19,2026-02-19,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-18,2026-02-18,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-18,2026-02-18,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,3,actions:offsite_conversion.fb_pixel_purchase,1.99333333,12.5,Daily,5.98,3018,2776,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-18,2026-02-18,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-18,2026-02-18,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,3,actions:offsite_conversion.fb_pixel_purchase,1.99333333,12.5,Daily,5.98,3018,2776,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-18,2026-02-18,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-18,2026-02-18,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-18,2026-02-18,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -119,8 +119,8 @@
 2026-02-18,2026-02-18,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-18,2026-02-18,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-18,2026-02-18,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-17,2026-02-17,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-17,2026-02-17,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,6.21,12.5,Daily,6.21,2669,2474,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-17,2026-02-17,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-17,2026-02-17,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,6.21,12.5,Daily,6.21,2669,2474,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-17,2026-02-17,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-17,2026-02-17,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-17,2026-02-17,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -159,8 +159,8 @@
 2026-02-17,2026-02-17,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-17,2026-02-17,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-17,2026-02-17,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-16,2026-02-16,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-16,2026-02-16,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,7.47,12.5,Daily,7.47,3273,2978,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-16,2026-02-16,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-16,2026-02-16,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,7.47,12.5,Daily,7.47,3273,2978,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-16,2026-02-16,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-16,2026-02-16,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,3.59,1744,1723,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-16,2026-02-16,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -199,8 +199,8 @@
 2026-02-16,2026-02-16,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-16,2026-02-16,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-16,2026-02-16,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-15,2026-02-15,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-15,2026-02-15,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,2,actions:offsite_conversion.fb_pixel_purchase,3.21,12.5,Daily,6.42,2253,2164,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-15,2026-02-15,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-15,2026-02-15,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,2,actions:offsite_conversion.fb_pixel_purchase,3.21,12.5,Daily,6.42,2253,2164,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-15,2026-02-15,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-15,2026-02-15,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-15,2026-02-15,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -239,8 +239,8 @@
 2026-02-15,2026-02-15,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-15,2026-02-15,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-15,2026-02-15,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-14,2026-02-14,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-14,2026-02-14,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,4,actions:offsite_conversion.fb_pixel_purchase,0.95,12.5,Daily,3.8,1144,1086,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-14,2026-02-14,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-14,2026-02-14,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,4,actions:offsite_conversion.fb_pixel_purchase,0.95,12.5,Daily,3.8,1144,1086,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-14,2026-02-14,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -279,8 +279,8 @@
 2026-02-14,2026-02-14,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-14,2026-02-14,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-13,2026-02-13,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-13,2026-02-13,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,3.3,12.5,Daily,3.3,935,846,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-13,2026-02-13,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-13,2026-02-13,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,3.3,12.5,Daily,3.3,935,846,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-13,2026-02-13,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -319,8 +319,8 @@
 2026-02-13,2026-02-13,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-13,2026-02-13,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-12,2026-02-12,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-12,2026-02-12,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,1,actions:offsite_conversion.fb_pixel_purchase,2.62,12.5,Daily,2.62,593,546,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
+2026-02-12,2026-02-12,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-12,2026-02-12,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,1,actions:offsite_conversion.fb_pixel_purchase,2.62,12.5,Daily,2.62,593,546,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-12,2026-02-12,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,1.34,342,313,Ongoing,"7-day click, 1-day view, or 1-day engaged-view"
 2026-02-12,2026-02-12,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -359,8 +359,8 @@
 2026-02-12,2026-02-12,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-12,2026-02-12,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-11,2026-02-11,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-11,2026-02-11,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-11,2026-02-11,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -399,8 +399,8 @@
 2026-02-11,2026-02-11,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-11,2026-02-11,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-10,2026-02-10,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-10,2026-02-10,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -439,8 +439,8 @@
 2026-02-10,2026-02-10,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-10,2026-02-10,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-09,2026-02-09,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-09,2026-02-09,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -479,8 +479,8 @@
 2026-02-09,2026-02-09,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-09,2026-02-09,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-08,2026-02-08,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-08,2026-02-08,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -519,8 +519,8 @@
 2026-02-08,2026-02-08,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-08,2026-02-08,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-07,2026-02-07,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-07,2026-02-07,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -559,8 +559,8 @@
 2026-02-07,2026-02-07,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-07,2026-02-07,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-06,2026-02-06,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-06,2026-02-06,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -599,8 +599,8 @@
 2026-02-06,2026-02-06,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-06,2026-02-06,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-05,2026-02-05,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-05,2026-02-05,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -639,8 +639,8 @@
 2026-02-05,2026-02-05,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-05,2026-02-05,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-04,2026-02-04,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-04,2026-02-04,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -679,8 +679,8 @@
 2026-02-04,2026-02-04,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-04,2026-02-04,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-03,2026-02-03,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-03,2026-02-03,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -719,8 +719,8 @@
 2026-02-03,2026-02-03,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-03,2026-02-03,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-02,2026-02-02,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-02,2026-02-02,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
@@ -759,8 +759,8 @@
 2026-02-02,2026-02-02,"Test Rokba Campaign - IQ040107WUYT99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test Massage Campaign - IQ040108SODS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
 2026-02-02,2026-02-02,"Test Miqchara 1 - IQ030401TAKS99",inactive,,,,10,Daily,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Rign and Headphones Campaign - IQ010601GHKK99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
-2026-02-01,2026-02-01,"Test Magsafe  Campaign 1 - IQ010106MAGG99",active,,,,12.5,Daily,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Rign and Headphones Campaign - IQ010601GHKK99",inactive,,,,"Using ad set budget",0,0,0,0,Ongoing,-
+2026-02-01,2026-02-01,"Test Magsafe  Campaign 1 - IQ010106MAGG99",inactive,,,,12.5,Daily,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Test Heat Massage Campaign - IQ040108QTMM99",active,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Test Ordinary Campaign 3 - IQ040303ORDI99",inactive,,,,3,Daily,0,0,0,Ongoing,-
 2026-02-01,2026-02-01,"Forchat New Campaign - IQ040107ALUY99",active,,,,"Using ad set budget",0,0,0,0,Ongoing,-
