@@ -21,6 +21,7 @@ import altair as alt
 import base64
 import json
 import math
+import html
 from datetime import date
 
 def _json_safe(x):
@@ -82,6 +83,18 @@ def clean_markdown_spacing(text: str) -> str:
     text = re.sub(r"(\*)([^\s])", r"\1 \2", text)
 
     return text
+
+
+def render_ai_text(text: str):
+    """
+    Render AI output as plain wrapped text (not Markdown) to avoid accidental
+    style glitches from tokens like '*' or '_' inside model output.
+    """
+    safe = html.escape(text or "").replace("\n", "<br>")
+    st.markdown(
+        f"<div style='white-space: pre-wrap; line-height: 1.6;'>{safe}</div>",
+        unsafe_allow_html=True,
+    )
 # --- Optional: ChatGPT / OpenAI API ---
 # Install: pip install openai
 try:
@@ -2621,7 +2634,7 @@ def render_ai_summary(
                 out = chatgpt_generate_store_summary(payload_json, user_focus=user_focus)
 
             out = clean_markdown_spacing(out)
-            st.markdown(out)
+            render_ai_text(out)
     
     st.markdown("### Insights & what to do next")
     bullets = []
