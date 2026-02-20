@@ -2729,6 +2729,9 @@ def render_ai_summary(
         daily_graph = daily_graph.dropna(subset=["day"]).sort_values("day")
         daily_graph["day"] = pd.to_datetime(daily_graph["day"], errors="coerce")
         daily_graph = daily_graph.dropna(subset=["day"])
+        month_start = today.replace(day=1).normalize()
+        month_end = (month_start + pd.offsets.MonthEnd(1)).normalize()
+        daily_graph = daily_graph[(daily_graph["day"] >= month_start) & (daily_graph["day"] <= month_end)].copy()
         st.markdown("#### Daily graph")
 
         def _draw_metric_chart(metric_col: str, metric_title: str):
@@ -2758,6 +2761,7 @@ def render_ai_summary(
         with c2:
             _draw_metric_chart("profit_disp", f"Profit ({currency})")
             _draw_metric_chart("net_disp", f"Net ({currency})")
+        st.caption(f"Showing {today.strftime('%B %Y')} daily values.")
 
     api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
 
