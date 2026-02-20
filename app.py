@@ -91,10 +91,7 @@ def render_ai_text(text: str):
     style glitches from tokens like '*' or '_' inside model output.
     """
     safe = html.escape(text or "").replace("\n", "<br>")
-    st.markdown(
-        f"<div style='white-space: pre-wrap; line-height: 1.6;'>{safe}</div>",
-        unsafe_allow_html=True,
-    )
+    st.markdown(f"<div class='ai-output-wrap'>{safe}</div>", unsafe_allow_html=True)
 # --- Optional: ChatGPT / OpenAI API ---
 # Install: pip install openai
 try:
@@ -1994,6 +1991,47 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   color: var(--text) !important;
 }
 
+/* AI panel */
+.ai-panel{
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(165deg, rgba(15,23,34,0.86), rgba(12,20,30,0.70));
+  margin: 6px 0 12px 0;
+}
+.ai-panel-head{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.ai-title{
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.ai-sub{
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.ai-status{
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: rgba(255,255,255,0.02);
+}
+.ai-output-wrap{
+  white-space: pre-wrap;
+  line-height: 1.65;
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(9,15,22,0.58);
+}
+
 /* Floating Quick KPIs expander */
 div.kpi-fixed-expander {
   position: fixed !important;
@@ -2483,13 +2521,63 @@ def render_ai_summary(
             )
 
     
-    st.markdown("### ChatGPT Summary")
-    with st.expander("Generate narrative summary with ChatGPT (optional)", expanded=False):
-        st.caption("Uses OpenAI API via your **OPENAI_API_KEY** secret. Output refreshes automatically when data changes (cached).")
-        user_focus = st.text_input("Optional focus (e.g., 'optimize spend', 'reduce cancellations', 'scale winners')", key="ai_focus")
-        gen = st.button("Generate with ChatGPT", type="primary", key="btn_gen_ai")
+    st.markdown("### AI Copilot")
+    api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
 
-        if gen:
+    if "ai_last_output" not in st.session_state:
+        st.session_state.ai_last_output = ""
+    if "ai_last_run_at" not in st.session_state:
+        st.session_state.ai_last_run_at = ""
+
+    st.markdown(
+        f"""
+        <div class="ai-panel">
+          <div class="ai-panel-head">
+            <div>
+              <div class="ai-title">Narrative Performance Brief</div>
+              <div class="ai-sub">Generate an executive summary from current KPI, daily, product, and campaign data.</div>
+            </div>
+            <div class="ai-status">API: {"Connected" if api_ready else "Missing OPENAI_API_KEY"}</div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    focus_presets = {
+        "None": "",
+        "Optimize spend efficiency": "optimize spend efficiency",
+        "Reduce cancellations": "reduce cancellations and improve confirmation",
+        "Scale winning products": "find winners to scale with low risk",
+        "Protect net profit": "protect net profit while maintaining growth",
+    }
+
+    ui1, ui2 = st.columns([3, 1])
+    with ui1:
+        preset_label = st.selectbox("Focus preset", list(focus_presets.keys()), index=0, key="ai_focus_preset")
+        focus_text = st.text_input(
+            "Custom focus (optional)",
+            key="ai_focus",
+            placeholder="Example: prioritize campaigns with ROAS > 1.6 and high delivery rate",
+        ).strip()
+
+    selected_preset = focus_presets.get(preset_label, "")
+    user_focus = focus_text if focus_text else selected_preset
+
+    with ui2:
+        st.caption("Generate")
+        gen = st.button(
+            "Generate brief",
+            type="primary",
+            key="btn_gen_ai",
+            use_container_width=True,
+            disabled=not api_ready,
+        )
+
+    if not api_ready:
+        st.info("Add `OPENAI_API_KEY` in Streamlit secrets to enable AI brief generation.")
+
+    if gen and api_ready:
             # -------- Build a richer (but still compact) analysis bundle for ChatGPT --------
             def _window_sum(start_day: pd.Timestamp, end_day: pd.Timestamp) -> dict:
                 w = daily_summary[(daily_summary["day"] >= start_day) & (daily_summary["day"] <= end_day)].copy()
@@ -2697,7 +2785,15 @@ def render_ai_summary(
                 out = chatgpt_generate_store_summary(payload_json, user_focus=user_focus)
 
             out = clean_markdown_spacing(out)
-            render_ai_text(out)
+            st.session_state.ai_last_output = out
+            st.session_state.ai_last_run_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    if st.session_state.ai_last_output:
+        if st.session_state.ai_last_run_at:
+            st.caption(f"Latest AI brief generated at {st.session_state.ai_last_run_at}")
+        render_ai_text(st.session_state.ai_last_output)
+    else:
+        st.caption("No AI brief generated yet.")
     
     st.markdown("### Insights & what to do next")
     bullets = []
