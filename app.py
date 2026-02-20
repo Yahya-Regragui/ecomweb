@@ -1907,8 +1907,94 @@ st.set_page_config(page_title="E-commerce Dashboard", layout="wide")
 st.markdown(
     """
     <style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+:root{
+  --bg-0:#0b1116;
+  --bg-1:#111923;
+  --bg-2:#172331;
+  --card:rgba(15,23,34,0.78);
+  --card-strong:rgba(12,20,30,0.92);
+  --stroke:rgba(154,182,207,0.20);
+  --text:#eaf2f8;
+  --muted:#a9bbc9;
+  --good:#31c48d;
+  --bad:#ff6a79;
+  --accent:#5ec8ff;
+}
 
-/* Floating Quick KPIs expander (bottom-left) */
+html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI", sans-serif; }
+[data-testid="stAppViewContainer"]{
+  background:
+    radial-gradient(1200px 600px at 10% -5%, rgba(94,200,255,0.18), transparent 58%),
+    radial-gradient(900px 500px at 95% 10%, rgba(49,196,141,0.12), transparent 52%),
+    linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+  color: var(--text);
+}
+[data-testid="stHeader"]{ background: transparent; }
+[data-testid="block-container"]{
+  max-width: 1320px;
+  padding-top: 1.2rem;
+  padding-bottom: 4rem;
+}
+[data-testid="stSidebar"]{
+  background: linear-gradient(175deg, rgba(9,15,22,0.98), rgba(12,19,27,0.92));
+  border-right: 1px solid var(--stroke);
+}
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] label{
+  color: var(--muted) !important;
+}
+
+/* Hero */
+.hero-wrap{
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  padding:18px 20px;
+  background: linear-gradient(120deg, rgba(24,35,50,0.86), rgba(12,20,30,0.72));
+  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  margin-bottom: 14px;
+}
+.hero-title{
+  font-size: 1.65rem;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  color: var(--text);
+}
+.hero-sub{
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Tabs */
+[data-testid="stTabs"] button[role="tab"]{
+  border-radius: 12px;
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  color: var(--muted);
+  background: rgba(255,255,255,0.02);
+}
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"]{
+  color: var(--text);
+  border-color: var(--stroke);
+  background: rgba(94,200,255,0.10);
+}
+
+/* Inputs & buttons */
+.stButton > button, .stDownloadButton > button{
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: linear-gradient(180deg, rgba(94,200,255,0.24), rgba(94,200,255,0.10));
+  color: var(--text);
+}
+.stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] > div, .stDateInput input{
+  border-radius: 10px !important;
+  border-color: var(--stroke) !important;
+  background: rgba(255,255,255,0.02) !important;
+  color: var(--text) !important;
+}
+
+/* Floating Quick KPIs expander */
 div.kpi-fixed-expander {
   position: fixed !important;
   right: 16px;
@@ -1917,55 +2003,29 @@ div.kpi-fixed-expander {
   z-index: 9999;
 }
 div.kpi-fixed-expander details {
-  background: rgba(20, 22, 26, 0.96);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--card-strong);
+  border: 1px solid var(--stroke);
   border-radius: 14px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 34px rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
 }
-div.kpi-fixed-expander summary {
-  padding: 10px 12px !important;
-}
-      /* Fixed KPI panel container */
-      .kpi-fixed {
-        position: fixed;
-        left: 16px;
-        bottom: 16px;
-        width: 360px;
-        z-index: 9999;
-      }
-      /* Make it look like your dark theme cards */
-      .kpi-card {
-        background: rgba(20, 22, 26, 0.96);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 14px;
-        padding: 12px 12px 10px 12px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-        backdrop-filter: blur(6px);
-      }
-      /* Reduce padding inside widgets so it fits */
-      .kpi-card .block-container { padding: 0 !important; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+div.kpi-fixed-expander summary { padding: 10px 12px !important; }
 
-st.markdown("""
-<style>
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 4px; }
 .kpi-card {
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid var(--stroke);
   border-radius: 14px;
   padding: 14px 14px 12px 14px;
-  background: rgba(255,255,255,0.03);
+  background: var(--card);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
-.kpi-title { font-size: 12px; opacity: 0.8; margin-bottom: 8px; }
-.kpi-value { font-size: 28px; font-weight: 700; line-height: 1.1; margin-bottom: 6px; }
-.kpi-sub { font-size: 12px; opacity: 0.75; }
-.good { color: #39d98a; }
-.bad  { color: #ff6b6b; }
-.neutral { color: rgba(255,255,255,0.92); }
-            .kpi-title-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.kpi-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight:600; }
+.kpi-value { font-size: 28px; font-weight: 800; line-height: 1.1; margin-bottom: 6px; letter-spacing: -0.01em; }
+.kpi-sub { font-size: 12px; color: var(--muted); }
+.good { color: var(--good); }
+.bad  { color: var(--bad); }
+.neutral { color: var(--text); }
+.kpi-title-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .kpi-tip{
   display:inline-flex;
   align-items:center;
@@ -1973,15 +2033,14 @@ st.markdown("""
   width:18px;
   height:18px;
   border-radius:50%;
-  border:1px solid rgba(255,255,255,0.22);
-  color: rgba(255,255,255,0.80);
+  border:1px solid var(--stroke);
+  color: var(--muted);
   font-size:12px;
   cursor: help;
   position: relative;
   flex: 0 0 auto;
 }
-.kpi-tip:hover{ border-color: rgba(255,255,255,0.40); color: rgba(255,255,255,0.95); }
-
+.kpi-tip:hover{ border-color: rgba(255,255,255,0.40); color: var(--text); }
 .kpi-tip[data-tip]:hover:after{
   content: attr(data-tip);
   position:absolute;
@@ -1990,14 +2049,14 @@ st.markdown("""
   bottom: 130%;
   width: 280px;
   max-width: 320px;
-  background: rgba(10,12,16,0.98);
-  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(8,12,18,0.98);
+  border: 1px solid var(--stroke);
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 12px;
   line-height: 1.35;
-  color: rgba(255,255,255,0.92);
-  white-space: pre-wrap;   /* allow line breaks */
+  color: var(--text);
+  white-space: pre-wrap;
   z-index: 9999;
   box-shadow: 0 10px 30px rgba(0,0,0,0.45);
 }
@@ -2009,59 +2068,31 @@ st.markdown("""
   bottom: 118%;
   border-width: 7px;
   border-style: solid;
-  border-color: rgba(10,12,16,0.98) transparent transparent transparent;
-}
-.kpi-title-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.kpi-tip{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,0.22);
-  color: rgba(255,255,255,0.80);
-  font-size:12px;
-  cursor: help;
-  position: relative;
-}
-.kpi-tip:hover{ border-color: rgba(255,255,255,0.40); }
-
-.kpi-tip[data-tip]:hover:after{
-  content: attr(data-tip);
-  position:absolute;
-  left:50%;
-  transform: translateX(-50%);
-  bottom:130%;
-  width:280px;
-  background: rgba(10,12,16,0.98);
-  border:1px solid rgba(255,255,255,0.16);
-  border-radius:10px;
-  padding:10px 12px;
-  font-size:12px;
-  line-height:1.35;
-  color: rgba(255,255,255,0.92);
-  white-space: pre-wrap;
-  z-index:9999;
-  box-shadow:0 10px 30px rgba(0,0,0,0.45);
-}
-.kpi-tip[data-tip]:hover:before{
-  content:"";
-  position:absolute;
-  left:50%;
-  transform: translateX(-50%);
-  bottom:118%;
-  border-width:7px;
-  border-style:solid;
-  border-color: rgba(10,12,16,0.98) transparent transparent transparent;
+  border-color: rgba(8,12,18,0.98) transparent transparent transparent;
 }
 
-</style>
-""", unsafe_allow_html=True)
+@media (max-width: 980px){
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  div.kpi-fixed-expander { width: calc(100vw - 24px); right: 12px; bottom: 12px; }
+}
+@media (max-width: 640px){
+  .hero-title{ font-size: 1.25rem; }
+  .kpi-grid { grid-template-columns: 1fr; }
+}
+    </style>
+""",
+    unsafe_allow_html=True
+)
 
-
-st.title("E-commerce Dashboard")
-st.caption("Drop Orders CSV + Campaigns CSV → dashboard updates instantly. Export to PDF or Excel.")
+st.markdown(
+    """
+    <div class="hero-wrap">
+      <div class="hero-title">E-commerce Performance Console</div>
+      <div class="hero-sub">Upload Orders + Campaigns to track profitability, delivery health, and ad efficiency in one place.</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 with st.sidebar:
     st.header("Inputs")
