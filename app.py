@@ -2083,6 +2083,37 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   color: var(--muted);
   background: rgba(9,15,22,0.42);
 }
+.ai-assistant-wrap{
+  border: 1px solid var(--stroke);
+  background: rgba(22,32,48,0.72);
+  border-radius: 16px;
+  padding: 18px;
+  margin: 10px 0 14px 0;
+}
+.ai-assistant-wrap .stButton > button{
+  min-height: 52px;
+  border-radius: 16px;
+  border: 1px solid rgba(110,166,216,0.38);
+  background: linear-gradient(180deg, rgba(39,83,117,0.92), rgba(27,54,78,0.88));
+  color: #eaf2f8;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.ai-assistant-wrap .stButton > button:hover{
+  border-color: rgba(130,191,245,0.55);
+  background: linear-gradient(180deg, rgba(45,95,132,0.96), rgba(31,64,91,0.94));
+}
+.ai-assistant-wrap .stTextArea textarea{
+  min-height: 140px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(140,168,196,0.26) !important;
+  background: rgba(15,22,36,0.86) !important;
+}
+.ai-assistant-wrap [data-testid="stExpander"]{
+  border: 1px solid rgba(140,168,196,0.24);
+  border-radius: 12px;
+  background: rgba(8,14,26,0.28);
+}
 .ai-output-wrap{
   white-space: pre-wrap;
   line-height: 1.65;
@@ -2675,20 +2706,16 @@ def render_ai_summary(
     if "ai_qa_history" not in st.session_state:
         st.session_state.ai_qa_history = []
 
-    st.markdown(
-        f"""
-        <div class="ai-card">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div>
-              <div class="ai-card-title">AI Assistant</div>
-              <div class="ai-card-sub">Ask questions about your campaigns, products, trends, and recommendations.</div>
-            </div>
-            <span class="ai-status-pill">{'Connected' if api_ready else 'Disconnected'}</span>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown("<div class='ai-assistant-wrap'>", unsafe_allow_html=True)
+    head1, head2 = st.columns([4, 1])
+    with head1:
+        st.markdown("### AI Assistant")
+        st.caption("Ask questions about your campaigns, products, trends, and recommendations.")
+    with head2:
+        st.markdown(
+            f"<div style='text-align:right; padding-top:6px'><span class='ai-status-pill'>{'Connected' if api_ready else 'Disconnected'}</span></div>",
+            unsafe_allow_html=True,
+        )
 
     st.markdown("<div class='ai-divider'></div>", unsafe_allow_html=True)
     act1, act2 = st.columns([1, 3])
@@ -3105,12 +3132,13 @@ def render_ai_summary(
     else:
         st.markdown("<div class='ai-empty'>Your AI-generated insights will appear here</div>", unsafe_allow_html=True)
 
-    tools_col, empty_col = st.columns([1, 6])
+    tools_col, _ = st.columns([1, 6])
     with tools_col:
         clear_output = st.button("Clear", key="btn_ai_clear", use_container_width=True)
     if clear_output:
         st.session_state.ai_last_output = ""
         st.session_state.ai_qa_history = []
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 
