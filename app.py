@@ -2004,6 +2004,85 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   color: var(--muted);
   font-size: 0.92rem;
 }
+.ai-banner{
+  border: 1px solid rgba(72,139,255,0.35);
+  background: rgba(40,86,170,0.20);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #c8defd;
+  margin: 4px 0 14px 0;
+}
+.ai-card{
+  border: 1px solid var(--stroke);
+  background: rgba(22,32,48,0.72);
+  border-radius: 16px;
+  padding: 18px 18px 14px 18px;
+  margin: 10px 0 14px 0;
+}
+.ai-card-title{
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.ai-card-sub{
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-bottom: 14px;
+}
+.ai-grid-4{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 14px;
+}
+.ai-grid-3{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 14px;
+}
+.ai-divider{
+  height:1px;
+  background: rgba(255,255,255,0.08);
+  margin: 14px 0;
+}
+.ai-k-label{
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+.ai-k-value{
+  color: var(--text);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.ai-k-sub{
+  color: rgba(180,198,215,0.72);
+  font-size: 0.82rem;
+  margin-top: 3px;
+}
+.ai-delta-pos{ color:#1fe58f; font-weight:700; }
+.ai-delta-neg{ color:#ff7f8e; font-weight:700; }
+.ai-status-pill{
+  display:inline-block;
+  border-radius: 999px;
+  border: 1px solid rgba(34,197,94,0.35);
+  background: rgba(18,95,61,0.38);
+  color: #2df0a0;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.ai-empty{
+  border: 1px dashed rgba(180,198,215,0.22);
+  border-radius: 12px;
+  min-height: 120px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color: var(--muted);
+  background: rgba(9,15,22,0.42);
+}
 .ai-output-wrap{
   white-space: pre-wrap;
   line-height: 1.65;
@@ -2092,11 +2171,14 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
 
 @media (max-width: 980px){
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .ai-grid-4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .ai-grid-3 { grid-template-columns: repeat(2, minmax(0,1fr)); }
   div.kpi-fixed-expander { width: calc(100vw - 24px); right: 12px; bottom: 12px; }
 }
 @media (max-width: 640px){
   .hero-title{ font-size: 1.25rem; }
   .kpi-grid { grid-template-columns: 1fr; }
+  .ai-grid-4, .ai-grid-3 { grid-template-columns: 1fr; }
 }
     </style>
 """,
@@ -2445,9 +2527,10 @@ def render_ai_summary(
     """Rule-based 'AI' summary (no external API)."""
     st.markdown("## AI Summary")
     if last_saved:
-        st.caption(f"Snapshot: {last_saved} | Currency: {currency}")
-    else:
-        st.caption(f"Currency: {currency}")
+        st.markdown(
+            f"<div class='ai-banner'>Showing last saved snapshot from GitHub • {last_saved}</div>",
+            unsafe_allow_html=True,
+        )
 
     # --- Overall snapshot (all-time, from Orders+Campaigns KPIs) ---
     spend_usd = float(kpis.get("spend_usd", 0.0))
@@ -2461,19 +2544,34 @@ def render_ai_summary(
     deliv_rate = float(kpis.get("delivery_rate", 0.0))
     ret_rate = float(kpis.get("return_rate", 0.0))
 
-    st.markdown("#### Store Overview")
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Total spend", money_ccy(kpis_disp.get("spend_disp", 0.0), currency))
-    c2.metric("Delivered profit", money_ccy(kpis_disp.get("delivered_profit_disp", 0.0), currency))
-    c3.metric("Net after ads", money_ccy(net_usd * fx, "IQD") if currency == "IQD" else money_ccy(net_usd, "USD"))
-    c4.metric("Delivered ROAS", "N/A" if roas_real is None else f"{roas_real:.2f}")
+    spend_total = money_ccy(kpis_disp.get("spend_disp", 0.0), currency)
+    delivered_total = money_ccy(kpis_disp.get("delivered_profit_disp", 0.0), currency)
+    net_total = money_ccy(net_usd * fx, "IQD") if currency == "IQD" else money_ccy(net_usd, "USD")
+    roas_total = "N/A" if roas_real is None else f"{roas_real:.2f}"
+    snapshot_txt = last_saved if last_saved else "Live session"
 
-    h1, h2, h3 = st.columns(3)
-    h1.metric("Confirmation rate", f"{conf_rate:.1%}")
-    h2.metric("Delivery rate", f"{deliv_rate:.1%}")
-    h3.metric("Return rate", f"{ret_rate:.1%}")
+    st.markdown(
+        f"""
+        <div class="ai-card">
+          <div class="ai-card-title">Store Overview</div>
+          <div class="ai-card-sub">Snapshot: {snapshot_txt} | Currency: {currency}</div>
+          <div class="ai-grid-4">
+            <div><div class="ai-k-label">Total spend</div><div class="ai-k-value">{spend_total}</div><div class="ai-k-sub">Total ad investment</div></div>
+            <div><div class="ai-k-label">Delivered profit</div><div class="ai-k-value">{delivered_total}</div><div class="ai-k-sub">Gross profit</div></div>
+            <div><div class="ai-k-label">Net after ads</div><div class="ai-k-value">{net_total}</div><div class="ai-k-sub">Net profit after ad costs</div></div>
+            <div><div class="ai-k-label">Delivered ROAS</div><div class="ai-k-value">{roas_total}</div><div class="ai-k-sub">Return on ad spend</div></div>
+          </div>
+          <div class="ai-divider"></div>
+          <div class="ai-grid-3">
+            <div><div class="ai-k-label">Confirmation rate</div><div class="ai-k-value">{conf_rate:.1%}</div><div class="ai-k-sub">Orders confirmed</div></div>
+            <div><div class="ai-k-label">Delivery rate</div><div class="ai-k-value">{deliv_rate:.1%}</div><div class="ai-k-sub">Successfully delivered</div></div>
+            <div><div class="ai-k-label">Return rate</div><div class="ai-k-value">{ret_rate:.1%}</div><div class="ai-k-sub">Orders returned</div></div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.markdown("#### Analysis Window")
     if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
         st.info("Upload **Daily Orders (Taager) XLSX** to enable analysis-day summary + recommendations.")
         return
@@ -2488,7 +2586,7 @@ def render_ai_summary(
         st.info("No valid dates found in Daily Orders.")
         return
 
-    cfg_col, info_col = st.columns([1, 2])
+    cfg_col, _ = st.columns([1, 5])
     with cfg_col:
         include_latest_partial = st.checkbox(
             "Use latest day",
@@ -2511,16 +2609,6 @@ def render_ai_summary(
             st.caption("Only one day exists in the file, so the app is using that day.")
 
     compare_day = (analysis_day - pd.Timedelta(days=1)).normalize()
-    with info_col:
-        st.markdown(
-            f"""
-            <div class="ai-panel">
-              <p><strong>Analysis day:</strong> {analysis_day.date()} ({analysis_mode})</p>
-              <p><strong>Comparison day:</strong> {compare_day.date()}</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
     # Keep variable names used below; here "today" means selected analysis day.
     today = analysis_day
@@ -2550,12 +2638,36 @@ def render_ai_summary(
 
     day_label = str(today.date())
     prev_label = str(yesterday.date())
-    st.markdown("#### Day Comparison")
-    tc1, tc2, tc3, tc4 = st.columns(4)
-    tc1.metric("Orders", f"{orders_t:,}", f"{orders_t - orders_y:+,} vs {prev_label}")
-    tc2.metric("Profit", money_ccy(profit_t, currency), money_ccy(profit_t - profit_y, currency))
-    tc3.metric("Ad spend", money_ccy(spend_t, currency), money_ccy(spend_t - spend_y, currency))
-    tc4.metric("Net", money_ccy(net_t, currency), money_ccy(net_t - net_y, currency))
+
+    def _delta_class(v: float) -> str:
+        return "ai-delta-pos" if v >= 0 else "ai-delta-neg"
+
+    def _signed_num(v: int) -> str:
+        return f"{v:+,}"
+
+    def _signed_money(v: float) -> str:
+        return f"+{money_ccy(v, currency)}" if v >= 0 else money_ccy(v, currency)
+
+    orders_delta = orders_t - orders_y
+    profit_delta = profit_t - profit_y
+    spend_delta = spend_t - spend_y
+    net_delta = net_t - net_y
+
+    st.markdown(
+        f"""
+        <div class="ai-card">
+          <div class="ai-card-title">Day Comparison</div>
+          <div class="ai-card-sub">Analysis day: {day_label} ({analysis_mode}) | Comparison day: {prev_label}</div>
+          <div class="ai-grid-4">
+            <div><div class="ai-k-label">Orders</div><div class="ai-k-value">{orders_t:,}</div><div class="{_delta_class(orders_delta)}">{_signed_num(orders_delta)} vs {prev_label}</div></div>
+            <div><div class="ai-k-label">Profit</div><div class="ai-k-value">{money_ccy(profit_t, currency)}</div><div class="{_delta_class(profit_delta)}">{_signed_money(profit_delta)}</div></div>
+            <div><div class="ai-k-label">Ad spend</div><div class="ai-k-value">{money_ccy(spend_t, currency)}</div><div class="{_delta_class(spend_delta)}">{_signed_money(spend_delta)}</div></div>
+            <div><div class="ai-k-label">Net</div><div class="ai-k-value">{money_ccy(net_t, currency)}</div><div class="{_delta_class(net_delta)}">{_signed_money(net_delta)}</div></div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Optional status breakdown
     excluded = {
@@ -2572,8 +2684,7 @@ def render_ai_summary(
                 use_container_width=True
             )
 
-    
-    st.markdown("#### Assistant Workspace")
+    st.markdown("### AI Assistant")
     api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
 
     if "ai_last_output" not in st.session_state:
@@ -2584,7 +2695,17 @@ def render_ai_summary(
         st.session_state.ai_qa_history = []
 
     st.markdown(
-        f"<div class='ai-panel'><p>API status: {'Connected' if api_ready else 'Missing OPENAI_API_KEY'}</p></div>",
+        f"""
+        <div class="ai-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div>
+              <div class="ai-card-title">AI Assistant</div>
+              <div class="ai-card-sub">Ask questions about your campaigns, products, trends, and recommendations.</div>
+            </div>
+            <span class="ai-status-pill">{'Connected' if api_ready else 'Disconnected'}</span>
+          </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
@@ -2596,50 +2717,52 @@ def render_ai_summary(
         "Protect net profit": "protect net profit while maintaining growth",
     }
 
-    gen = False
-    ask_ai = False
-    ai_question = ""
-    user_focus = ""
-    tab_brief, tab_qa = st.tabs(["Generate Brief", "Ask Question"])
+    ui1, ui2 = st.columns([3, 2])
+    with ui1:
+        gen = st.button(
+            "Generate General Analysis",
+            type="primary",
+            key="btn_gen_ai",
+            disabled=not api_ready,
+        )
+    with ui2:
+        preset_label = st.selectbox("Focus preset", list(focus_presets.keys()), index=0, key="ai_focus_preset")
+    focus_text = st.text_input(
+        "Custom focus (optional)",
+        key="ai_focus",
+        placeholder="Example: prioritize campaigns with ROAS > 1.6 and high delivery rate",
+    ).strip()
+    selected_preset = focus_presets.get(preset_label, "")
+    user_focus = focus_text if focus_text else selected_preset
 
-    with tab_brief:
-        ui1, ui2 = st.columns([3, 1])
-        with ui1:
-            preset_label = st.selectbox("Focus preset", list(focus_presets.keys()), index=0, key="ai_focus_preset")
-            focus_text = st.text_input(
-                "Custom focus (optional)",
-                key="ai_focus",
-                placeholder="Example: prioritize campaigns with ROAS > 1.6 and high delivery rate",
-            ).strip()
-            selected_preset = focus_presets.get(preset_label, "")
-            user_focus = focus_text if focus_text else selected_preset
-        with ui2:
-            st.caption("Action")
-            gen = st.button(
-                "Generate brief",
-                type="primary",
-                key="btn_gen_ai",
-                use_container_width=True,
-                disabled=not api_ready,
-            )
+    ai_question = st.text_area(
+        "Ask anything",
+        key="ai_free_question",
+        height=120,
+        label_visibility="collapsed",
+        placeholder="Ask anything about your campaigns, products, trends, or get recommendations...",
+    ).strip()
 
-    with tab_qa:
-        ask_q_col1, ask_q_col2 = st.columns([4, 1])
-        with ask_q_col1:
-            ai_question = st.text_area(
-                "Your question",
-                key="ai_free_question",
-                height=130,
-                placeholder="Ask anything about performance, products, ads, trends, or risks.",
-            ).strip()
-        with ask_q_col2:
-            st.caption("Action")
-            ask_ai = st.button(
-                "Ask AI",
-                key="btn_ask_ai",
-                use_container_width=True,
-                disabled=not api_ready,
-            )
+    def _set_ai_question(q: str):
+        st.session_state.ai_free_question = q
+
+    chips = [
+        "What are my top performing campaigns?",
+        "Analyze delivery issues",
+        "Which products should I scale?",
+        "Compare this week vs last week",
+    ]
+    chip_cols = st.columns([1, 1, 1, 1, 0.7])
+    for i, q in enumerate(chips):
+        with chip_cols[i]:
+            st.button(q, key=f"ai_chip_{i}", on_click=_set_ai_question, args=(q,), use_container_width=True)
+    with chip_cols[4]:
+        ask_ai = st.button(
+            "Ask AI",
+            key="btn_ask_ai",
+            use_container_width=True,
+            disabled=not api_ready,
+        )
 
     if not api_ready:
         st.info("Add `OPENAI_API_KEY` in Streamlit secrets to enable AI brief generation.")
@@ -2980,26 +3103,26 @@ def render_ai_summary(
                 )
                 st.session_state.ai_qa_history = st.session_state.ai_qa_history[-10:]
 
-    st.markdown("#### Outputs")
-    out_col, hist_col = st.columns([2, 1])
-    with out_col:
-        st.markdown("**Latest brief**")
-        if st.session_state.ai_last_output:
-            if st.session_state.ai_last_run_at:
-                st.caption(f"Generated at {st.session_state.ai_last_run_at}")
-            render_ai_text(st.session_state.ai_last_output)
-        else:
-            st.caption("No brief generated yet.")
+    st.markdown("#### AI Output")
+    if st.session_state.ai_last_output:
+        if st.session_state.ai_last_run_at:
+            st.caption(f"Generated at {st.session_state.ai_last_run_at}")
+        render_ai_text(st.session_state.ai_last_output)
+    elif st.session_state.ai_qa_history:
+        latest = st.session_state.ai_qa_history[-1]
+        st.caption(f"Latest answer • {latest['at']}")
+        st.markdown(f"**Q:** {latest['q']}")
+        render_ai_text(latest["a"])
+    else:
+        st.markdown("<div class='ai-empty'>Your AI-generated insights will appear here</div>", unsafe_allow_html=True)
 
-    with hist_col:
-        st.markdown("**Recent questions**")
-        if st.session_state.ai_qa_history:
+    if st.session_state.ai_qa_history:
+        with st.expander("Recent Q&A", expanded=False):
             for item in reversed(st.session_state.ai_qa_history):
-                with st.expander(f"{item['at']} • {item['q'][:55]}", expanded=False):
-                    st.markdown(f"**Q:** {item['q']}")
-                    render_ai_text(item["a"])
-        else:
-            st.caption("No questions yet.")
+                st.markdown(f"**{item['at']}**")
+                st.markdown(f"Q: {item['q']}")
+                render_ai_text(item["a"])
+                st.divider()
     
     st.markdown("#### Operational Guidance")
     bullets = []
@@ -3247,11 +3370,6 @@ with tab_dashboard:
 
 
 with tab_ai:
-    if data_source == "github" and snap is not None and snap.get("generated_at"):
-        st.info(f"Showing last saved snapshot from GitHub • {snap['generated_at']}")
-    elif data_source == "uploads":
-        st.success("Showing uploaded files (not yet saved).")
-
     render_ai_summary(
         kpis=kpis,
         kpis_disp=kpis_disp,
