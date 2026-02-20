@@ -2341,6 +2341,9 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
         "## Products (winners & losers)\n"
         "- 3 winners: product, why (numbers), and what action to take\n"
         "- 3 losers: product, what is wrong (numbers), and what action to take\n"
+        "- For each product, compare recent performance (`*_7d`) versus lifetime (`*_lifetime`) from first campaign day to analysis day.\n"
+        "- Treat new launches carefully using `campaign_age_days`, `is_new_launch`, and `is_new_no_delivery_expected`.\n"
+        "- If `is_new_no_delivery_expected` is true, do NOT classify that product as a loser only due to low/zero deliveries.\n"
         "Use `products_top` only. If it is empty, say product-level data is missing.\n\n"
         "## Ads (scale / hold / cut)\n"
         "- Scale: up to 3 campaigns with reasons\n"
@@ -2357,6 +2360,7 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
         "- `yesterday` means the day before that selected analysis day.\n"
         "- Always reference at least one metric when making a recommendation.\n"
         "- Treat allocated ad spend at the product level as an ESTIMATE based on `spend_allocation_method`.\n"
+        "- Respect product maturity: avoid harsh judgments for products with low `campaign_age_days`.\n"
         "- If data is missing, say exactly what's missing and how to fix it.\n"
         "- Do not mention that you are an AI model.\n\n"
         f"{focus_line}\n\n"
@@ -2610,112 +2614,220 @@ def render_ai_summary(
                 "mtd": _window_sum(mtd_start, today),
             }
 
-            # ---- Product leaderboard (last 7d) ----
+            # ---- Product leaderboard (7d + lifetime since first campaign day) ----
             products_top = []
             sku_to_name = build_sku_to_name_map(orders_df) if orders_df is not None else {}
+            NEW_LAUNCH_DAYS = 7
 
-            # daily orders window
-            d7 = ddf[(ddf["day"] >= last_7_start) & (ddf["day"] <= today)].copy()
+            has_campaigns = campaigns_df is not None and not getattr(campaigns_df, "empty", True)
+            sku_match_rate = None
+            first_campaign_day_by_sku = pd.Series(dtype="datetime64[ns]")
+            last_campaign_day_by_sku = pd.Series(dtype="datetime64[ns]")
+            c_for_sku = pd.DataFrame(columns=["day", "sku", "spend_usd"])
 
-            # exclude "Cancelled by You" from order counts and SKU allocation base
-            if "Status" in d7.columns:
-                _s = d7["Status"].astype(str).str.strip().str.lower()
-                d7 = d7[~_s.str.contains("cancelled by you", na=False)].copy()
+            if has_campaigns and "Reporting starts" in campaigns_df.columns:
+                c_all = campaigns_df.copy()
+                c_all["Reporting starts"] = pd.to_datetime(c_all["Reporting starts"], errors="coerce")
+                c_all = c_all.dropna(subset=["Reporting starts"])
+                c_all["day"] = c_all["Reporting starts"].dt.floor("D")
+                c_all = c_all[c_all["day"] <= today].copy()
 
-            id_col = get_daily_order_id_col(d7)
-            if id_col and not d7.empty:
-                total_orders_by_day = d7.groupby("day")[id_col].nunique()
-            else:
-                total_orders_by_day = pd.Series(dtype=float)
+                name_col_all = "Campaign name" if "Campaign name" in c_all.columns else ("Campaign" if "Campaign" in c_all.columns else None)
+                spend_col_all = "Amount spent (USD)" if "Amount spent (USD)" in c_all.columns else None
 
-            lines = _explode_order_lines(d7) if not d7.empty else pd.DataFrame()
-            if lines is not None and not lines.empty and id_col:
-                # Delivered-only profit (estimated allocation by qty)
-                st_lower = lines["Status"].astype(str).str.lower()
-                delivered_mask = st_lower.str.contains("delivered", na=False)
+                if name_col_all and spend_col_all:
+                    c_all[spend_col_all] = pd.to_numeric(c_all[spend_col_all], errors="coerce").fillna(0.0)
+                    extracted_all = c_all[name_col_all].apply(extract_sku_from_campaign_name)
+                    sku_match_rate = float((extracted_all.notna().mean() * 100.0)) if len(extracted_all) else None
 
-                profit_iqd_by_sku = (
-                    lines[delivered_mask]
-                    .groupby("sku")["profit_iqd_alloc"]
-                    .sum()
-                    .sort_values(ascending=False)
+                    c_all["sku"] = extracted_all
+                    c_for_sku = (
+                        c_all.dropna(subset=["sku"])[["day", "sku", spend_col_all]]
+                        .rename(columns={spend_col_all: "spend_usd"})
+                        .copy()
+                    )
+                    c_for_sku["sku"] = c_for_sku["sku"].astype(str).str.strip()
+                    c_for_sku = c_for_sku[c_for_sku["sku"] != ""]
+
+                    if not c_for_sku.empty:
+                        first_campaign_day_by_sku = c_for_sku.groupby("sku")["day"].min()
+                        last_campaign_day_by_sku = c_for_sku.groupby("sku")["day"].max()
+
+            analysis_start = (
+                pd.Timestamp(first_campaign_day_by_sku.min()).normalize()
+                if not first_campaign_day_by_sku.empty
+                else last_7_start
+            )
+
+            def _clean_orders_slice(df_slice: pd.DataFrame) -> pd.DataFrame:
+                if df_slice is None or df_slice.empty:
+                    return pd.DataFrame()
+                out = df_slice.copy()
+                if "Status" in out.columns:
+                    _status = out["Status"].astype(str).str.strip().str.lower()
+                    out = out[~_status.str.contains("cancelled by you", na=False)].copy()
+                return out
+
+            d7 = _clean_orders_slice(ddf[(ddf["day"] >= last_7_start) & (ddf["day"] <= today)].copy())
+            d_life = _clean_orders_slice(ddf[(ddf["day"] >= analysis_start) & (ddf["day"] <= today)].copy())
+
+            lines_7 = _explode_order_lines(d7) if not d7.empty else pd.DataFrame()
+            lines_life = _explode_order_lines(d_life) if not d_life.empty else pd.DataFrame()
+
+            def _normalize_lines(lines_df: pd.DataFrame) -> pd.DataFrame:
+                if lines_df is None or lines_df.empty:
+                    return pd.DataFrame()
+                out = lines_df.copy()
+                if "day" in out.columns:
+                    out["day"] = pd.to_datetime(out["day"], errors="coerce").dt.floor("D")
+                    out = out.dropna(subset=["day"])
+                out["sku"] = out["sku"].astype(str).str.strip()
+                out = out[out["sku"] != ""]
+                return out
+
+            lines_7 = _normalize_lines(lines_7)
+            lines_life = _normalize_lines(lines_life)
+
+            spend_usd_7d_by_day = pd.Series(dtype=float)
+            spend_usd_life_by_day = pd.Series(dtype=float)
+            spend_usd_lifetime_by_sku = pd.Series(dtype=float)
+            if not c_for_sku.empty:
+                spend_usd_7d_by_day = (
+                    c_for_sku[(c_for_sku["day"] >= last_7_start) & (c_for_sku["day"] <= today)]
+                    .groupby("day")["spend_usd"].sum()
                 )
+                spend_usd_life_by_day = (
+                    c_for_sku[(c_for_sku["day"] >= analysis_start) & (c_for_sku["day"] <= today)]
+                    .groupby("day")["spend_usd"].sum()
+                )
+                spend_usd_lifetime_by_sku = c_for_sku.groupby("sku")["spend_usd"].sum()
 
-                # Allocate spend to SKU by share of orders per day (estimate)
-                spend_usd_by_day = pd.Series(dtype=float)
-                if campaigns_df is not None and not getattr(campaigns_df, "empty", True) and "Reporting starts" in campaigns_df.columns:
-                    c = campaigns_df.copy()
-                    c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
-                    c = c.dropna(subset=["Reporting starts"])
-                    c["day"] = c["Reporting starts"].dt.floor("D")
-                    c = c[(c["day"] >= last_7_start) & (c["day"] <= today)].copy()
-                    if "Amount spent (USD)" in c.columns:
-                        c["Amount spent (USD)"] = pd.to_numeric(c["Amount spent (USD)"], errors="coerce").fillna(0)
-                        spend_usd_by_day = c.groupby("day")["Amount spent (USD)"].sum()
+            def _sku_metrics(lines_df: pd.DataFrame, spend_by_day: pd.Series) -> dict:
+                if lines_df is None or lines_df.empty:
+                    return {
+                        "profit_iqd_by_sku": pd.Series(dtype=float),
+                        "spend_usd_by_sku": pd.Series(dtype=float),
+                        "orders_by_sku": pd.Series(dtype=float),
+                        "delivered_orders_by_sku": pd.Series(dtype=float),
+                    }
 
-                # sku order counts per day (distinct orders containing sku)
+                if "Status" in lines_df.columns:
+                    st_lower = lines_df["Status"].astype(str).str.lower()
+                    delivered_mask = st_lower.str.contains("delivered", na=False)
+                else:
+                    delivered_mask = pd.Series(False, index=lines_df.index)
+
+                if "profit_iqd_alloc" in lines_df.columns:
+                    profit_iqd_by_sku = lines_df[delivered_mask].groupby("sku")["profit_iqd_alloc"].sum()
+                else:
+                    profit_iqd_by_sku = pd.Series(dtype=float)
+
+                orders_by_sku = lines_df.groupby("sku")["order_id"].nunique()
+                delivered_orders_by_sku = lines_df[delivered_mask].groupby("sku")["order_id"].nunique()
+
+                total_orders_by_day = lines_df.groupby("day")["order_id"].nunique()
                 sku_orders_by_day = (
-                    lines.groupby(["day", "sku"])["order_id"]
+                    lines_df.groupby(["day", "sku"])["order_id"]
                     .nunique()
                     .rename("sku_orders")
                     .reset_index()
                 )
-
-                # merge total orders and spend
                 sku_orders_by_day["total_orders"] = sku_orders_by_day["day"].map(total_orders_by_day).fillna(0)
-                sku_orders_by_day["spend_usd_day"] = sku_orders_by_day["day"].map(spend_usd_by_day).fillna(0.0)
+                sku_orders_by_day["spend_usd_day"] = sku_orders_by_day["day"].map(spend_by_day).fillna(0.0)
                 sku_orders_by_day["spend_usd_alloc"] = np.where(
                     sku_orders_by_day["total_orders"] > 0,
                     sku_orders_by_day["spend_usd_day"] * (sku_orders_by_day["sku_orders"] / sku_orders_by_day["total_orders"]),
-                    0.0
+                    0.0,
                 )
                 spend_usd_by_sku = sku_orders_by_day.groupby("sku")["spend_usd_alloc"].sum()
 
-                # Delivered orders per SKU (distinct)
-                delivered_orders_by_sku = (
-                    lines[delivered_mask]
-                    .groupby("sku")["order_id"]
-                    .nunique()
-                )
+                return {
+                    "profit_iqd_by_sku": profit_iqd_by_sku,
+                    "spend_usd_by_sku": spend_usd_by_sku,
+                    "orders_by_sku": orders_by_sku,
+                    "delivered_orders_by_sku": delivered_orders_by_sku,
+                }
 
-                # Total orders per SKU (distinct)
-                orders_by_sku = lines.groupby("sku")["order_id"].nunique()
+            m7 = _sku_metrics(lines_7, spend_usd_7d_by_day)
+            ml = _sku_metrics(lines_life, spend_usd_life_by_day)
 
-                # Compose top list (limit 10) sorted by net (profit - spend)
-                all_skus = set(orders_by_sku.index) | set(profit_iqd_by_sku.index) | set(spend_usd_by_sku.index)
-                rows = []
-                for sku in all_skus:
-                    profit_iqd = float(profit_iqd_by_sku.get(sku, 0.0))
-                    spend_usd = float(spend_usd_by_sku.get(sku, 0.0))
-                    # display currency
-                    if currency == "IQD":
-                        profit_disp = profit_iqd
-                        spend_disp = spend_usd * fx
-                    else:
-                        profit_disp = iqd_to_usd(profit_iqd, fx)
-                        spend_disp = spend_usd
-                    net_disp = profit_disp - spend_disp
-                    orders_cnt = int(orders_by_sku.get(sku, 0) or 0)
-                    delivered_cnt = int(delivered_orders_by_sku.get(sku, 0) or 0)
-                    delivery_rate_sku = (delivered_cnt / orders_cnt) if orders_cnt else None
-                    rows.append({
-                        "sku": sku,
-                        "name": sku_to_name.get(sku) or None,
-                        "orders": orders_cnt,
-                        "delivered_orders": delivered_cnt,
-                        "delivery_rate": delivery_rate_sku,
-                        "profit": profit_disp,
-                        "spend": spend_disp,
-                        "net": net_disp,
-                        "net_per_delivered": (net_disp / delivered_cnt) if delivered_cnt else None,
-                    })
-                rows = sorted(rows, key=lambda r: (r.get("net", 0.0) if r.get("net") is not None else 0.0), reverse=True)
-                products_top = rows[:10]
+            all_skus = (
+                set(m7["orders_by_sku"].index)
+                | set(m7["spend_usd_by_sku"].index)
+                | set(m7["profit_iqd_by_sku"].index)
+                | set(ml["orders_by_sku"].index)
+                | set(ml["spend_usd_by_sku"].index)
+                | set(ml["profit_iqd_by_sku"].index)
+                | set(first_campaign_day_by_sku.index)
+            )
+
+            rows = []
+            for sku in all_skus:
+                profit_iqd_7d = float(m7["profit_iqd_by_sku"].get(sku, 0.0))
+                spend_usd_7d = float(m7["spend_usd_by_sku"].get(sku, 0.0))
+                orders_7d = int(m7["orders_by_sku"].get(sku, 0) or 0)
+                delivered_7d = int(m7["delivered_orders_by_sku"].get(sku, 0) or 0)
+
+                profit_iqd_lifetime = float(ml["profit_iqd_by_sku"].get(sku, 0.0))
+                spend_usd_lifetime = float(ml["spend_usd_by_sku"].get(sku, 0.0))
+                orders_lifetime = int(ml["orders_by_sku"].get(sku, 0) or 0)
+                delivered_lifetime = int(ml["delivered_orders_by_sku"].get(sku, 0) or 0)
+
+                if currency == "IQD":
+                    profit_7d = profit_iqd_7d
+                    spend_7d = spend_usd_7d * fx
+                    profit_lifetime = profit_iqd_lifetime
+                    spend_lifetime = spend_usd_lifetime * fx
+                else:
+                    profit_7d = iqd_to_usd(profit_iqd_7d, fx)
+                    spend_7d = spend_usd_7d
+                    profit_lifetime = iqd_to_usd(profit_iqd_lifetime, fx)
+                    spend_lifetime = spend_usd_lifetime
+
+                net_7d = profit_7d - spend_7d
+                net_lifetime = profit_lifetime - spend_lifetime
+
+                first_day = first_campaign_day_by_sku.get(sku, pd.NaT)
+                last_day = last_campaign_day_by_sku.get(sku, pd.NaT)
+                age_days = None
+                if pd.notna(first_day):
+                    age_days = max(1, int((today - pd.Timestamp(first_day).normalize()).days) + 1)
+
+                is_new_launch = bool(age_days is not None and age_days <= NEW_LAUNCH_DAYS)
+                is_new_no_delivery_expected = bool(is_new_launch and delivered_lifetime == 0 and orders_lifetime > 0)
+
+                rows.append({
+                    "sku": sku,
+                    "name": sku_to_name.get(sku) or None,
+                    "orders_7d": orders_7d,
+                    "delivered_orders_7d": delivered_7d,
+                    "delivery_rate_7d": (delivered_7d / orders_7d) if orders_7d else None,
+                    "profit_7d": profit_7d,
+                    "spend_7d": spend_7d,
+                    "net_7d": net_7d,
+                    "orders_lifetime": orders_lifetime,
+                    "delivered_orders_lifetime": delivered_lifetime,
+                    "delivery_rate_lifetime": (delivered_lifetime / orders_lifetime) if orders_lifetime else None,
+                    "profit_lifetime": profit_lifetime,
+                    "spend_lifetime": spend_lifetime,
+                    "net_lifetime": net_lifetime,
+                    "campaign_spend_lifetime_usd": float(spend_usd_lifetime_by_sku.get(sku, 0.0)),
+                    "first_campaign_day": str(pd.Timestamp(first_day).date()) if pd.notna(first_day) else None,
+                    "last_campaign_day": str(pd.Timestamp(last_day).date()) if pd.notna(last_day) else None,
+                    "campaign_age_days": age_days,
+                    "is_new_launch": is_new_launch,
+                    "is_new_no_delivery_expected": is_new_no_delivery_expected,
+                    "new_launch_window_days": NEW_LAUNCH_DAYS,
+                    "net_per_delivered_7d": (net_7d / delivered_7d) if delivered_7d else None,
+                    "net_per_delivered_lifetime": (net_lifetime / delivered_lifetime) if delivered_lifetime else None,
+                    "rank_weight": float(spend_usd_7d + 0.35 * spend_usd_lifetime),
+                })
+
+            rows = sorted(rows, key=lambda r: (r.get("rank_weight", 0.0), r.get("orders_7d", 0)), reverse=True)
+            products_top = rows[:20]
 
             # ---- Campaign leaderboard (last 7d) ----
             campaigns_top = []
-            sku_match_rate = None
-            has_campaigns = campaigns_df is not None and not getattr(campaigns_df, "empty", True)
             if has_campaigns and "Reporting starts" in campaigns_df.columns:
                 c = campaigns_df.copy()
                 c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
@@ -2764,7 +2876,8 @@ def render_ai_summary(
                 "has_orders_catalog": orders_df is not None and not getattr(orders_df, "empty", True),
                 "sku_match_rate_pct": sku_match_rate,
                 "notes": [
-                    "Product-level ad spend is allocated as an estimate using order share by day."
+                    "Product-level ad spend is allocated as an estimate using order share by day.",
+                    f"Products with campaign_age_days <= {NEW_LAUNCH_DAYS} are considered new launches.",
                 ],
             }
 
