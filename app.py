@@ -1994,42 +1994,23 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
 /* AI panel */
 .ai-panel{
   border: 1px solid var(--stroke);
-  border-radius: 14px;
-  padding: 14px;
-  background: linear-gradient(165deg, rgba(15,23,34,0.86), rgba(12,20,30,0.70));
-  margin: 6px 0 12px 0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: rgba(12,20,30,0.55);
+  margin: 4px 0 10px 0;
 }
-.ai-panel-head{
-  display:flex;
-  justify-content: space-between;
-  align-items:center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.ai-title{
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -0.01em;
-}
-.ai-sub{
+.ai-panel p{
+  margin: 0;
   color: var(--muted);
-  font-size: 0.88rem;
-}
-.ai-status{
-  border: 1px solid var(--stroke);
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 0.78rem;
-  color: var(--muted);
-  background: rgba(255,255,255,0.02);
+  font-size: 0.92rem;
 }
 .ai-output-wrap{
   white-space: pre-wrap;
   line-height: 1.65;
   border: 1px solid var(--stroke);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 14px;
-  background: rgba(9,15,22,0.58);
+  background: rgba(9,15,22,0.48);
 }
 
 /* Floating Quick KPIs expander */
@@ -2572,7 +2553,7 @@ def render_ai_summary(
             )
 
     
-    st.markdown("### AI Copilot")
+    st.markdown("### AI Assistant")
     api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
 
     if "ai_last_output" not in st.session_state:
@@ -2585,13 +2566,7 @@ def render_ai_summary(
     st.markdown(
         f"""
         <div class="ai-panel">
-          <div class="ai-panel-head">
-            <div>
-              <div class="ai-title">Narrative Performance Brief</div>
-              <div class="ai-sub">Generate an executive summary from current KPI, daily, product, and campaign data.</div>
-            </div>
-            <div class="ai-status">API: {"Connected" if api_ready else "Missing OPENAI_API_KEY"}</div>
-          </div>
+          <p>Use this section to generate a brief or ask any question about your current data snapshot. API status: {"Connected" if api_ready else "Missing OPENAI_API_KEY"}.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -2605,6 +2580,7 @@ def render_ai_summary(
         "Protect net profit": "protect net profit while maintaining growth",
     }
 
+    st.markdown("#### 1) Generate brief")
     ui1, ui2 = st.columns([3, 1])
     with ui1:
         preset_label = st.selectbox("Focus preset", list(focus_presets.keys()), index=0, key="ai_focus_preset")
@@ -2618,7 +2594,7 @@ def render_ai_summary(
     user_focus = focus_text if focus_text else selected_preset
 
     with ui2:
-        st.caption("Generate")
+        st.caption("Action")
         gen = st.button(
             "Generate brief",
             type="primary",
@@ -2627,7 +2603,7 @@ def render_ai_summary(
             disabled=not api_ready,
         )
 
-    st.markdown("#### Ask AI about your data")
+    st.markdown("#### 2) Ask any question")
     ask_q_col1, ask_q_col2 = st.columns([4, 1])
     with ask_q_col1:
         ai_question = st.text_area(
@@ -2637,7 +2613,7 @@ def render_ai_summary(
             placeholder="Example: Which products have negative lifetime net but positive 7-day trend, and what action should I take?",
         ).strip()
     with ask_q_col2:
-        st.caption("Q&A")
+        st.caption("Action")
         ask_ai = st.button(
             "Ask AI",
             key="btn_ask_ai",
@@ -2984,6 +2960,7 @@ def render_ai_summary(
                 )
                 st.session_state.ai_qa_history = st.session_state.ai_qa_history[-10:]
 
+    st.markdown("#### 3) Results")
     if st.session_state.ai_last_output:
         if st.session_state.ai_last_run_at:
             st.caption(f"Latest AI brief generated at {st.session_state.ai_last_run_at}")
@@ -2992,7 +2969,7 @@ def render_ai_summary(
         st.caption("No AI brief generated yet.")
 
     if st.session_state.ai_qa_history:
-        st.markdown("#### Q&A history")
+        st.markdown("#### Recent Q&A")
         for item in reversed(st.session_state.ai_qa_history):
             with st.expander(f"{item['at']} • {item['q'][:90]}", expanded=False):
                 st.markdown(f"**Q:** {item['q']}")
