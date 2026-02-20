@@ -2734,33 +2734,116 @@ def render_ai_summary(
         daily_graph = daily_graph[(daily_graph["day"] >= month_start) & (daily_graph["day"] <= month_end)].copy()
         st.markdown("#### Daily graph")
 
-        def _draw_metric_chart(metric_col: str, metric_title: str):
+        marker_days = pd.DataFrame(
+            {
+                "day": [today, yesterday],
+                "label": ["Analysis day", "Comparison day"],
+            }
+        )
+        marker_days["day"] = pd.to_datetime(marker_days["day"], errors="coerce")
+        marker_days = marker_days[
+            (marker_days["day"] >= month_start) & (marker_days["day"] <= month_end)
+        ].copy()
+
+        def _draw_metric_chart(metric_col: str, metric_title: str, color_hex: str, value_fmt: str):
             chart_df = daily_graph[["day", metric_col]].rename(columns={metric_col: "value"}).copy()
             chart_df["value"] = pd.to_numeric(chart_df["value"], errors="coerce").fillna(0.0)
+            if chart_df.empty:
+                st.info(f"No {metric_title.lower()} data for this month.")
+                return
 
-            chart = (
+            last_point = chart_df.sort_values("day").tail(1).copy()
+
+            x_enc = alt.X(
+                "day:T",
+                title=None,
+                axis=alt.Axis(format="%d %b", labelColor="#b8cad9", tickColor="#4d6176", grid=False),
+            )
+            y_enc = alt.Y(
+                "value:Q",
+                title=None,
+                axis=alt.Axis(labelColor="#b8cad9", gridColor="rgba(184,202,217,0.18)", tickCount=4),
+            )
+
+            area = (
                 alt.Chart(chart_df)
-                .mark_line(point=True)
+                .mark_area(color=color_hex, opacity=0.18, interpolate="monotone")
+                .encode(x=x_enc, y=y_enc)
+            )
+            line = (
+                alt.Chart(chart_df)
+                .mark_line(color=color_hex, strokeWidth=3, interpolate="monotone")
                 .encode(
-                    x=alt.X("day:T", title="Day"),
-                    y=alt.Y("value:Q", title=metric_title),
+                    x=x_enc,
+                    y=y_enc,
                     tooltip=[
                         alt.Tooltip("day:T", title="Day"),
-                        alt.Tooltip("value:Q", title=metric_title, format=",.2f"),
+                        alt.Tooltip("value:Q", title=metric_title, format=value_fmt),
                     ],
                 )
-                .properties(height=180)
+            )
+            points = (
+                alt.Chart(chart_df)
+                .mark_circle(color=color_hex, size=42, opacity=0.95)
+                .encode(x=x_enc, y=y_enc)
+            )
+            last_marker = (
+                alt.Chart(last_point)
+                .mark_point(
+                    shape="circle",
+                    filled=True,
+                    color="#eaf2f8",
+                    stroke=color_hex,
+                    strokeWidth=2,
+                    size=120,
+                )
+                .encode(x=x_enc, y=y_enc)
+            )
+            last_label = (
+                alt.Chart(last_point)
+                .mark_text(
+                    align="left",
+                    dx=8,
+                    dy=-8,
+                    fontSize=11,
+                    fontWeight="bold",
+                    color="#eaf2f8",
+                )
+                .encode(
+                    x=x_enc,
+                    y=y_enc,
+                    text=alt.Text("value:Q", format=value_fmt),
+                )
+            )
+
+            layers = [area, line, points, last_marker, last_label]
+            if not marker_days.empty:
+                marker_rules = alt.Chart(marker_days).mark_rule(
+                    color="#88a1b8", opacity=0.6, strokeDash=[5, 4]
+                ).encode(x=x_enc)
+                marker_labels = alt.Chart(marker_days).mark_text(
+                    dy=10, align="left", fontSize=10, color="#9cb4c8"
+                ).encode(x=x_enc, text="label:N", y=alt.value(8))
+                layers.extend([marker_rules, marker_labels])
+
+            chart = (
+                alt.layer(*layers)
+                .properties(
+                    title=alt.TitleParams(metric_title, color="#eaf2f8", fontSize=15, fontWeight="bold"),
+                    height=210,
+                )
                 .interactive()
+                .configure_view(stroke=None)
             )
             st.altair_chart(chart, use_container_width=True)
 
         c1, c2 = st.columns(2)
         with c1:
-            _draw_metric_chart("orders_count", "Orders")
-            _draw_metric_chart("spend_disp", f"Ad spend ({currency})")
+            _draw_metric_chart("orders_count", "Orders", "#66d9ff", ",.0f")
+            _draw_metric_chart("spend_disp", f"Ad spend ({currency})", "#ff9f6e", ",.2f")
         with c2:
-            _draw_metric_chart("profit_disp", f"Profit ({currency})")
-            _draw_metric_chart("net_disp", f"Net ({currency})")
+            _draw_metric_chart("profit_disp", f"Profit ({currency})", "#49e39a", ",.2f")
+            _draw_metric_chart("net_disp", f"Net ({currency})", "#c08bff", ",.2f")
         st.caption(f"Showing {today.strftime('%B %Y')} daily values.")
 
     api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
