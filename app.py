@@ -64,6 +64,24 @@ def _json_safe(x):
 import requests
 import re
 
+def clean_markdown_spacing(text: str) -> str:
+    """
+    Fix common Markdown spacing issues that cause words to collapse.
+    """
+    if not text:
+        return text
+
+    # Ensure space after commas and periods if missing
+    text = re.sub(r",([A-Za-z])", r", \1", text)
+    text = re.sub(r"\.([A-Za-z])", r". \1", text)
+
+    # Ensure space before markdown italics if stuck to previous token
+    text = re.sub(r"([^\s])(\*)", r"\1 \2", text)
+
+    # Ensure space after closing italics
+    text = re.sub(r"(\*)([^\s])", r"\1 \2", text)
+
+    return text
 # --- Optional: ChatGPT / OpenAI API ---
 # Install: pip install openai
 try:
@@ -2601,6 +2619,8 @@ def render_ai_summary(
             payload_json = json.dumps(_json_safe(payload), ensure_ascii=False)
             with st.spinner("Generating..."):
                 out = chatgpt_generate_store_summary(payload_json, user_focus=user_focus)
+
+            out = clean_markdown_spacing(out)
             st.markdown(out)
     
     st.markdown("### Insights & what to do next")
