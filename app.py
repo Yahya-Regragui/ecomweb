@@ -2402,6 +2402,53 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
     except Exception as e:
         return f"⚠️ ChatGPT call failed: {e}"
 
+def chatgpt_answer_data_question(payload_json: str, question: str) -> str:
+    """Answer a free-form question using only the provided app data payload."""
+    api_key = st.secrets.get("OPENAI_API_KEY")
+    if not api_key:
+        return "⚠️ Missing **OPENAI_API_KEY** in Streamlit secrets. Add it to `.streamlit/secrets.toml` or your deployment secrets."
+    if OpenAI is None:
+        return "⚠️ `openai` Python package not installed. Run `pip install openai` in your environment."
+
+    client = OpenAI(api_key=api_key)
+    prompt = (
+        "You are answering questions about ecommerce performance data.\n"
+        "Rules:\n"
+        "- Use only the JSON data provided below.\n"
+        "- If a metric is missing, say it is missing.\n"
+        "- Be direct and practical.\n"
+        "- When relevant, include exact numbers from the JSON.\n\n"
+        f"Question:\n{question.strip()}\n\n"
+        f"JSON:\n{payload_json}"
+    )
+    try:
+        r = client.responses.create(
+            model=st.secrets.get("OPENAI_MODEL", "gpt-4.1-mini"),
+            input=[
+                {"role": "system", "content": "You are a precise ecommerce data analyst."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.2,
+            max_output_tokens=800,
+        )
+        txt = getattr(r, "output_text", None)
+        if txt:
+            return txt
+        if hasattr(r, "output") and r.output:
+            chunks = []
+            for item in r.output:
+                if isinstance(item, dict):
+                    content = item.get("content")
+                    if isinstance(content, list):
+                        for c in content:
+                            if isinstance(c, dict) and c.get("type") in ("output_text", "text"):
+                                chunks.append(c.get("text", ""))
+            out = "\n".join([c for c in chunks if c])
+            return out or "(No text returned)"
+        return "(No text returned)"
+    except Exception as e:
+        return f"⚠️ ChatGPT call failed: {e}"
+
 
 def render_ai_summary(
     *,
@@ -2532,6 +2579,8 @@ def render_ai_summary(
         st.session_state.ai_last_output = ""
     if "ai_last_run_at" not in st.session_state:
         st.session_state.ai_last_run_at = ""
+    if "ai_qa_history" not in st.session_state:
+        st.session_state.ai_qa_history = []
 
     st.markdown(
         f"""
@@ -2578,10 +2627,31 @@ def render_ai_summary(
             disabled=not api_ready,
         )
 
+    st.markdown("#### Ask AI about your data")
+    ask_q_col1, ask_q_col2 = st.columns([4, 1])
+    with ask_q_col1:
+        ai_question = st.text_area(
+            "Your question",
+            key="ai_free_question",
+            height=110,
+            placeholder="Example: Which products have negative lifetime net but positive 7-day trend, and what action should I take?",
+        ).strip()
+    with ask_q_col2:
+        st.caption("Q&A")
+        ask_ai = st.button(
+            "Ask AI",
+            key="btn_ask_ai",
+            use_container_width=True,
+            disabled=not api_ready,
+        )
+
     if not api_ready:
         st.info("Add `OPENAI_API_KEY` in Streamlit secrets to enable AI brief generation.")
 
-    if gen and api_ready:
+    if ask_ai and api_ready and not ai_question:
+        st.warning("Write a question first.")
+
+    if (gen and api_ready) or (ask_ai and api_ready and ai_question):
             # -------- Build a richer (but still compact) analysis bundle for ChatGPT --------
             def _window_sum(start_day: pd.Timestamp, end_day: pd.Timestamp) -> dict:
                 w = daily_summary[(daily_summary["day"] >= start_day) & (daily_summary["day"] <= end_day)].copy()
@@ -2894,12 +2964,25 @@ def render_ai_summary(
                 spend_allocation_method="order_share",
             )
             payload_json = json.dumps(_json_safe(payload), ensure_ascii=False)
-            with st.spinner("Generating..."):
-                out = chatgpt_generate_store_summary(payload_json, user_focus=user_focus)
+            if gen and api_ready:
+                with st.spinner("Generating brief..."):
+                    out = chatgpt_generate_store_summary(payload_json, user_focus=user_focus)
+                out = clean_markdown_spacing(out)
+                st.session_state.ai_last_output = out
+                st.session_state.ai_last_run_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            out = clean_markdown_spacing(out)
-            st.session_state.ai_last_output = out
-            st.session_state.ai_last_run_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            if ask_ai and api_ready and ai_question:
+                with st.spinner("Answering your question..."):
+                    ans = chatgpt_answer_data_question(payload_json, ai_question)
+                ans = clean_markdown_spacing(ans)
+                st.session_state.ai_qa_history.append(
+                    {
+                        "at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "q": ai_question,
+                        "a": ans,
+                    }
+                )
+                st.session_state.ai_qa_history = st.session_state.ai_qa_history[-10:]
 
     if st.session_state.ai_last_output:
         if st.session_state.ai_last_run_at:
@@ -2907,6 +2990,13 @@ def render_ai_summary(
         render_ai_text(st.session_state.ai_last_output)
     else:
         st.caption("No AI brief generated yet.")
+
+    if st.session_state.ai_qa_history:
+        st.markdown("#### Q&A history")
+        for item in reversed(st.session_state.ai_qa_history):
+            with st.expander(f"{item['at']} • {item['q'][:90]}", expanded=False):
+                st.markdown(f"**Q:** {item['q']}")
+                render_ai_text(item["a"])
     
     st.markdown("### Insights & what to do next")
     bullets = []
