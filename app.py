@@ -3790,6 +3790,11 @@ with tab_orders:
         st.info("No orders data available yet.")
     else:
         ov = orders_df.copy()
+        source_mode = "orders"
+        used_daily_fallback = False
+        d_from = None
+        d_to = None
+
         date_col = None
         for c in ["order_date", "created_at", "date", "تاريخ_الطلب", "Created At"]:
             if c in ov.columns:
@@ -3817,32 +3822,84 @@ with tab_orders:
             else:
                 st.info("No valid order dates found for date filtering.")
         else:
-            st.caption("Date range filter unavailable (no order date column found).")
+            source_mode = "daily_fallback"
+            ddf = parse_daily_orders(daily_orders_df) if daily_orders_df is not None else None
+            if ddf is not None and not ddf.empty and "day" in ddf.columns and not ddf["day"].isna().all():
+                ddf = ddf.dropna(subset=["day"]).copy()
+                min_d = ddf["day"].min().date()
+                max_d = ddf["day"].max().date()
+                d_from, d_to = st.date_input(
+                    "Date range",
+                    value=(min_d, max_d),
+                    min_value=min_d,
+                    max_value=max_d,
+                    key="orders_overview_date_range",
+                )
+                if isinstance(d_from, tuple) and len(d_from) == 2:
+                    d_from, d_to = d_from
+                if d_from and d_to:
+                    ddf = ddf[(ddf["day"].dt.date >= d_from) & (ddf["day"].dt.date <= d_to)].copy()
+                used_daily_fallback = True
+                st.caption(f"Showing {d_from} to {d_to} using Daily Orders dates (Orders file has no date column).")
+            else:
+                ddf = None
+                source_mode = "orders_no_date"
+                st.caption("Date range filter unavailable (no date column in Orders and no valid Daily Orders dates).")
 
-        if ov.empty:
-            st.info("No orders found for the selected date range.")
+        if source_mode == "daily_fallback":
+            if ddf is None or ddf.empty:
+                st.info("No orders found for the selected date range.")
+                requested = confirmed = delivered = returned = delivered_profit = 0.0
+            else:
+                id_col = get_daily_order_id_col(ddf)
+                if id_col is None:
+                    ddf["__rowid__"] = range(len(ddf))
+                    id_col = "__rowid__"
 
-        for c in ["requested_units", "confirmed_units", "delivered_units", "returned_units"]:
-            if c in ov.columns:
-                ov[c] = pd.to_numeric(ov[c], errors="coerce").fillna(0)
+                ddf["status_clean"] = ddf["Status"].astype(str).str.strip().str.lower() if "Status" in ddf.columns else ""
+                delivered_mask = ddf["status_clean"].str.contains("delivered", na=False)
+                returned_mask = ddf["status_clean"].str.contains("return", na=False)
+                cancelled_mask = ddf["status_clean"].str.contains("cancel", na=False)
+                confirmed_mask = ddf["status_clean"].str.contains("confirm", na=False) | delivered_mask | returned_mask
 
-        if currency == "IQD":
-            ov["delivered_profit_disp"] = pd.to_numeric(ov.get("delivered_profit_iqd", 0), errors="coerce").fillna(0)
+                requested = float(ddf[id_col].nunique())
+                confirmed = float(ddf.loc[confirmed_mask, id_col].nunique())
+                delivered = float(ddf.loc[delivered_mask, id_col].nunique())
+                returned = float(ddf.loc[returned_mask, id_col].nunique())
+                cancelled = float(ddf.loc[cancelled_mask, id_col].nunique())
+
+                if "Order Profit" in ddf.columns:
+                    ddf["Order Profit"] = pd.to_numeric(ddf["Order Profit"], errors="coerce").fillna(0)
+                    delivered_profit_iqd = float(ddf.loc[delivered_mask, "Order Profit"].sum())
+                else:
+                    delivered_profit_iqd = 0.0
+                delivered_profit = delivered_profit_iqd if currency == "IQD" else iqd_to_usd(delivered_profit_iqd, fx)
         else:
-            ov["delivered_profit_disp"] = pd.to_numeric(ov.get("delivered_profit_usd", 0), errors="coerce").fillna(0)
+            if ov.empty:
+                st.info("No orders found for the selected date range.")
 
-        requested = float(ov.get("requested_units", pd.Series(dtype=float)).sum())
-        confirmed = float(ov.get("confirmed_units", pd.Series(dtype=float)).sum())
-        delivered = float(ov.get("delivered_units", pd.Series(dtype=float)).sum())
-        returned = float(ov.get("returned_units", pd.Series(dtype=float)).sum())
-        delivered_profit = float(ov["delivered_profit_disp"].sum())
+            for c in ["requested_units", "confirmed_units", "delivered_units", "returned_units"]:
+                if c in ov.columns:
+                    ov[c] = pd.to_numeric(ov[c], errors="coerce").fillna(0)
+
+            if currency == "IQD":
+                ov["delivered_profit_disp"] = pd.to_numeric(ov.get("delivered_profit_iqd", 0), errors="coerce").fillna(0)
+            else:
+                ov["delivered_profit_disp"] = pd.to_numeric(ov.get("delivered_profit_usd", 0), errors="coerce").fillna(0)
+
+            requested = float(ov.get("requested_units", pd.Series(dtype=float)).sum())
+            confirmed = float(ov.get("confirmed_units", pd.Series(dtype=float)).sum())
+            delivered = float(ov.get("delivered_units", pd.Series(dtype=float)).sum())
+            returned = float(ov.get("returned_units", pd.Series(dtype=float)).sum())
+            delivered_profit = float(ov["delivered_profit_disp"].sum())
+            cancelled = max(requested - confirmed, 0.0)
 
         confirmation_rate = (confirmed / requested) if requested else 0.0
         delivery_rate = (delivered / confirmed) if confirmed else 0.0
         return_rate = (returned / delivered) if delivered else 0.0
 
         m1, m2, m3, m4, m5 = st.columns(5)
-        m1.metric("Requested", f"{int(requested):,}")
+        m1.metric("Orders", f"{int(requested):,}")
         m2.metric("Confirmed", f"{int(confirmed):,}", f"{confirmation_rate*100:.1f}%")
         m3.metric("Delivered", f"{int(delivered):,}", f"{delivery_rate*100:.1f}%")
         m4.metric("Returned", f"{int(returned):,}", f"{return_rate*100:.1f}%")
@@ -3855,7 +3912,7 @@ with tab_orders:
                 fig_funnel = go.Figure(
                     data=[
                         go.Bar(
-                            x=["Requested", "Confirmed", "Delivered", "Returned"],
+                            x=["Orders", "Confirmed", "Delivered", "Returned"],
                             y=[requested, confirmed, delivered, returned],
                             marker_color=["#64D2FF", "#4EE3A3", "#B58DFF", "#FFA66B"],
                             text=[f"{int(requested):,}", f"{int(confirmed):,}", f"{int(delivered):,}", f"{int(returned):,}"],
@@ -3883,11 +3940,11 @@ with tab_orders:
                 fig_mix = go.Figure(
                     data=[
                         go.Pie(
-                            labels=["Delivered", "Returned", "Not delivered yet"],
+                            labels=["Delivered", "Returned", "Open/Other"],
                             values=[
                                 max(delivered - returned, 0),
                                 returned,
-                                max(requested - delivered, 0),
+                                max(requested - delivered - cancelled, 0) + cancelled,
                             ],
                             hole=0.58,
                             marker=dict(colors=["#4EE3A3", "#FFA66B", "#5D7088"]),
