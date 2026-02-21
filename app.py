@@ -1954,8 +1954,26 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   border: 1px solid rgba(122,147,182,0.24);
   border-radius: 18px;
   background: linear-gradient(145deg, rgba(21,32,54,0.92), rgba(10,18,33,0.88));
-  padding: 16px 14px;
+  padding: 16px 14px 14px 14px;
   margin-bottom: 12px;
+}
+.sb-head-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.sb-icon{
+  width:56px;
+  height:56px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.45rem;
+  font-weight:800;
+  color:#eaf2ff;
+  background: linear-gradient(145deg, #5f9bff, #7838ff);
+  box-shadow: 0 10px 20px rgba(61,106,255,0.28);
 }
 .sb-header-title{
   color: #eef5fb;
@@ -1973,13 +1991,6 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   color: #dbe8f5;
   font-size: 1.1rem;
   font-weight: 800;
-}
-.sb-card{
-  border: 1px solid rgba(122,147,182,0.24);
-  border-radius: 16px;
-  background: linear-gradient(145deg, rgba(24,36,58,0.82), rgba(16,26,45,0.72));
-  padding: 10px 10px 2px 10px;
-  margin-bottom: 10px;
 }
 .sb-divider{
   height: 1px;
@@ -2004,11 +2015,30 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   border: 1px solid rgba(120,146,178,0.35) !important;
   border-radius: 12px !important;
 }
+[data-testid="stSidebar"] [data-testid="stNumberInput"],
+[data-testid="stSidebar"] [data-testid="stSelectbox"],
+[data-testid="stSidebar"] [data-testid="stDateInput"],
+[data-testid="stSidebar"] [data-testid="stTextInput"]{
+  border: 1px solid rgba(122,147,182,0.24);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(24,36,58,0.82), rgba(16,26,45,0.72));
+  padding: 12px 10px 8px 10px;
+  margin: 8px 0 12px 0;
+}
+[data-testid="stSidebar"] [data-testid="stNumberInput"] label p,
+[data-testid="stSidebar"] [data-testid="stSelectbox"] label p,
+[data-testid="stSidebar"] [data-testid="stDateInput"] label p,
+[data-testid="stSidebar"] [data-testid="stTextInput"] label p{
+  color:#d8e6f5 !important;
+  font-weight:700 !important;
+  font-size:0.98rem !important;
+}
 [data-testid="stSidebar"] .stFileUploader{
   border: 1px dashed rgba(138,163,192,0.38);
   border-radius: 14px;
-  padding: 8px 10px;
+  padding: 10px 10px;
   background: linear-gradient(145deg, rgba(13,24,42,0.7), rgba(11,20,35,0.62));
+  margin-bottom: 12px;
 }
 [data-testid="stSidebar"] .stFileUploader section{
   border: none !important;
@@ -2331,25 +2361,29 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sb-header">
-          <div class="sb-header-title">Inputs</div>
-          <div class="sb-header-sub">Configure dashboard settings</div>
+          <div class="sb-head-row">
+            <div class="sb-icon">⚙</div>
+            <div>
+              <div class="sb-header-title">Inputs</div>
+              <div class="sb-header-sub">Configure dashboard settings</div>
+            </div>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
     st.markdown('<div class="sb-section-title">Settings</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sb-card">', unsafe_allow_html=True)
     fx = st.number_input("FX Rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0)
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown('<div class="sb-card">', unsafe_allow_html=True)
     currency = st.selectbox("Display Currency (Orders)", ["USD", "IQD"], index=0)
-    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
     st.markdown('<div class="sb-section-title">Data Files</div>', unsafe_allow_html=True)
     orders_file = st.file_uploader("Orders CSV (Taager File)", type=["csv"], help="Upload orders data")
+    st.caption("Upload orders data")
     campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"], help="Upload campaign metrics")
+    st.caption("Upload campaign metrics")
     daily_orders_file = st.file_uploader("Daily Orders (Taager) XLSX", type=["xlsx"], help="Upload daily order reports")
+    st.caption("Upload daily order reports")
     st.markdown('<div class="sb-foot">All data is processed locally</div>', unsafe_allow_html=True)
 
 both_uploaded = orders_file is not None and campaigns_file is not None
