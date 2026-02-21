@@ -2399,6 +2399,7 @@ def _build_llm_payload(
     windows: Optional[dict] = None,
     products_top: Optional[list] = None,
     campaigns_top: Optional[list] = None,
+    detailed_context: Optional[dict] = None,
     data_quality: Optional[dict] = None,
     spend_allocation_method: str = "order_share",
 ):
@@ -2428,6 +2429,7 @@ def _build_llm_payload(
         "yesterday": yesterday_row,
         "products_top": products_top or [],
         "campaigns_top": campaigns_top or [],
+        "detailed_context": detailed_context or {},
     }
 @st.cache_data(show_spinner=False)
 def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> str:
@@ -2459,6 +2461,7 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
         "(3–5 sentences, no bullets. Mention: net after ads, delivery/return health, and what to do next.)\n\n"
         "## Trend (today vs yesterday, and vs last 7 days)\n"
         "Bullets with concrete deltas. Use `today`, `yesterday`, and `windows.last_7d` when available.\n\n"
+        "If `detailed_context` is present and non-empty, use it to support deeper reasoning and specific examples.\n\n"
         "## Products (winners & losers)\n"
         "- 3 winners: product, why (numbers), and what action to take\n"
         "- 3 losers: product, what is wrong (numbers), and what action to take\n"
@@ -2536,6 +2539,7 @@ def chatgpt_answer_data_question(payload_json: str, question: str) -> str:
         "You are answering questions about ecommerce performance data.\n"
         "Rules:\n"
         "- Use only the JSON data provided below.\n"
+        "- If `detailed_context` exists, prioritize it for deeper answers.\n"
         "- If a metric is missing, say it is missing.\n"
         "- Be direct and practical.\n"
         "- When relevant, include exact numbers from the JSON.\n\n"
@@ -2935,6 +2939,12 @@ def render_ai_summary(
     selected_preset = focus_presets.get(st.session_state.get("ai_focus_preset", "None"), "")
     focus_text_val = st.session_state.get("ai_focus", "").strip()
     user_focus = focus_text_val if focus_text_val else selected_preset
+    use_deeper_context = st.checkbox(
+        "Use deeper data context (slower, more complete answers)",
+        value=False,
+        key="ai_use_deeper_context",
+        help="Adds larger bounded datasets (daily series + campaign/product detail) to the AI payload.",
+    )
 
     ai_question = st.text_area(
         "Ask anything",
@@ -3260,11 +3270,85 @@ def render_ai_summary(
                         for _, r in agg.iterrows()
                     ]
 
+            detailed_context = {}
+            if use_deeper_context:
+                daily_detail_cols = [c for c in ["day", "orders_count", "profit_disp", "spend_disp", "net_disp"] if c in daily_summary.columns]
+                daily_detail = daily_summary[daily_detail_cols].copy().sort_values("day").tail(90)
+                if "day" in daily_detail.columns:
+                    daily_detail["day"] = daily_detail["day"].astype(str)
+
+                status_daily = []
+                if "day" in ddf.columns and "Status" in ddf.columns:
+                    ds = ddf.copy()
+                    ds["day"] = pd.to_datetime(ds["day"], errors="coerce").dt.floor("D")
+                    ds = ds.dropna(subset=["day"])
+                    ds["status_clean"] = ds["Status"].astype(str).str.strip().str.lower()
+                    id_col = get_daily_order_id_col(ds)
+                    if id_col is None:
+                        ds["__rowid__"] = range(len(ds))
+                        id_col = "__rowid__"
+                    status_daily_df = (
+                        ds.groupby(["day", "status_clean"], as_index=False)[id_col]
+                        .nunique()
+                        .rename(columns={id_col: "orders"})
+                        .sort_values(["day", "orders"], ascending=[True, False])
+                    )
+                    status_daily_df = status_daily_df.tail(240)
+                    status_daily_df["day"] = status_daily_df["day"].astype(str)
+                    status_daily = status_daily_df.to_dict("records")
+
+                campaigns_daily_top = []
+                if has_campaigns and "Reporting starts" in campaigns_df.columns:
+                    cdt = campaigns_df.copy()
+                    cdt["Reporting starts"] = pd.to_datetime(cdt["Reporting starts"], errors="coerce")
+                    cdt = cdt.dropna(subset=["Reporting starts"])
+                    cdt["day"] = cdt["Reporting starts"].dt.floor("D")
+                    cdt = cdt[cdt["day"] >= (today - pd.Timedelta(days=60)).normalize()].copy()
+                    cname = "Campaign name" if "Campaign name" in cdt.columns else ("Campaign" if "Campaign" in cdt.columns else None)
+                    if cname and "Amount spent (USD)" in cdt.columns:
+                        cdt["Amount spent (USD)"] = pd.to_numeric(cdt["Amount spent (USD)"], errors="coerce").fillna(0)
+                        if "Results" in cdt.columns:
+                            cdt["Results"] = pd.to_numeric(cdt["Results"], errors="coerce").fillna(0)
+                        else:
+                            cdt["Results"] = 0.0
+                        top_names = (
+                            cdt.groupby(cname, as_index=False)["Amount spent (USD)"]
+                            .sum()
+                            .sort_values("Amount spent (USD)", ascending=False)
+                            .head(12)[cname]
+                            .tolist()
+                        )
+                        cdt = cdt[cdt[cname].isin(top_names)]
+                        cdt = (
+                            cdt.groupby(["day", cname], as_index=False)[["Amount spent (USD)", "Results"]]
+                            .sum()
+                            .rename(columns={cname: "campaign", "Amount spent (USD)": "spend_usd", "Results": "results"})
+                            .sort_values("day")
+                            .tail(300)
+                        )
+                        cdt["day"] = cdt["day"].astype(str)
+                        campaigns_daily_top = cdt.to_dict("records")
+
+                detailed_context = {
+                    "enabled": True,
+                    "limits": {
+                        "daily_series_rows": 90,
+                        "status_daily_rows": 240,
+                        "campaign_daily_rows": 300,
+                        "products_rows": 50,
+                    },
+                    "daily_series": daily_detail.to_dict("records"),
+                    "status_daily": status_daily,
+                    "campaigns_daily_top": campaigns_daily_top,
+                    "products_detailed": rows[:50],
+                }
+
             data_quality = {
                 "has_daily_orders": daily_orders_df is not None and not getattr(daily_orders_df, "empty", True),
                 "has_campaigns": has_campaigns,
                 "has_orders_catalog": orders_df is not None and not getattr(orders_df, "empty", True),
                 "sku_match_rate_pct": sku_match_rate,
+                "ai_deeper_context_enabled": bool(use_deeper_context),
                 "notes": [
                     "Product-level ad spend is allocated as an estimate using order share by day.",
                     f"Products with campaign_age_days <= {NEW_LAUNCH_DAYS} are considered new launches.",
@@ -3280,6 +3364,7 @@ def render_ai_summary(
                 windows=windows,
                 products_top=products_top,
                 campaigns_top=campaigns_top,
+                detailed_context=detailed_context,
                 data_quality=data_quality,
                 spend_allocation_method="order_share",
             )
