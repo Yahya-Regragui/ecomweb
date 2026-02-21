@@ -16,6 +16,12 @@ from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.lib.utils import ImageReader
 import altair as alt
+try:
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+except Exception:  # pragma: no cover
+    go = None
+    make_subplots = None
 
 
 import base64
@@ -2733,117 +2739,118 @@ def render_ai_summary(
         month_end = (month_start + pd.offsets.MonthEnd(1)).normalize()
         daily_graph = daily_graph[(daily_graph["day"] >= month_start) & (daily_graph["day"] <= month_end)].copy()
         st.markdown("#### Daily graph")
-
-        marker_days = pd.DataFrame(
-            {
-                "day": [today, yesterday],
-                "label": ["Analysis day", "Comparison day"],
-            }
-        )
-        marker_days["day"] = pd.to_datetime(marker_days["day"], errors="coerce")
-        marker_days = marker_days[
-            (marker_days["day"] >= month_start) & (marker_days["day"] <= month_end)
-        ].copy()
-
-        def _draw_metric_chart(metric_col: str, metric_title: str, color_hex: str, value_fmt: str):
-            chart_df = daily_graph[["day", metric_col]].rename(columns={metric_col: "value"}).copy()
-            chart_df["value"] = pd.to_numeric(chart_df["value"], errors="coerce").fillna(0.0)
-            if chart_df.empty:
-                st.info(f"No {metric_title.lower()} data for this month.")
-                return
-
-            last_point = chart_df.sort_values("day").tail(1).copy()
-
-            x_enc = alt.X(
-                "day:T",
-                title=None,
-                axis=alt.Axis(format="%d %b", labelColor="#b8cad9", tickColor="#4d6176", grid=False),
-            )
-            y_enc = alt.Y(
-                "value:Q",
-                title=None,
-                axis=alt.Axis(labelColor="#b8cad9", gridColor="rgba(184,202,217,0.18)", tickCount=4),
+        if go is not None and make_subplots is not None:
+            fig = make_subplots(
+                rows=2,
+                cols=2,
+                subplot_titles=("Orders", f"Profit ({currency})", f"Ad spend ({currency})", f"Net ({currency})"),
+                vertical_spacing=0.17,
+                horizontal_spacing=0.08,
             )
 
-            area = (
-                alt.Chart(chart_df)
-                .mark_area(color=color_hex, opacity=0.18, interpolate="monotone")
-                .encode(x=x_enc, y=y_enc)
-            )
-            line = (
-                alt.Chart(chart_df)
-                .mark_line(color=color_hex, strokeWidth=3, interpolate="monotone")
-                .encode(
-                    x=x_enc,
-                    y=y_enc,
-                    tooltip=[
-                        alt.Tooltip("day:T", title="Day"),
-                        alt.Tooltip("value:Q", title=metric_title, format=value_fmt),
-                    ],
+            metric_specs = [
+                ("orders_count", "Orders", "#64D2FF", "rgba(100,210,255,0.20)", ",.0f", 1, 1),
+                ("profit_disp", f"Profit ({currency})", "#4EE3A3", "rgba(78,227,163,0.20)", ",.2f", 1, 2),
+                ("spend_disp", f"Ad spend ({currency})", "#FFA66B", "rgba(255,166,107,0.20)", ",.2f", 2, 1),
+                ("net_disp", f"Net ({currency})", "#B58DFF", "rgba(181,141,255,0.22)", ",.2f", 2, 2),
+            ]
+
+            for metric_col, metric_title, line_color, fill_color, fmt, row_i, col_i in metric_specs:
+                chart_df = daily_graph[["day", metric_col]].rename(columns={metric_col: "value"}).copy()
+                chart_df["value"] = pd.to_numeric(chart_df["value"], errors="coerce").fillna(0.0)
+                chart_df = chart_df.sort_values("day")
+                if chart_df.empty:
+                    continue
+
+                fig.add_trace(
+                    go.Scatter(
+                        x=chart_df["day"],
+                        y=chart_df["value"],
+                        mode="lines",
+                        line={"color": line_color, "width": 3, "shape": "spline", "smoothing": 0.65},
+                        fill="tozeroy",
+                        fillcolor=fill_color,
+                        name=metric_title,
+                        showlegend=False,
+                        hovertemplate=f"<b>%{{x|%d %b %Y}}</b><br>{metric_title}: %{{y:{fmt}}}<extra></extra>",
+                    ),
+                    row=row_i,
+                    col=col_i,
                 )
-            )
-            points = (
-                alt.Chart(chart_df)
-                .mark_circle(color=color_hex, size=42, opacity=0.95)
-                .encode(x=x_enc, y=y_enc)
-            )
-            last_marker = (
-                alt.Chart(last_point)
-                .mark_point(
-                    shape="circle",
-                    filled=True,
-                    color="#eaf2f8",
-                    stroke=color_hex,
-                    strokeWidth=2,
-                    size=120,
-                )
-                .encode(x=x_enc, y=y_enc)
-            )
-            last_label = (
-                alt.Chart(last_point)
-                .mark_text(
-                    align="left",
-                    dx=8,
-                    dy=-8,
-                    fontSize=11,
-                    fontWeight="bold",
-                    color="#eaf2f8",
-                )
-                .encode(
-                    x=x_enc,
-                    y=y_enc,
-                    text=alt.Text("value:Q", format=value_fmt),
-                )
-            )
 
-            layers = [area, line, points, last_marker, last_label]
-            if not marker_days.empty:
-                marker_rules = alt.Chart(marker_days).mark_rule(
-                    color="#88a1b8", opacity=0.6, strokeDash=[5, 4]
-                ).encode(x=x_enc)
-                marker_labels = alt.Chart(marker_days).mark_text(
-                    dy=10, align="left", fontSize=10, color="#9cb4c8"
-                ).encode(x=x_enc, text="label:N", y=alt.value(8))
-                layers.extend([marker_rules, marker_labels])
-
-            chart = (
-                alt.layer(*layers)
-                .properties(
-                    title=alt.TitleParams(metric_title, color="#eaf2f8", fontSize=15, fontWeight="bold"),
-                    height=210,
+                fig.add_trace(
+                    go.Scatter(
+                        x=chart_df["day"],
+                        y=chart_df["value"],
+                        mode="markers",
+                        marker={"size": 6, "color": line_color, "line": {"color": "rgba(255,255,255,0.55)", "width": 1}},
+                        name=f"{metric_title} points",
+                        showlegend=False,
+                        hoverinfo="skip",
+                    ),
+                    row=row_i,
+                    col=col_i,
                 )
-                .interactive()
-                .configure_view(stroke=None)
-            )
-            st.altair_chart(chart, use_container_width=True)
 
-        c1, c2 = st.columns(2)
-        with c1:
-            _draw_metric_chart("orders_count", "Orders", "#66d9ff", ",.0f")
-            _draw_metric_chart("spend_disp", f"Ad spend ({currency})", "#ff9f6e", ",.2f")
-        with c2:
-            _draw_metric_chart("profit_disp", f"Profit ({currency})", "#49e39a", ",.2f")
-            _draw_metric_chart("net_disp", f"Net ({currency})", "#c08bff", ",.2f")
+                last_point = chart_df.tail(1)
+                fig.add_trace(
+                    go.Scatter(
+                        x=last_point["day"],
+                        y=last_point["value"],
+                        mode="markers+text",
+                        marker={"size": 11, "color": "#EAF2F8", "line": {"color": line_color, "width": 2}},
+                        text=[f"{float(last_point['value'].iloc[0]):{fmt}}"],
+                        textposition="top right",
+                        textfont={"size": 11, "color": "#EAF2F8"},
+                        name=f"{metric_title} latest",
+                        showlegend=False,
+                        hoverinfo="skip",
+                    ),
+                    row=row_i,
+                    col=col_i,
+                )
+
+                for marker_day in [yesterday, today]:
+                    marker_day = pd.Timestamp(marker_day).normalize()
+                    if month_start <= marker_day <= month_end:
+                        fig.add_vline(
+                            x=marker_day,
+                            line_dash="dash",
+                            line_color="rgba(160,180,198,0.55)",
+                            line_width=1.2,
+                            row=row_i,
+                            col=col_i,
+                        )
+
+                fig.update_xaxes(
+                    showgrid=False,
+                    tickformat="%d %b",
+                    tickfont={"color": "#B8CAD9", "size": 11},
+                    row=row_i,
+                    col=col_i,
+                )
+                fig.update_yaxes(
+                    showgrid=True,
+                    gridcolor="rgba(184,202,217,0.16)",
+                    zeroline=False,
+                    tickfont={"color": "#B8CAD9", "size": 11},
+                    row=row_i,
+                    col=col_i,
+                )
+
+            fig.update_layout(
+                height=660,
+                margin={"l": 24, "r": 20, "t": 66, "b": 20},
+                paper_bgcolor="rgba(9,16,26,0.68)",
+                plot_bgcolor="rgba(9,16,26,0.68)",
+                hovermode="x unified",
+                font={"family": "Manrope, Segoe UI, sans-serif", "color": "#EAF2F8"},
+            )
+            fig.update_annotations(font={"size": 18, "color": "#EAF2F8", "family": "Manrope, Segoe UI, sans-serif"})
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+            st.caption("Dashed lines mark the comparison and analysis days.")
+        else:
+            st.info("Install Plotly for enhanced chart visuals. Falling back to the current chart style.")
         st.caption(f"Showing {today.strftime('%B %Y')} daily values.")
 
     api_ready = bool(st.secrets.get("OPENAI_API_KEY"))

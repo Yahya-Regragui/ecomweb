@@ -5,6 +5,7 @@ reportlab
 xlsxwriter
 requests
 altair
+plotly
 openpyxl
 numpy
 openai
