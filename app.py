@@ -2771,7 +2771,7 @@ def render_ai_summary(
                         fill="tozeroy",
                         fillcolor=fill_color,
                         name=metric_title,
-                        showlegend=False,
+                        showlegend=True,
                         hovertemplate=f"<b>%{{x|%d %b %Y}}</b><br>{metric_title}: %{{y:{fmt}}}<extra></extra>",
                     ),
                     row=row_i,
@@ -2826,6 +2826,11 @@ def render_ai_summary(
                     showgrid=False,
                     tickformat="%d %b",
                     tickfont={"color": "#B8CAD9", "size": 11},
+                    showspikes=True,
+                    spikemode="across",
+                    spikesnap="cursor",
+                    spikethickness=1,
+                    spikecolor="rgba(184,202,217,0.40)",
                     row=row_i,
                     col=col_i,
                 )
@@ -2834,6 +2839,11 @@ def render_ai_summary(
                     gridcolor="rgba(184,202,217,0.16)",
                     zeroline=False,
                     tickfont={"color": "#B8CAD9", "size": 11},
+                    showspikes=True,
+                    spikemode="across",
+                    spikesnap="cursor",
+                    spikethickness=1,
+                    spikecolor="rgba(184,202,217,0.30)",
                     row=row_i,
                     col=col_i,
                 )
@@ -2845,9 +2855,28 @@ def render_ai_summary(
                 plot_bgcolor="rgba(9,16,26,0.68)",
                 hovermode="x unified",
                 font={"family": "Manrope, Segoe UI, sans-serif", "color": "#EAF2F8"},
+                dragmode="zoom",
+                legend={
+                    "orientation": "h",
+                    "yanchor": "bottom",
+                    "y": 1.04,
+                    "xanchor": "left",
+                    "x": 0.0,
+                    "font": {"size": 11, "color": "#B8CAD9"},
+                },
             )
             fig.update_annotations(font={"size": 18, "color": "#EAF2F8", "family": "Manrope, Segoe UI, sans-serif"})
-            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(
+                fig,
+                use_container_width=True,
+                config={
+                    "displayModeBar": True,
+                    "scrollZoom": True,
+                    "doubleClick": "reset",
+                    "displaylogo": False,
+                    "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+                },
+            )
             st.caption("Dashed lines mark the comparison and analysis days.")
         else:
             st.info("Install Plotly for enhanced chart visuals. Falling back to the current chart style.")
