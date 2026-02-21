@@ -2354,11 +2354,135 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
   border-style: solid;
   border-color: rgba(8,12,18,0.98) transparent transparent transparent;
 }
+.dash-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.dash-top-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:14px;
+}
+.dash-top-card{
+  border-radius:16px;
+  border:1px solid rgba(94,122,157,0.28);
+  padding:18px 20px 16px 20px;
+  min-height:132px;
+}
+.dash-card-blue{ background: linear-gradient(135deg, rgba(23,49,91,0.92), rgba(6,16,45,0.86)); }
+.dash-card-green{ background: linear-gradient(135deg, rgba(8,74,57,0.92), rgba(6,45,35,0.86)); }
+.dash-card-purple{ background: linear-gradient(135deg, rgba(52,26,93,0.92), rgba(34,15,64,0.86)); }
+.dash-top-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#a9bdd4;
+  font-size:1.02rem;
+  font-weight:700;
+}
+.dash-top-icon{
+  font-size:1.45rem;
+  line-height:1;
+  opacity:0.95;
+}
+.dash-top-value{
+  margin-top:8px;
+  color:#f2f7fc;
+  font-size:3.05rem;
+  line-height:1.02;
+  letter-spacing:-0.02em;
+  font-weight:800;
+}
+.dash-top-sub{
+  margin-top:8px;
+  color:#26f2a6;
+  font-weight:700;
+  font-size:1.12rem;
+}
+.dash-panel{
+  border:1px solid rgba(94,122,157,0.24);
+  border-radius:18px;
+  background: linear-gradient(140deg, rgba(10,20,41,0.90), rgba(5,13,32,0.84));
+  padding:18px 18px 16px 18px;
+}
+.dash-panel-title{
+  color:#f0f5fb;
+  font-size:2.7rem;
+  font-weight:800;
+  letter-spacing:-0.02em;
+  margin-bottom:10px;
+}
+.dash-profit-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:16px;
+}
+.dash-k-label{
+  color:#9fb2c8;
+  font-size:0.98rem;
+  font-weight:600;
+}
+.dash-k-value{
+  margin-top:8px;
+  font-size:3.0rem;
+  font-weight:800;
+  line-height:1.02;
+  letter-spacing:-0.02em;
+}
+.dash-k-value-green{ color:#1fe68d; }
+.dash-k-value-violet{ color:#b57bff; }
+.dash-k-sub{
+  margin-top:7px;
+  color:#8093a9;
+  font-size:0.93rem;
+}
+.dash-lower-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:14px;
+}
+.dash-mini-grid-2{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:12px;
+}
+.dash-mini-grid-4{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:12px;
+}
+.dash-mini{
+  border:1px solid rgba(94,122,157,0.22);
+  border-radius:14px;
+  background: rgba(24,37,60,0.55);
+  padding:12px 14px;
+}
+.dash-mini-label{
+  color:#9dafc4;
+  font-size:0.95rem;
+  font-weight:600;
+}
+.dash-mini-value{
+  margin-top:6px;
+  color:#f3f8fc;
+  font-size:2rem;
+  font-weight:800;
+}
+.dash-note{
+  margin-top:12px;
+  color:#8195ad;
+  font-size:0.95rem;
+}
 
 @media (max-width: 980px){
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .ai-grid-4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .ai-grid-3 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .dash-top-grid{ grid-template-columns: 1fr; }
+  .dash-profit-grid{ grid-template-columns: 1fr; }
+  .dash-lower-grid{ grid-template-columns: 1fr; }
+  .dash-mini-grid-2, .dash-mini-grid-4{ grid-template-columns: 1fr; }
   div.kpi-fixed-expander { width: calc(100vw - 24px); right: 12px; bottom: 12px; }
 }
 @media (max-width: 640px){
@@ -3733,20 +3857,6 @@ with tab_dashboard:
     elif data_source == "uploads":
         st.success("Showing uploaded files (not yet saved).")
 
-    # Dashboard cards
-    col1, col2, col3 = st.columns(3)
-    col1.metric(f"Confirmed Profit ({currency})", money_ccy(kpis_disp["confirmed_profit_disp"], currency), f"{int(kpis['confirmed_units']):,} confirmed")
-    col2.metric(f"Delivered Profit ({currency})", money_ccy(kpis_disp["delivered_profit_disp"], currency), f"{int(kpis['delivered_units']):,} delivered")
-    col3.metric(f"Ad Spend ({currency})", money_ccy(kpis_disp["spend_disp"], currency))
-
-    st.markdown("### Profit After Ads")
-
-    # helpers
-    
-
-
-
-
     # compute display values
     net_disp = kpis_disp["net_profit_disp"]
     pot_disp = kpis_disp["potential_net_disp"]
@@ -3765,71 +3875,95 @@ with tab_dashboard:
     # Step 2: convert to USD using fixed 1602
     pot_taager_disp = potential_iqd / TAAGER_FX if potential_iqd is not None else None
 
+    confirmed_sub = f"↑ {int(kpis['confirmed_units']):,} confirmed"
+    delivered_sub = f"↑ {int(kpis['delivered_units']):,} delivered"
+    st.markdown(
+        f"""
+        <div class="dash-wrap">
+          <div class="dash-top-grid">
+            <div class="dash-top-card dash-card-blue">
+              <div class="dash-top-head">
+                <span>Confirmed Profit ({currency})</span>
+                <span class="dash-top-icon">$</span>
+              </div>
+              <div class="dash-top-value">{_esc(money_ccy(kpis_disp["confirmed_profit_disp"], currency))}</div>
+              <div class="dash-top-sub">{_esc(confirmed_sub)}</div>
+            </div>
+            <div class="dash-top-card dash-card-green">
+              <div class="dash-top-head">
+                <span>Delivered Profit ({currency})</span>
+                <span class="dash-top-icon">◈</span>
+              </div>
+              <div class="dash-top-value">{_esc(money_ccy(kpis_disp["delivered_profit_disp"], currency))}</div>
+              <div class="dash-top-sub">{_esc(delivered_sub)}</div>
+            </div>
+            <div class="dash-top-card dash-card-purple">
+              <div class="dash-top-head">
+                <span>Ad Spend ({currency})</span>
+                <span class="dash-top-icon">◎</span>
+              </div>
+              <div class="dash-top-value">{_esc(money_ccy(kpis_disp["spend_disp"], currency))}</div>
+            </div>
+          </div>
 
+          <div class="dash-panel">
+            <div class="dash-panel-title">Profit After Ads</div>
+            <div class="dash-profit-grid">
+              <div>
+                <div class="dash-k-label">Net (Delivered − Spend)</div>
+                <div class="dash-k-value dash-k-value-green">{_esc(money_ccy(net_disp, currency))}</div>
+                <div class="dash-k-sub">Realized profitability</div>
+              </div>
+              <div>
+                <div class="dash-k-label">Potential (Confirmed - Spend)</div>
+                <div class="dash-k-value dash-k-value-violet">{_esc(money_ccy(pot_disp, currency))}</div>
+                <div class="dash-k-sub">If all confirmed deliver</div>
+              </div>
+            </div>
+          </div>
 
-    # render 4 cards in a tight grid
-    st.markdown('<div class="kpi-grid">', unsafe_allow_html=True)
+          <div class="dash-lower-grid">
+            <div class="dash-panel">
+              <div class="dash-panel-title">ROAS</div>
+              <div class="dash-mini-grid-2">
+                <div class="dash-mini">
+                  <div class="dash-mini-label">ROAS (Realized)</div>
+                  <div class="dash-mini-value">{_esc(fmt_ratio(kpis["roas_real"]))}</div>
+                </div>
+                <div class="dash-mini">
+                  <div class="dash-mini-label">ROAS (Potential)</div>
+                  <div class="dash-mini-value">{_esc(fmt_ratio(kpis["roas_potential"]))}</div>
+                </div>
+              </div>
+              <div class="dash-note">Taager FX 1602 = payout rate to Payoneer (IQD ÷ USD).</div>
+            </div>
 
-    _card("Net (Delivered − Spend)",
-        money_ccy(net_disp, currency),
-        "Realized profitability",
-        _tone(net_disp))
-
-    # _card("Net (Taager FX 1602)",
-    #     "N/A" if net_taager_disp is None else money_ccy(net_taager_disp, currency),
-    #     "Using payout FX",
-    #     _tone(net_taager_disp))
-
-    _card(
-        "Potential (Confirmed − Spend)",
-        money_ccy(pot_disp, currency),
-        "If all confirmed deliver",
-        _tone(pot_disp),
-        tip=(
-            "Potential Net = Confirmed Profit − Ad Spend\n"
-            f"Confirmed Profit ({currency}) = {money_ccy(kpis_disp['confirmed_profit_disp'], currency)}\n"
-            f"Ad Spend ({currency}) = {money_ccy(kpis_disp['spend_disp'], currency)}\n"
-        )
+            <div class="dash-panel">
+              <div class="dash-panel-title">Key Rates</div>
+              <div class="dash-mini-grid-4">
+                <div class="dash-mini">
+                  <div class="dash-mini-label">Confirmation Rate</div>
+                  <div class="dash-mini-value">{_esc(pct(kpis["confirmation_rate"]))}</div>
+                </div>
+                <div class="dash-mini">
+                  <div class="dash-mini-label">Delivery Rate</div>
+                  <div class="dash-mini-value">{_esc(pct(kpis["delivery_rate"]))}</div>
+                </div>
+                <div class="dash-mini">
+                  <div class="dash-mini-label">Return Rate</div>
+                  <div class="dash-mini-value">{_esc(pct(kpis["return_rate"]))}</div>
+                </div>
+                <div class="dash-mini">
+                  <div class="dash-mini-label">CPM</div>
+                  <div class="dash-mini-value">{_esc(fmt_money_or_na(kpis["cpm"]))}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
-
-
-    _card(
-        "Potential (Taager FX 1602)",
-        "N/A" if pot_taager_disp is None else money_ccy(pot_taager_disp, "USD"),
-        "Using payout FX",
-        _tone(pot_taager_disp),
-        tip=(
-            "Taager Potential (USD) = Potential Net (IQD) ÷ 1602\n"
-            "Potential Net (IQD) = (Confirmed Profit (IQD) − Ad Spend (IQD))\n"
-            f"Confirmed Profit (IQD) = {money_ccy(kpis['confirmed_profit_usd'] * fx, 'IQD')}\n"
-            f"Ad Spend (IQD) = {money_ccy(kpis['spend_usd'] * fx, 'IQD')}\n"
-        )
-    )
-
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-
-
-    # --- ROAS row (separate) ---
-    roas1, roas2 = st.columns(2)
-    roas1.metric("ROAS (Realized)", fmt_ratio(kpis["roas_real"]))
-    roas2.metric("ROAS (Potential)", fmt_ratio(kpis["roas_potential"]))
-
-
-
-
-    st.caption("Taager FX 1602 = payout rate to Payoneer (IQD → USD).")
-
-
-    st.divider()
-
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Confirmation Rate", pct(kpis["confirmation_rate"]))
-    c2.metric("Delivery Rate", pct(kpis["delivery_rate"]))
-    c3.metric("Return Rate", pct(kpis["return_rate"]))
-    c4.metric("CPM", fmt_money_or_na(kpis["cpm"]))
 
     # Charts
     funnel_png, realized_png, potential_png = make_charts_bytes(kpis)
