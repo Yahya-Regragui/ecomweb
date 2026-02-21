@@ -2652,11 +2652,7 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
 .dash-fill-green{ background: linear-gradient(90deg, #18cf7a, #17e99f); }
 .dash-fill-orange{ background: linear-gradient(90deg, #ff8e21, #ff6b00); }
 .dash-fill-violet{ background: linear-gradient(90deg, #8b59ff, #bf68ff); }
-button.save-global-btn{
-  position: fixed !important;
-  right: max(18px, calc((100vw - 1320px) / 2 + 28px)) !important;
-  top: 106px !important;
-  z-index: 10000 !important;
+button.save-inline-btn{
   width: auto !important;
   min-width: 190px !important;
   max-width: 230px !important;
@@ -2673,11 +2669,11 @@ button.save-global-btn{
   padding: 0 18px !important;
   box-shadow: 0 12px 26px rgba(34,113,255,0.38) !important;
 }
-button.save-global-btn:hover{
+button.save-inline-btn:hover{
   border-color: rgba(148,206,255,0.75) !important;
   background: linear-gradient(180deg, #44a1ff 0%, #2d74ff 100%) !important;
 }
-button.save-global-btn:before{
+button.save-inline-btn:before{
   content: "💾";
   margin-right: 10px;
 }
@@ -2691,9 +2687,7 @@ button.save-global-btn:before{
   .dash-lower-grid{ grid-template-columns: 1fr; }
   .dash-bars-grid{ grid-template-columns: 1fr; }
   .dash-mini-grid-2, .dash-mini-grid-4{ grid-template-columns: 1fr; }
-  button.save-global-btn{
-    top: 74px !important;
-    right: 12px !important;
+  button.save-inline-btn{
     min-width: 160px !important;
     max-width: 190px !important;
     min-height: 44px !important;
@@ -4392,7 +4386,11 @@ pdf_bytes = build_pdf_bytes(kpis, fx, funnel_png, realized_png, potential_png)
 xlsx_bytes = build_excel_bytes(kpis, fx, funnel_png, realized_png, potential_png)
 
 # Global save button (available from all tabs)
-save_global = st.button("Save to GitHub", key="btn_save_global")
+save_row_l, save_row_r = st.columns([6, 1.8])
+with save_row_l:
+    st.write("")
+with save_row_r:
+    save_global = st.button("Save to GitHub", key="btn_save_global", use_container_width=True)
 components.html(
     """
     <script>
@@ -4402,7 +4400,7 @@ components.html(
       const buttons = doc.querySelectorAll('button');
       buttons.forEach((btn) => {
         const t = (btn.innerText || '').trim();
-        if (t === 'Save to GitHub') btn.classList.add('save-global-btn');
+        if (t === 'Save to GitHub') btn.classList.add('save-inline-btn');
       });
     })();
     </script>
