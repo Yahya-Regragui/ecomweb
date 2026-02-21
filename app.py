@@ -3790,6 +3790,38 @@ with tab_orders:
         st.info("No orders data available yet.")
     else:
         ov = orders_df.copy()
+        date_col = None
+        for c in ["order_date", "created_at", "date", "تاريخ_الطلب", "Created At"]:
+            if c in ov.columns:
+                date_col = c
+                break
+
+        if date_col:
+            ov["_order_day"] = pd.to_datetime(ov[date_col], errors="coerce").dt.floor("D")
+            ov = ov.dropna(subset=["_order_day"])
+            if not ov.empty:
+                min_d = ov["_order_day"].min().date()
+                max_d = ov["_order_day"].max().date()
+                d_from, d_to = st.date_input(
+                    "Date range",
+                    value=(min_d, max_d),
+                    min_value=min_d,
+                    max_value=max_d,
+                    key="orders_overview_date_range",
+                )
+                if isinstance(d_from, tuple) and len(d_from) == 2:
+                    d_from, d_to = d_from
+                if d_from and d_to:
+                    ov = ov[(ov["_order_day"].dt.date >= d_from) & (ov["_order_day"].dt.date <= d_to)].copy()
+                st.caption(f"Showing orders from {d_from} to {d_to}.")
+            else:
+                st.info("No valid order dates found for date filtering.")
+        else:
+            st.caption("Date range filter unavailable (no order date column found).")
+
+        if ov.empty:
+            st.info("No orders found for the selected date range.")
+
         for c in ["requested_units", "confirmed_units", "delivered_units", "returned_units"]:
             if c in ov.columns:
                 ov[c] = pd.to_numeric(ov[c], errors="coerce").fillna(0)
