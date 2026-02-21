@@ -4047,21 +4047,34 @@ def chatgpt_generate_ai_panel(payload_json: str, user_focus: str = "") -> dict:
     focus_line = f"Focus: {focus}" if focus else ""
     prompt = (
         "You are an ecommerce performance analyst.\n"
-        "Return ONLY valid JSON with this exact shape:\n"
+        "Return STRICT JSON ONLY.\n"
+        "Return EXACT JSON shape:\n"
         "{\n"
-        '  "overview": "string",\n'
-        '  "insights": [\n'
-        '    {"title":"string","body":"string","tone":"bad|good|info"},\n'
-        '    {"title":"string","body":"string","tone":"bad|good|info"},\n'
-        '    {"title":"string","body":"string","tone":"bad|good|info"}\n'
+        '  "overview": "string (1-2 sentences, includes net after ads + main bottleneck + next action)",\n'
+        '  "scoreboard": [\n'
+        '    {"metric":"Net after ads","value":"...","delta_vs_yesterday":"...","delta_vs_7d":"...","status":"good|warn|bad","why":"..."},\n'
+        '    {"metric":"Delivered ROAS","value":"...","delta_vs_yesterday":"...","delta_vs_7d":"...","status":"good|warn|bad","why":"..."},\n'
+        '    {"metric":"Confirmation rate","value":"...","delta_vs_yesterday":"...","delta_vs_7d":"...","status":"good|warn|bad","why":"..."},\n'
+        '    {"metric":"Delivery rate","value":"...","delta_vs_yesterday":"...","delta_vs_7d":"...","status":"good|warn|bad","why":"..."}\n'
         "  ],\n"
-        '  "recommendations": ["string","string","string","string"]\n'
+        '  "diagnostics": [\n'
+        '    {"stage":"Ads efficiency","finding":"...","evidence":["metric=..., value=..., delta=..."],"likely_causes":["..."],"tests":["..."]},\n'
+        '    {"stage":"Confirmation","finding":"...","evidence":["..."],"likely_causes":["..."],"tests":["..."]},\n'
+        '    {"stage":"Delivery","finding":"...","evidence":["..."],"likely_causes":["..."],"tests":["..."]}\n'
+        "  ],\n"
+        '  "actions": [\n'
+        '    {"priority":1,"type":"Scale|Hold|Cut|FixOps|ImproveCreative|Investigate","entity":"Campaign|Product|Store","name":"...","what_to_do":"...","target":"...","why":["..."],"expected_impact":"...","confidence":"high|medium|low"}\n'
+        "  ],\n"
+        '  "questions_to_answer_next": ["...","...","..."]\n'
         "}\n"
         "Rules:\n"
-        "- Use numbers from JSON payload.\n"
-        "- Keep overview to 1-3 sentences.\n"
-        "- Keep each recommendation actionable and concise.\n"
-        "- If data is missing, state it clearly in overview.\n"
+        "- Use ONLY provided JSON payload. Do not invent metrics.\n"
+        "- ALWAYS reference at least one metric in each action `why`.\n"
+        "- Use today/yesterday/last_7d when available; include deltas when possible.\n"
+        "- Never recommend scaling when net after ads is negative; in that case use FixOps/Investigate first.\n"
+        "- Only recommend budget reallocation if payload has campaign spend/ROAS; otherwise explicitly say missing.\n"
+        "- If product-level or campaign-level data is missing, state it in overview and questions_to_answer_next.\n"
+        "- If a field is unavailable, state what is missing and how to add it.\n"
         f"{focus_line}\n\n"
         f"JSON payload:\n{payload_json}"
     )
@@ -4253,24 +4266,48 @@ def render_ai_summary_v2(
     with h2:
         refresh = st.button("Refresh", key="ai2_refresh", use_container_width=True, disabled=not api_ready)
 
+    def _is_old_schema(panel_obj: dict) -> bool:
+        if not isinstance(panel_obj, dict):
+            return False
+        has_old = ("insights" in panel_obj) or ("recommendations" in panel_obj)
+        has_new = ("scoreboard" in panel_obj) or ("diagnostics" in panel_obj) or ("actions" in panel_obj)
+        return bool(has_old and not has_new)
+
+    def _normalize_panel(panel_obj: dict) -> dict:
+        if not isinstance(panel_obj, dict):
+            return {}
+        out = dict(panel_obj)
+        out["overview"] = str(out.get("overview", "") or "").strip()
+        out["scoreboard"] = out.get("scoreboard", []) if isinstance(out.get("scoreboard", []), list) else []
+        out["diagnostics"] = out.get("diagnostics", []) if isinstance(out.get("diagnostics", []), list) else []
+        out["actions"] = out.get("actions", []) if isinstance(out.get("actions", []), list) else []
+        out["questions_to_answer_next"] = out.get("questions_to_answer_next", []) if isinstance(out.get("questions_to_answer_next", []), list) else []
+        return out
+
+    if _is_old_schema(st.session_state.ai2_panel):
+        st.warning("AI Summary format changed. Refreshing to generate the new actionable schema.")
+        st.session_state.ai2_panel = {}
+
     if refresh and api_ready:
         with st.spinner("Refreshing AI summary..."):
             data = chatgpt_generate_ai_panel(payload_json, "")
         if data:
-            st.session_state.ai2_panel = data
+            st.session_state.ai2_panel = _normalize_panel(data)
             st.session_state.ai2_updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if not st.session_state.ai2_panel and api_ready:
         with st.spinner("Generating AI summary..."):
             data = chatgpt_generate_ai_panel(payload_json, "")
         if data:
-            st.session_state.ai2_panel = data
+            st.session_state.ai2_panel = _normalize_panel(data)
             st.session_state.ai2_updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    panel = st.session_state.ai2_panel or {}
-    overview = str(panel.get("overview", "Generate AI summary to see the overview.")).strip()
-    insights = panel.get("insights", []) if isinstance(panel.get("insights", []), list) else []
-    recs = panel.get("recommendations", []) if isinstance(panel.get("recommendations", []), list) else []
+    panel = _normalize_panel(st.session_state.ai2_panel or {})
+    overview = panel.get("overview") or "Generate AI summary to see the overview."
+    scoreboard = panel.get("scoreboard", [])
+    diagnostics = panel.get("diagnostics", [])
+    actions = panel.get("actions", [])
+    questions_next = panel.get("questions_to_answer_next", [])
 
     st.markdown('<div class="ai2-wrap">', unsafe_allow_html=True)
     st.markdown(
@@ -4283,50 +4320,94 @@ def render_ai_summary_v2(
         unsafe_allow_html=True,
     )
 
-    st.markdown('<div class="ai2-sec-title">Key Insights</div>', unsafe_allow_html=True)
-    cards = insights[:3] if insights else [
-        {"title": "Delivery Rate Concern", "body": "Delivery rate may be limiting realized profitability.", "tone": "bad"},
-        {"title": "Strong Confirmation Rate", "body": "Confirmation looks healthy and indicates demand quality.", "tone": "good"},
-        {"title": "ROAS Gap", "body": "Potential ROAS vs realized ROAS suggests fulfillment improvements are needed.", "tone": "info"},
+    st.markdown('<div class="ai2-sec-title">Scoreboard</div>', unsafe_allow_html=True)
+    score_defaults = [
+        {"metric": "Net after ads", "value": "N/A", "delta_vs_yesterday": "N/A", "delta_vs_7d": "N/A", "status": "warn", "why": "Missing day-level context."},
+        {"metric": "Delivered ROAS", "value": "N/A", "delta_vs_yesterday": "N/A", "delta_vs_7d": "N/A", "status": "warn", "why": "Missing day-level context."},
+        {"metric": "Confirmation rate", "value": "N/A", "delta_vs_yesterday": "N/A", "delta_vs_7d": "N/A", "status": "warn", "why": "Missing day-level context."},
+        {"metric": "Delivery rate", "value": "N/A", "delta_vs_yesterday": "N/A", "delta_vs_7d": "N/A", "status": "warn", "why": "Missing day-level context."},
     ]
-    c1, c2, c3 = st.columns(3)
-    cols = [c1, c2, c3]
-    for i, card in enumerate(cards[:3]):
-        tone = str(card.get("tone", "info")).lower()
-        tone_cls = "ai2-ins-info"
-        if tone == "bad":
-            tone_cls = "ai2-ins-bad"
-        elif tone == "good":
-            tone_cls = "ai2-ins-good"
-        with cols[i]:
+    scores = scoreboard[:4] if scoreboard else score_defaults
+    s1, s2, s3, s4 = st.columns(4)
+    scol = [s1, s2, s3, s4]
+    for i, sc in enumerate(scores[:4]):
+        status = str(sc.get("status", "warn")).lower()
+        tone_cls = "ai2-ins-info" if status == "good" else ("ai2-ins-bad" if status == "bad" else "ai2-overview")
+        with scol[i]:
             st.markdown(
                 f"""
                 <div class="ai2-ins {tone_cls}">
-                  <div class="ai2-ins-title">{_esc(str(card.get("title", "Insight")))} </div>
-                  <div class="ai2-ins-body">{_esc(str(card.get("body", "")))}</div>
+                  <div class="ai2-ins-title">{_esc(str(sc.get("metric", "Metric")))}</div>
+                  <div class="ai2-ins-body"><b>Value:</b> {_esc(str(sc.get("value", "N/A")))}</div>
+                  <div class="ai2-ins-body"><b>vs Yesterday:</b> {_esc(str(sc.get("delta_vs_yesterday", "N/A")))}</div>
+                  <div class="ai2-ins-body"><b>vs 7d:</b> {_esc(str(sc.get("delta_vs_7d", "N/A")))}</div>
+                  <div class="ai2-ins-body"><b>Why:</b> {_esc(str(sc.get("why", "")))}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
-    st.markdown('<div class="ai2-panel"><div class="ai2-sec-title">AI Recommendations</div>', unsafe_allow_html=True)
-    rec_items = recs[:4] if recs else [
-        "Improve delivery logistics to increase delivered share of confirmed orders.",
-        "Investigate return reasons and address top causes by SKU.",
-        "Shift budget toward campaigns with stronger realized efficiency.",
-        "Maintain high-performing targeting while reducing waste.",
+    st.markdown('<div class="ai2-sec-title">Diagnostics</div>', unsafe_allow_html=True)
+    diag_items = diagnostics if diagnostics else [
+        {"stage": "Ads efficiency", "finding": "Missing diagnostics", "evidence": ["No data"], "likely_causes": ["Missing campaign diagnostics"], "tests": ["Refresh with valid payload"]},
+        {"stage": "Confirmation", "finding": "Missing diagnostics", "evidence": ["No data"], "likely_causes": ["Missing order diagnostics"], "tests": ["Upload Daily Orders"]},
+        {"stage": "Delivery", "finding": "Missing diagnostics", "evidence": ["No data"], "likely_causes": ["Missing delivery diagnostics"], "tests": ["Upload Daily Orders"]},
     ]
-    for idx, rec in enumerate(rec_items, start=1):
+    for d in diag_items[:3]:
+        stage = str(d.get("stage", "Stage"))
+        finding = str(d.get("finding", ""))
+        evidence = d.get("evidence", []) if isinstance(d.get("evidence", []), list) else []
+        causes = d.get("likely_causes", []) if isinstance(d.get("likely_causes", []), list) else []
+        tests = d.get("tests", []) if isinstance(d.get("tests", []), list) else []
+        with st.expander(f"{stage}: {finding}", expanded=False):
+            st.markdown("**Evidence**")
+            for x in evidence[:6]:
+                st.markdown(f"- {x}")
+            st.markdown("**Likely causes**")
+            for x in causes[:6]:
+                st.markdown(f"- {x}")
+            st.markdown("**Tests**")
+            for x in tests[:6]:
+                st.markdown(f"- {x}")
+
+    st.markdown('<div class="ai2-sec-title">Action Plan (24–48h)</div>', unsafe_allow_html=True)
+    action_items = actions if actions else [
+        {
+            "priority": 1,
+            "type": "Investigate",
+            "entity": "Store",
+            "name": "Store",
+            "what_to_do": "Generate AI summary again after adding missing data.",
+            "target": "Have complete scoreboard and diagnostics.",
+            "why": ["Missing structured action data from model output."],
+            "expected_impact": "Higher confidence recommendations.",
+            "confidence": "low",
+        }
+    ]
+    for a in sorted(action_items, key=lambda x: int(x.get("priority", 99) or 99))[:8]:
+        why_list = a.get("why", []) if isinstance(a.get("why", []), list) else []
+        why_text = "; ".join([str(x) for x in why_list[:3]]) if why_list else "No metric evidence provided."
         st.markdown(
             f"""
-            <div class="ai2-rec-item">
-              <div class="ai2-rec-num">{idx}</div>
-              <div class="ai2-rec-text">{_esc(str(rec))}</div>
+            <div class="ai2-panel">
+              <div class="ai2-rec-item">
+                <div class="ai2-rec-num">{_esc(str(a.get("priority", "?")))}</div>
+                <div class="ai2-rec-text"><b>{_esc(str(a.get("type", "Action")))}</b> • {_esc(str(a.get("entity", "Store")))} • {_esc(str(a.get("name", "Store")))}</div>
+              </div>
+              <div class="ai2-ins-body"><b>Do:</b> {_esc(str(a.get("what_to_do", "")))}</div>
+              <div class="ai2-ins-body"><b>Target:</b> {_esc(str(a.get("target", "")))}</div>
+              <div class="ai2-ins-body"><b>Why:</b> {_esc(why_text)}</div>
+              <div class="ai2-ins-body"><b>Expected impact:</b> {_esc(str(a.get("expected_impact", "")))}</div>
+              <div class="ai2-ins-body"><b>Confidence:</b> {_esc(str(a.get("confidence", "medium")))}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
-    st.markdown("</div>", unsafe_allow_html=True)
+
+    if questions_next:
+        st.markdown('<div class="ai2-sec-title">Questions To Answer Next</div>', unsafe_allow_html=True)
+        for qn in questions_next[:3]:
+            st.markdown(f"- {qn}")
 
     st.markdown('<div class="ai2-panel"><div class="ai2-sec-title">Ask AI Assistant</div>', unsafe_allow_html=True)
     st.caption("Quick questions to get started:")
