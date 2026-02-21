@@ -2527,6 +2527,12 @@ button.save-global-btn{
   right: 24px !important;
   top: 14px !important;
   z-index: 10000 !important;
+  width: auto !important;
+  min-width: 190px !important;
+  max-width: 230px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   border-radius: 14px !important;
   border: 1px solid rgba(108,172,255,0.55) !important;
   background: linear-gradient(180deg, #2d8eff 0%, #1f62f0 100%) !important;
@@ -2558,6 +2564,8 @@ button.save-global-btn:before{
   button.save-global-btn{
     top: 10px !important;
     right: 12px !important;
+    min-width: 160px !important;
+    max-width: 190px !important;
     min-height: 44px !important;
     padding: 0 12px !important;
     font-size: 0.95rem !important;
