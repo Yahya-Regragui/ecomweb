@@ -4078,18 +4078,8 @@ def chatgpt_generate_ai_panel(payload_json: str, user_focus: str = "") -> dict:
         f"{focus_line}\n\n"
         f"JSON payload:\n{payload_json}"
     )
-    try:
-        r = client.responses.create(
-            model=st.secrets.get("OPENAI_MODEL", "gpt-4.1-mini"),
-            input=[
-                {"role": "system", "content": "You return strict JSON only."},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.35,
-            max_output_tokens=700,
-        )
-        txt = getattr(r, "output_text", "") or ""
-        txt = txt.strip()
+    def _parse_json_text(txt: str) -> dict:
+        txt = (txt or "").strip()
         if not txt:
             return {}
         try:
@@ -4098,11 +4088,25 @@ def chatgpt_generate_ai_panel(payload_json: str, user_focus: str = "") -> dict:
             s = txt.find("{")
             e = txt.rfind("}")
             out = json.loads(txt[s:e + 1]) if s >= 0 and e > s else {}
-        if not isinstance(out, dict):
-            return {}
-        return out
-    except Exception:
-        return {}
+        return out if isinstance(out, dict) else {}
+
+    for _ in range(2):
+        try:
+            r = client.responses.create(
+                model=st.secrets.get("OPENAI_MODEL", "gpt-4.1-mini"),
+                input=[
+                    {"role": "system", "content": "Return strict JSON only. No markdown, no prose outside JSON."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.35,
+                max_output_tokens=700,
+            )
+            out = _parse_json_text(getattr(r, "output_text", "") or "")
+            if out:
+                return out
+        except Exception:
+            pass
+    return {}
 
 
 def _build_ai_v2_payload(
@@ -4220,6 +4224,152 @@ def _build_ai_v2_payload(
     return payload, today_label
 
 
+def _build_ai2_fallback_panel(payload: dict) -> dict:
+    overall = payload.get("overall", {}) if isinstance(payload, dict) else {}
+    windows = payload.get("windows", {}) if isinstance(payload, dict) else {}
+    today = windows.get("today", {}) if isinstance(windows.get("today", {}), dict) else {}
+    yday = windows.get("yesterday", {}) if isinstance(windows.get("yesterday", {}), dict) else {}
+    w7 = windows.get("last_7d", {}) if isinstance(windows.get("last_7d", {}), dict) else {}
+    campaigns_top = payload.get("campaigns_top", []) if isinstance(payload.get("campaigns_top", []), list) else []
+    has_campaigns = bool(campaigns_top)
+
+    def _f(x, d=0.0):
+        try:
+            return float(x)
+        except Exception:
+            return d
+
+    def _fmt_money(x):
+        try:
+            return f"${float(x):,.2f}"
+        except Exception:
+            return "N/A"
+
+    def _fmt_pct(x):
+        try:
+            return f"{float(x)*100:.1f}%"
+        except Exception:
+            return "N/A"
+
+    def _fmt_num(x):
+        try:
+            v = float(x)
+            return f"{v:+.2f}"
+        except Exception:
+            return "N/A"
+
+    net_today = _f(today.get("net"))
+    net_y = _f(yday.get("net"))
+    net_7 = _f(w7.get("net")) / 7.0 if _f(w7.get("days")) else 0.0
+    roas = overall.get("roas_delivered")
+    roas_val = _f(roas, 0.0) if roas is not None else None
+    conf = _f(overall.get("confirmation_rate"))
+    deliv = _f(overall.get("delivery_rate"))
+
+    score = [
+        {
+            "metric": "Net after ads",
+            "value": _fmt_money(net_today),
+            "delta_vs_yesterday": _fmt_money(net_today - net_y),
+            "delta_vs_7d": _fmt_money(net_today - net_7),
+            "status": "good" if net_today > 0 else ("warn" if net_today == 0 else "bad"),
+            "why": f"today_net={_fmt_money(net_today)}, yesterday_net={_fmt_money(net_y)}",
+        },
+        {
+            "metric": "Delivered ROAS",
+            "value": "N/A" if roas_val is None else f"{roas_val:.2f}",
+            "delta_vs_yesterday": "N/A",
+            "delta_vs_7d": "N/A",
+            "status": "good" if (roas_val is not None and roas_val >= 1.5) else ("warn" if roas_val is not None else "warn"),
+            "why": "roas_delivered from payload overall",
+        },
+        {
+            "metric": "Confirmation rate",
+            "value": _fmt_pct(conf),
+            "delta_vs_yesterday": "N/A",
+            "delta_vs_7d": "N/A",
+            "status": "good" if conf >= 0.6 else ("warn" if conf >= 0.45 else "bad"),
+            "why": f"confirmation_rate={_fmt_pct(conf)}",
+        },
+        {
+            "metric": "Delivery rate",
+            "value": _fmt_pct(deliv),
+            "delta_vs_yesterday": "N/A",
+            "delta_vs_7d": "N/A",
+            "status": "good" if deliv >= 0.75 else ("warn" if deliv >= 0.6 else "bad"),
+            "why": f"delivery_rate={_fmt_pct(deliv)}",
+        },
+    ]
+
+    diagnostics = [
+        {
+            "stage": "Ads efficiency",
+            "finding": "ROAS and net monitoring",
+            "evidence": [f"delivered_roas={score[1]['value']}", f"net_today={score[0]['value']}"],
+            "likely_causes": ["Spend concentration on lower-return traffic", "Creative or audience fatigue"],
+            "tests": ["Shift 15% budget to top campaign by spend efficiency", "Refresh 2 creatives and compare CPR/ROAS in 24h"],
+        },
+        {
+            "stage": "Confirmation",
+            "finding": "Confirmation performance review",
+            "evidence": [f"confirmation_rate={score[2]['value']}"],
+            "likely_causes": ["Lead quality variance", "Call-center SLA"],
+            "tests": ["Tag leads by source and compare confirmation by source", "Call within 15 minutes on fresh leads"],
+        },
+        {
+            "stage": "Delivery",
+            "finding": "Delivery conversion gap",
+            "evidence": [f"delivery_rate={score[3]['value']}"],
+            "likely_causes": ["Fulfillment delays", "Address/phone quality issues"],
+            "tests": ["Track failed delivery reasons by top SKUs", "Pilot courier/zone routing change for 48h"],
+        },
+    ]
+
+    top_campaign_name = campaigns_top[0].get("campaign") if has_campaigns else "Store"
+    actions = [
+        {
+            "priority": 1,
+            "type": "FixOps" if net_today < 0 else "Investigate",
+            "entity": "Store",
+            "name": "Store",
+            "what_to_do": "Improve delivery execution on confirmed orders before scaling spend.",
+            "target": "Increase delivery rate by +3 to +5 points in next 48h.",
+            "why": [f"delivery_rate={score[3]['value']}", f"net_after_ads={score[0]['value']}"],
+            "expected_impact": "Higher realized profit and better ROAS realization.",
+            "confidence": "medium",
+        },
+        {
+            "priority": 2,
+            "type": "Hold" if net_today >= 0 else "Cut",
+            "entity": "Campaign" if has_campaigns else "Store",
+            "name": str(top_campaign_name),
+            "what_to_do": "Keep budget controlled and reallocate only after confirming efficiency.",
+            "target": "Maintain non-negative net after ads daily.",
+            "why": [f"roas_delivered={score[1]['value']}", f"net_after_ads={score[0]['value']}"],
+            "expected_impact": "Protect downside while preserving profitable volume.",
+            "confidence": "medium",
+        },
+    ]
+
+    questions = []
+    if not has_campaigns:
+        questions.append("Campaign-level spend/ROAS by day is missing. Add campaign daily performance for budget reallocation decisions.")
+    questions.append("Which top SKUs contribute most to failed deliveries in the last 7 days?")
+    questions.append("What share of confirmed orders is contacted within 15 minutes?")
+
+    overview = (
+        f"Net after ads is {score[0]['value']} with delivered ROAS at {score[1]['value']}. "
+        f"The main bottleneck is delivery execution ({score[3]['value']}); prioritize operational fixes before scaling."
+    )
+    return {
+        "overview": overview,
+        "scoreboard": score,
+        "diagnostics": diagnostics,
+        "actions": actions,
+        "questions_to_answer_next": questions[:3],
+    }
+
+
 def render_ai_summary_v2(
     *,
     kpis: dict,
@@ -4293,16 +4443,23 @@ def render_ai_summary_v2(
             data = chatgpt_generate_ai_panel(payload_json, "")
         if data:
             st.session_state.ai2_panel = _normalize_panel(data)
-            st.session_state.ai2_updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            st.session_state.ai2_panel = _build_ai2_fallback_panel(payload)
+        st.session_state.ai2_updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if not st.session_state.ai2_panel and api_ready:
         with st.spinner("Generating AI summary..."):
             data = chatgpt_generate_ai_panel(payload_json, "")
         if data:
             st.session_state.ai2_panel = _normalize_panel(data)
-            st.session_state.ai2_updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            st.session_state.ai2_panel = _build_ai2_fallback_panel(payload)
+        st.session_state.ai2_updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     panel = _normalize_panel(st.session_state.ai2_panel or {})
+    if not panel.get("scoreboard"):
+        panel = _normalize_panel(_build_ai2_fallback_panel(payload))
+        st.session_state.ai2_panel = panel
     overview = panel.get("overview") or "Generate AI summary to see the overview."
     scoreboard = panel.get("scoreboard", [])
     diagnostics = panel.get("diagnostics", [])
