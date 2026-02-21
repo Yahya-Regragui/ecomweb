@@ -2277,6 +2277,136 @@ button.ai-btn-clear{
   padding: 14px;
   background: rgba(9,15,22,0.48);
 }
+.ai2-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.ai2-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.ai2-title{
+  font-size:2rem;
+  font-weight:800;
+  color:#f1f6fb;
+  letter-spacing:-0.02em;
+}
+.ai2-sub{
+  color:#9db1c7;
+  font-size:1rem;
+  margin-top:2px;
+}
+.ai2-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  border:1px solid rgba(130,156,187,0.36);
+  background: rgba(33,47,69,0.76);
+  color:#e8f0f8;
+  font-weight:700;
+  padding:8px 14px;
+}
+.ai2-panel{
+  border:1px solid rgba(98,122,154,0.26);
+  border-radius:16px;
+  background: linear-gradient(140deg, rgba(9,19,39,0.92), rgba(6,14,31,0.86));
+  padding:18px;
+}
+.ai2-overview{
+  border:1px solid rgba(168,98,255,0.42);
+  border-radius:16px;
+  background: linear-gradient(145deg, rgba(42,18,58,0.72), rgba(28,14,49,0.66));
+  padding:18px;
+}
+.ai2-over-title{
+  color:#f6ebff;
+  font-size:1.65rem;
+  font-weight:800;
+  margin-bottom:8px;
+}
+.ai2-over-text{
+  color:#d8cae7;
+  font-size:1.28rem;
+  line-height:1.55;
+}
+.ai2-sec-title{
+  color:#f1f6fb;
+  font-size:1.9rem;
+  font-weight:800;
+  margin-bottom:10px;
+}
+.ai2-ins-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:12px;
+}
+.ai2-ins{
+  border-radius:14px;
+  border:1px solid rgba(111,142,176,0.28);
+  padding:16px;
+}
+.ai2-ins-bad{ background: linear-gradient(145deg, rgba(58,20,20,0.72), rgba(42,13,14,0.66)); border-color: rgba(255,130,72,0.42); }
+.ai2-ins-good{ background: linear-gradient(145deg, rgba(14,56,48,0.72), rgba(10,43,36,0.66)); border-color: rgba(38,224,152,0.38); }
+.ai2-ins-info{ background: linear-gradient(145deg, rgba(16,36,80,0.72), rgba(9,26,62,0.66)); border-color: rgba(78,152,255,0.38); }
+.ai2-ins-title{
+  color:#eef4fb;
+  font-size:1.25rem;
+  font-weight:800;
+  margin-bottom:8px;
+}
+.ai2-ins-body{
+  color:#c0cfdf;
+  font-size:1.08rem;
+  line-height:1.55;
+}
+.ai2-rec-item{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin:8px 0;
+}
+.ai2-rec-num{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background: linear-gradient(145deg, #5f3ad8, #7d44ff);
+  color:#f3efff;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+}
+.ai2-rec-text{
+  color:#dde8f5;
+  font-size:1.22rem;
+  line-height:1.5;
+}
+.ai2-chipwrap{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:10px;
+}
+.ai2-answer{
+  margin-top:12px;
+  border:1px solid rgba(120,146,176,0.3);
+  border-radius:12px;
+  background: rgba(14,24,42,0.66);
+  padding:14px;
+}
+.ai2-answer h4{
+  margin:0 0 8px 0;
+  color:#eaf2fb;
+}
+.ai2-answer p{
+  color:#cad7e6;
+  line-height:1.6;
+}
 
 /* Floating Quick KPIs expander */
 div.kpi-fixed-expander {
@@ -3912,6 +4042,334 @@ def render_ai_summary(
     st.markdown("</div>", unsafe_allow_html=True)
 
 
+@st.cache_data(show_spinner=False)
+def chatgpt_generate_ai_panel(payload_json: str, user_focus: str = "") -> dict:
+    api_key = st.secrets.get("OPENAI_API_KEY")
+    if not api_key or OpenAI is None:
+        return {}
+
+    client = OpenAI(api_key=api_key)
+    focus = user_focus.strip()
+    focus_line = f"Focus: {focus}" if focus else ""
+    prompt = (
+        "You are an ecommerce performance analyst.\n"
+        "Return ONLY valid JSON with this exact shape:\n"
+        "{\n"
+        '  "overview": "string",\n'
+        '  "insights": [\n'
+        '    {"title":"string","body":"string","tone":"bad|good|info"},\n'
+        '    {"title":"string","body":"string","tone":"bad|good|info"},\n'
+        '    {"title":"string","body":"string","tone":"bad|good|info"}\n'
+        "  ],\n"
+        '  "recommendations": ["string","string","string","string"]\n'
+        "}\n"
+        "Rules:\n"
+        "- Use numbers from JSON payload.\n"
+        "- Keep overview to 1-3 sentences.\n"
+        "- Keep each recommendation actionable and concise.\n"
+        "- If data is missing, state it clearly in overview.\n"
+        f"{focus_line}\n\n"
+        f"JSON payload:\n{payload_json}"
+    )
+    try:
+        r = client.responses.create(
+            model=st.secrets.get("OPENAI_MODEL", "gpt-4.1-mini"),
+            input=[
+                {"role": "system", "content": "You return strict JSON only."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.35,
+            max_output_tokens=700,
+        )
+        txt = getattr(r, "output_text", "") or ""
+        txt = txt.strip()
+        if not txt:
+            return {}
+        try:
+            out = json.loads(txt)
+        except Exception:
+            s = txt.find("{")
+            e = txt.rfind("}")
+            out = json.loads(txt[s:e + 1]) if s >= 0 and e > s else {}
+        if not isinstance(out, dict):
+            return {}
+        return out
+    except Exception:
+        return {}
+
+
+def _build_ai_v2_payload(
+    *,
+    kpis: dict,
+    kpis_disp: dict,
+    daily_orders_df: Optional[pd.DataFrame],
+    campaigns_df: Optional[pd.DataFrame],
+    orders_df: Optional[pd.DataFrame],
+    fx: float,
+    currency: str,
+) -> tuple[dict, str]:
+    today_row = {}
+    yesterday_row = {}
+    windows = {}
+    today_label = "N/A"
+
+    if daily_orders_df is not None and not getattr(daily_orders_df, "empty", True):
+        ddf = parse_daily_orders(daily_orders_df)
+        daily_summary = build_daily_summary(ddf, campaigns_df if campaigns_df is not None else pd.DataFrame(), fx, currency)
+        if daily_summary is not None and not daily_summary.empty and "day" in daily_summary.columns:
+            daily_summary = daily_summary.sort_values("day")
+            days = sorted(pd.to_datetime(daily_summary["day"], errors="coerce").dropna().dt.normalize().unique())
+            if days:
+                today = pd.Timestamp(days[-2]).normalize() if len(days) >= 2 else pd.Timestamp(days[-1]).normalize()
+                yesterday = (today - pd.Timedelta(days=1)).normalize()
+                today_label = str(today.date())
+
+                def _row_for(day_ts: pd.Timestamp) -> dict:
+                    r = daily_summary[daily_summary["day"] == day_ts]
+                    return {} if r.empty else r.iloc[0].to_dict()
+
+                today_row = _row_for(today)
+                yesterday_row = _row_for(yesterday)
+
+                def _window_sum(start_day: pd.Timestamp, end_day: pd.Timestamp) -> dict:
+                    w = daily_summary[(daily_summary["day"] >= start_day) & (daily_summary["day"] <= end_day)].copy()
+                    if w.empty:
+                        return {}
+                    return {
+                        "start": str(pd.Timestamp(start_day).date()),
+                        "end": str(pd.Timestamp(end_day).date()),
+                        "orders": _safe_int(w["orders_count"].sum()),
+                        "profit": _safe_float(w["profit_disp"].sum()),
+                        "spend": _safe_float(w["spend_disp"].sum()),
+                        "net": _safe_float(w["net_disp"].sum()),
+                    }
+
+                windows = {
+                    "today": _window_sum(today, today),
+                    "yesterday": _window_sum(yesterday, yesterday),
+                    "last_7d": _window_sum((today - pd.Timedelta(days=6)).normalize(), today),
+                    "mtd": _window_sum(today.replace(day=1).normalize(), today),
+                }
+
+    campaigns_top = []
+    campaign_context = {"today_campaigns": [], "meta": {"today_date": today_label}}
+    if campaigns_df is not None and not getattr(campaigns_df, "empty", True) and "Reporting starts" in campaigns_df.columns:
+        c = campaigns_df.copy()
+        c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
+        c = c.dropna(subset=["Reporting starts"])
+        c["day"] = c["Reporting starts"].dt.floor("D")
+        name_col = "Campaign name" if "Campaign name" in c.columns else ("Campaign" if "Campaign" in c.columns else None)
+        if name_col and "Amount spent (USD)" in c.columns:
+            c["Amount spent (USD)"] = pd.to_numeric(c["Amount spent (USD)"], errors="coerce").fillna(0)
+            if "Results" in c.columns:
+                c["Results"] = pd.to_numeric(c["Results"], errors="coerce").fillna(0)
+            else:
+                c["Results"] = 0.0
+            agg = (
+                c.groupby(name_col, as_index=False)[["Amount spent (USD)", "Results"]]
+                .sum()
+                .rename(columns={name_col: "campaign", "Amount spent (USD)": "spend_usd", "Results": "results"})
+                .sort_values("spend_usd", ascending=False)
+                .head(12)
+            )
+            campaigns_top = [
+                {"campaign": str(r["campaign"]), "spend_usd": float(r["spend_usd"]), "results": float(r["results"])}
+                for _, r in agg.iterrows()
+            ]
+
+            if today_label != "N/A":
+                tday = pd.to_datetime(today_label, errors="coerce")
+                ct = c[c["day"] == tday].copy()
+                if not ct.empty:
+                    ta = (
+                        ct.groupby(name_col, as_index=False)[["Amount spent (USD)", "Results"]]
+                        .sum()
+                        .rename(columns={name_col: "campaign", "Amount spent (USD)": "spend_usd", "Results": "results"})
+                        .sort_values("spend_usd", ascending=False)
+                    )
+                    campaign_context["today_campaigns"] = [
+                        {"campaign": str(r["campaign"]), "spend_usd": float(r["spend_usd"]), "results": float(r["results"])}
+                        for _, r in ta.iterrows()
+                    ]
+
+    payload = _build_llm_payload(
+        kpis=kpis,
+        kpis_disp=kpis_disp,
+        today_row=today_row,
+        yesterday_row=yesterday_row,
+        currency=currency,
+        windows=windows,
+        products_top=[],
+        campaigns_top=campaigns_top,
+        campaign_context=campaign_context,
+        detailed_context={},
+        data_quality={
+            "has_daily_orders": daily_orders_df is not None and not getattr(daily_orders_df, "empty", True),
+            "has_campaigns": campaigns_df is not None and not getattr(campaigns_df, "empty", True),
+            "has_orders_catalog": orders_df is not None and not getattr(orders_df, "empty", True),
+        },
+        spend_allocation_method="order_share",
+    )
+    return payload, today_label
+
+
+def render_ai_summary_v2(
+    *,
+    kpis: dict,
+    kpis_disp: dict,
+    daily_orders_df: Optional[pd.DataFrame],
+    campaigns_df: Optional[pd.DataFrame],
+    orders_df: Optional[pd.DataFrame],
+    fx: float,
+    currency: str,
+    last_saved: Optional[str] = None,
+):
+    payload, today_label = _build_ai_v2_payload(
+        kpis=kpis,
+        kpis_disp=kpis_disp,
+        daily_orders_df=daily_orders_df,
+        campaigns_df=campaigns_df,
+        orders_df=orders_df,
+        fx=fx,
+        currency=currency,
+    )
+    payload_json = json.dumps(_json_safe(payload), ensure_ascii=False)
+    api_ready = bool(st.secrets.get("OPENAI_API_KEY"))
+
+    if "ai2_panel" not in st.session_state:
+        st.session_state.ai2_panel = {}
+    if "ai2_updated_at" not in st.session_state:
+        st.session_state.ai2_updated_at = ""
+    if "ai2_answer" not in st.session_state:
+        st.session_state.ai2_answer = ""
+
+    h1, h2 = st.columns([4, 1])
+    with h1:
+        st.markdown(
+            f"""
+            <div class="ai2-head">
+              <div>
+                <div class="ai2-title">AI Performance Summary</div>
+                <div class="ai2-sub">Powered by ChatGPT • Analysis day: {today_label} • Last updated {st.session_state.ai2_updated_at or "not generated yet"}</div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with h2:
+        refresh = st.button("Refresh", key="ai2_refresh", use_container_width=True, disabled=not api_ready)
+
+    if refresh and api_ready:
+        with st.spinner("Refreshing AI summary..."):
+            data = chatgpt_generate_ai_panel(payload_json, "")
+        if data:
+            st.session_state.ai2_panel = data
+            st.session_state.ai2_updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    if not st.session_state.ai2_panel and api_ready:
+        with st.spinner("Generating AI summary..."):
+            data = chatgpt_generate_ai_panel(payload_json, "")
+        if data:
+            st.session_state.ai2_panel = data
+            st.session_state.ai2_updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    panel = st.session_state.ai2_panel or {}
+    overview = str(panel.get("overview", "Generate AI summary to see the overview.")).strip()
+    insights = panel.get("insights", []) if isinstance(panel.get("insights", []), list) else []
+    recs = panel.get("recommendations", []) if isinstance(panel.get("recommendations", []), list) else []
+
+    st.markdown('<div class="ai2-wrap">', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="ai2-overview">
+          <div class="ai2-over-title">Overview</div>
+          <div class="ai2-over-text">{_esc(overview)}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown('<div class="ai2-sec-title">Key Insights</div>', unsafe_allow_html=True)
+    cards = insights[:3] if insights else [
+        {"title": "Delivery Rate Concern", "body": "Delivery rate may be limiting realized profitability.", "tone": "bad"},
+        {"title": "Strong Confirmation Rate", "body": "Confirmation looks healthy and indicates demand quality.", "tone": "good"},
+        {"title": "ROAS Gap", "body": "Potential ROAS vs realized ROAS suggests fulfillment improvements are needed.", "tone": "info"},
+    ]
+    c1, c2, c3 = st.columns(3)
+    cols = [c1, c2, c3]
+    for i, card in enumerate(cards[:3]):
+        tone = str(card.get("tone", "info")).lower()
+        tone_cls = "ai2-ins-info"
+        if tone == "bad":
+            tone_cls = "ai2-ins-bad"
+        elif tone == "good":
+            tone_cls = "ai2-ins-good"
+        with cols[i]:
+            st.markdown(
+                f"""
+                <div class="ai2-ins {tone_cls}">
+                  <div class="ai2-ins-title">{_esc(str(card.get("title", "Insight")))} </div>
+                  <div class="ai2-ins-body">{_esc(str(card.get("body", "")))}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    st.markdown('<div class="ai2-panel"><div class="ai2-sec-title">AI Recommendations</div>', unsafe_allow_html=True)
+    rec_items = recs[:4] if recs else [
+        "Improve delivery logistics to increase delivered share of confirmed orders.",
+        "Investigate return reasons and address top causes by SKU.",
+        "Shift budget toward campaigns with stronger realized efficiency.",
+        "Maintain high-performing targeting while reducing waste.",
+    ]
+    for idx, rec in enumerate(rec_items, start=1):
+        st.markdown(
+            f"""
+            <div class="ai2-rec-item">
+              <div class="ai2-rec-num">{idx}</div>
+              <div class="ai2-rec-text">{_esc(str(rec))}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown('<div class="ai2-panel"><div class="ai2-sec-title">Ask AI Assistant</div>', unsafe_allow_html=True)
+    st.caption("Quick questions to get started:")
+    qchips = [
+        "How can I improve my delivery rate?",
+        "What's causing the low ROAS?",
+        "Should I increase my ad spend?",
+        "Which products are performing best?",
+        "How do I reduce return rates?",
+    ]
+
+    def _set_ai2_q(q: str):
+        st.session_state.ai2_question = q
+
+    chip_cols = st.columns(3)
+    for i, q in enumerate(qchips):
+        with chip_cols[i % 3]:
+            st.button(q, key=f"ai2_chip_{i}", on_click=_set_ai2_q, args=(q,), use_container_width=True)
+
+    q = st.text_area(
+        "Ask AI",
+        key="ai2_question",
+        height=90,
+        label_visibility="collapsed",
+        placeholder="Ask me anything about your performance data...",
+    ).strip()
+    ask = st.button("Send", key="ai2_send", use_container_width=True, disabled=not api_ready)
+    if ask and q and api_ready:
+        with st.spinner("Getting answer..."):
+            st.session_state.ai2_answer = chatgpt_answer_data_question(payload_json, q)
+    if st.session_state.ai2_answer:
+        st.markdown('<div class="ai2-answer"><h4>Answer</h4>', unsafe_allow_html=True)
+        render_ai_text(st.session_state.ai2_answer)
+        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
 # Show last upload date (from GitHub snapshot) + data source
 last_saved = None
@@ -4213,7 +4671,7 @@ with tab_dashboard:
     )
 
 with tab_ai:
-    render_ai_summary(
+    render_ai_summary_v2(
         kpis=kpis,
         kpis_disp=kpis_disp,
         daily_orders_df=daily_orders_df,
