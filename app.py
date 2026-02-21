@@ -2474,6 +2474,54 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
   color:#8195ad;
   font-size:0.95rem;
 }
+.dash-bars-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:14px;
+}
+.dash-panel-icon{
+  color:#9fb3c9;
+  font-size:1.2rem;
+}
+.dash-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.dash-m-row{
+  margin: 10px 0 14px 0;
+}
+.dash-m-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+.dash-m-label{
+  color:#a8bbcf;
+  font-size:0.94rem;
+  font-weight:600;
+}
+.dash-m-value{
+  color:#eef5fb;
+  font-size:1.95rem;
+  font-weight:700;
+}
+.dash-track{
+  height: 12px;
+  border-radius: 999px;
+  overflow:hidden;
+  background: rgba(44,61,89,0.62);
+}
+.dash-fill{
+  height:100%;
+  border-radius:999px;
+}
+.dash-fill-blue{ background: linear-gradient(90deg, #2f7dff, #38b6ff); }
+.dash-fill-green{ background: linear-gradient(90deg, #18cf7a, #17e99f); }
+.dash-fill-orange{ background: linear-gradient(90deg, #ff8e21, #ff6b00); }
+.dash-fill-violet{ background: linear-gradient(90deg, #8b59ff, #bf68ff); }
 
 @media (max-width: 980px){
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2482,6 +2530,7 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
   .dash-top-grid{ grid-template-columns: 1fr; }
   .dash-profit-grid{ grid-template-columns: 1fr; }
   .dash-lower-grid{ grid-template-columns: 1fr; }
+  .dash-bars-grid{ grid-template-columns: 1fr; }
   .dash-mini-grid-2, .dash-mini-grid-4{ grid-template-columns: 1fr; }
   div.kpi-fixed-expander { width: calc(100vw - 24px); right: 12px; bottom: 12px; }
 }
@@ -3966,107 +4015,112 @@ with tab_dashboard:
     # Charts
     funnel_png, realized_png, potential_png = make_charts_bytes(kpis)
 
-    st.subheader("Charts")
-    if go is not None:
-        chart_config = {
-            "displayModeBar": True,
-            "scrollZoom": True,
-            "doubleClick": "reset",
-            "displaylogo": False,
-            "modeBarButtonsToRemove": ["lasso2d", "select2d"],
-        }
-        plot_bg = "rgba(9,16,26,0.70)"
-        grid_clr = "rgba(184,202,217,0.16)"
-        text_clr = "#EAF2F8"
-        tick_clr = "#B8CAD9"
+    def _pct(v: float, m: float) -> float:
+        if m <= 0:
+            return 0.0
+        return max(0.0, min(100.0, (v / m) * 100.0))
 
-        fig_funnel = go.Figure(
-            data=[
-                go.Bar(
-                    x=["Requested", "Confirmed", "Delivered"],
-                    y=[kpis["requested_units"], kpis["confirmed_units"], kpis["delivered_units"]],
-                    marker_color=["#64D2FF", "#4EE3A3", "#B58DFF"],
-                    text=[f"{int(kpis['requested_units']):,}", f"{int(kpis['confirmed_units']):,}", f"{int(kpis['delivered_units']):,}"],
-                    textposition="outside",
-                    hovertemplate="<b>%{x}</b><br>Units: %{y:,}<extra></extra>",
-                )
-            ]
-        )
-        fig_funnel.update_layout(
-            title="Order Funnel",
-            height=340,
-            margin=dict(l=20, r=20, t=52, b=22),
-            paper_bgcolor=plot_bg,
-            plot_bgcolor=plot_bg,
-            font=dict(family="Manrope, Segoe UI, sans-serif", color=text_clr),
-            dragmode="zoom",
-        )
-        fig_funnel.update_yaxes(showgrid=True, gridcolor=grid_clr, tickfont=dict(color=tick_clr))
-        fig_funnel.update_xaxes(tickfont=dict(color=tick_clr))
+    req = float(kpis.get("requested_units", 0) or 0)
+    conf = float(kpis.get("confirmed_units", 0) or 0)
+    deli = float(kpis.get("delivered_units", 0) or 0)
+    funnel_max = max(req, 1.0)
 
-        fig_realized = go.Figure(
-            data=[
-                go.Bar(
-                    x=["Delivered Profit", "Ad Spend", "Net Profit"],
-                    y=[kpis["delivered_profit_usd"], kpis["spend_usd"], kpis["net_profit_usd"]],
-                    marker_color=["#4EE3A3", "#FFA66B", "#64D2FF"],
-                    text=[f"${kpis['delivered_profit_usd']:,.2f}", f"${kpis['spend_usd']:,.2f}", f"${kpis['net_profit_usd']:,.2f}"],
-                    textposition="outside",
-                    hovertemplate="<b>%{x}</b><br>USD: %{y:,.2f}<extra></extra>",
-                )
-            ]
-        )
-        fig_realized.update_layout(
-            title="Realized Profit (USD)",
-            height=340,
-            margin=dict(l=20, r=20, t=52, b=22),
-            paper_bgcolor=plot_bg,
-            plot_bgcolor=plot_bg,
-            font=dict(family="Manrope, Segoe UI, sans-serif", color=text_clr),
-            dragmode="zoom",
-        )
-        fig_realized.update_yaxes(showgrid=True, gridcolor=grid_clr, tickfont=dict(color=tick_clr))
-        fig_realized.update_xaxes(tickfont=dict(color=tick_clr))
+    delivered_usd = float(kpis.get("delivered_profit_usd", 0.0) or 0.0)
+    spend_usd = float(kpis.get("spend_usd", 0.0) or 0.0)
+    net_usd = float(kpis.get("net_profit_usd", 0.0) or 0.0)
+    realized_max = max(delivered_usd, spend_usd, net_usd, 1.0)
 
-        fig_potential = go.Figure(
-            data=[
-                go.Bar(
-                    x=["Confirmed Profit", "Ad Spend", "Potential Net"],
-                    y=[kpis["confirmed_profit_usd"], kpis["spend_usd"], kpis["potential_net_profit_usd"]],
-                    marker_color=["#4EE3A3", "#FFA66B", "#B58DFF"],
-                    text=[
-                        f"${kpis['confirmed_profit_usd']:,.2f}",
-                        f"${kpis['spend_usd']:,.2f}",
-                        f"${kpis['potential_net_profit_usd']:,.2f}",
-                    ],
-                    textposition="outside",
-                    hovertemplate="<b>%{x}</b><br>USD: %{y:,.2f}<extra></extra>",
-                )
-            ]
-        )
-        fig_potential.update_layout(
-            title="Potential Profit from Confirmed (USD)",
-            height=360,
-            margin=dict(l=20, r=20, t=52, b=22),
-            paper_bgcolor=plot_bg,
-            plot_bgcolor=plot_bg,
-            font=dict(family="Manrope, Segoe UI, sans-serif", color=text_clr),
-            dragmode="zoom",
-        )
-        fig_potential.update_yaxes(showgrid=True, gridcolor=grid_clr, tickfont=dict(color=tick_clr))
-        fig_potential.update_xaxes(tickfont=dict(color=tick_clr))
+    confirmed_usd = float(kpis.get("confirmed_profit_usd", 0.0) or 0.0)
+    potential_usd = float(kpis.get("potential_net_profit_usd", 0.0) or 0.0)
+    potential_max = max(confirmed_usd, spend_usd, potential_usd, 1.0)
 
-        cc1, cc2 = st.columns(2)
-        with cc1:
-            st.plotly_chart(fig_funnel, use_container_width=True, config=chart_config)
-        with cc2:
-            st.plotly_chart(fig_realized, use_container_width=True, config=chart_config)
-        st.plotly_chart(fig_potential, use_container_width=True, config=chart_config)
-    else:
-        cc1, cc2 = st.columns(2)
-        cc1.image(funnel_png, caption="Order Funnel", use_container_width=True)
-        cc2.image(realized_png, caption="Realized Profit (USD)", use_container_width=True)
-        st.image(potential_png, caption="Potential Profit from Confirmed (USD)", use_container_width=True)
+    p_req = _pct(req, funnel_max)
+    p_conf = _pct(conf, funnel_max)
+    p_deli = _pct(deli, funnel_max)
+
+    p_delivered_profit = _pct(delivered_usd, realized_max)
+    p_spend_realized = _pct(spend_usd, realized_max)
+    p_net = _pct(net_usd, realized_max)
+
+    p_confirmed_profit = _pct(confirmed_usd, potential_max)
+    p_spend_potential = _pct(spend_usd, potential_max)
+    p_potential_net = _pct(potential_usd, potential_max)
+
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown(
+            f"""
+            <div class="dash-panel">
+              <div class="dash-head">
+                <div class="dash-panel-title">Order Funnel</div>
+                <div class="dash-panel-icon">╷╵</div>
+              </div>
+              <div class="dash-m-row">
+                <div class="dash-m-meta"><div class="dash-m-label">Requested</div><div class="dash-m-value">{int(req):,}</div></div>
+                <div class="dash-track"><div class="dash-fill dash-fill-blue" style="width:{p_req:.2f}%"></div></div>
+              </div>
+              <div class="dash-m-row">
+                <div class="dash-m-meta"><div class="dash-m-label">Confirmed</div><div class="dash-m-value">{int(conf):,}</div></div>
+                <div class="dash-track"><div class="dash-fill dash-fill-green" style="width:{p_conf:.2f}%"></div></div>
+              </div>
+              <div class="dash-m-row">
+                <div class="dash-m-meta"><div class="dash-m-label">Delivered</div><div class="dash-m-value">{int(deli):,}</div></div>
+                <div class="dash-track"><div class="dash-fill dash-fill-violet" style="width:{p_deli:.2f}%"></div></div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with c2:
+        st.markdown(
+            f"""
+            <div class="dash-panel">
+              <div class="dash-head">
+                <div class="dash-panel-title">Realized Profit (USD)</div>
+                <div class="dash-panel-icon">╷╵</div>
+              </div>
+              <div class="dash-m-row">
+                <div class="dash-m-meta"><div class="dash-m-label">Delivered Profit</div><div class="dash-m-value" style="color:#1fe68d">{_esc(money(delivered_usd))}</div></div>
+                <div class="dash-track"><div class="dash-fill dash-fill-green" style="width:{p_delivered_profit:.2f}%"></div></div>
+              </div>
+              <div class="dash-m-row">
+                <div class="dash-m-meta"><div class="dash-m-label">Ad Spend</div><div class="dash-m-value" style="color:#ff9b21">{_esc(money(spend_usd))}</div></div>
+                <div class="dash-track"><div class="dash-fill dash-fill-orange" style="width:{p_spend_realized:.2f}%"></div></div>
+              </div>
+              <div class="dash-m-row">
+                <div class="dash-m-meta"><div class="dash-m-label">Net Profit</div><div class="dash-m-value" style="color:#5fa9ff">{_esc(money(net_usd))}</div></div>
+                <div class="dash-track"><div class="dash-fill dash-fill-blue" style="width:{p_net:.2f}%"></div></div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        f"""
+        <div class="dash-panel">
+          <div class="dash-head">
+            <div class="dash-panel-title">Potential Profit from Confirmed (USD)</div>
+            <div class="dash-panel-icon">╷╵</div>
+          </div>
+          <div class="dash-mini-grid-2">
+            <div>
+              <div class="dash-m-meta"><div class="dash-m-label">Confirmed Profit</div><div class="dash-m-value" style="color:#1fe68d">{_esc(money(confirmed_usd))}</div></div>
+              <div class="dash-track"><div class="dash-fill dash-fill-green" style="width:{p_confirmed_profit:.2f}%"></div></div>
+            </div>
+            <div>
+              <div class="dash-m-meta"><div class="dash-m-label">Ad Spend</div><div class="dash-m-value" style="color:#ff9b21">{_esc(money(spend_usd))}</div></div>
+              <div class="dash-track"><div class="dash-fill dash-fill-orange" style="width:{p_spend_potential:.2f}%"></div></div>
+            </div>
+          </div>
+          <div class="dash-m-row" style="margin-top:14px">
+            <div class="dash-m-meta"><div class="dash-m-label">Potential Net</div><div class="dash-m-value" style="color:#b57bff">{_esc(money(potential_usd))}</div></div>
+            <div class="dash-track"><div class="dash-fill dash-fill-violet" style="width:{p_potential_net:.2f}%"></div></div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Exports
     st.subheader("Export")
