@@ -2522,6 +2522,29 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
 .dash-fill-green{ background: linear-gradient(90deg, #18cf7a, #17e99f); }
 .dash-fill-orange{ background: linear-gradient(90deg, #ff8e21, #ff6b00); }
 .dash-fill-violet{ background: linear-gradient(90deg, #8b59ff, #bf68ff); }
+button.save-global-btn{
+  position: fixed !important;
+  right: 24px !important;
+  top: 14px !important;
+  z-index: 10000 !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(108,172,255,0.55) !important;
+  background: linear-gradient(180deg, #2d8eff 0%, #1f62f0 100%) !important;
+  color: #ffffff !important;
+  font-size: 1.07rem !important;
+  font-weight: 800 !important;
+  min-height: 48px !important;
+  padding: 0 18px !important;
+  box-shadow: 0 12px 26px rgba(34,113,255,0.38) !important;
+}
+button.save-global-btn:hover{
+  border-color: rgba(148,206,255,0.75) !important;
+  background: linear-gradient(180deg, #44a1ff 0%, #2d74ff 100%) !important;
+}
+button.save-global-btn:before{
+  content: "💾";
+  margin-right: 10px;
+}
 
 @media (max-width: 980px){
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2532,6 +2555,13 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
   .dash-lower-grid{ grid-template-columns: 1fr; }
   .dash-bars-grid{ grid-template-columns: 1fr; }
   .dash-mini-grid-2, .dash-mini-grid-4{ grid-template-columns: 1fr; }
+  button.save-global-btn{
+    top: 10px !important;
+    right: 12px !important;
+    min-height: 44px !important;
+    padding: 0 12px !important;
+    font-size: 0.95rem !important;
+  }
   div.kpi-fixed-expander { width: calc(100vw - 24px); right: 12px; bottom: 12px; }
 }
 @media (max-width: 640px){
@@ -3890,6 +3920,44 @@ else:
 if one_uploaded:
     st.info("Dashboard is showing the LAST SAVED snapshot. Upload the missing file to refresh.")
 
+# Precompute export artifacts once (used by dashboard downloads + global save button)
+funnel_png, realized_png, potential_png = make_charts_bytes(kpis)
+pdf_bytes = build_pdf_bytes(kpis, fx, funnel_png, realized_png, potential_png)
+xlsx_bytes = build_excel_bytes(kpis, fx, funnel_png, realized_png, potential_png)
+
+# Global save button (available from all tabs)
+save_global = st.button("Save to GitHub", key="btn_save_global")
+components.html(
+    """
+    <script>
+    (function(){
+      const doc = window.parent.document;
+      if (!doc) return;
+      const buttons = doc.querySelectorAll('button');
+      buttons.forEach((btn) => {
+        const t = (btn.innerText || '').trim();
+        if (t === 'Save to GitHub') btn.classList.add('save-global-btn');
+      });
+    })();
+    </script>
+    """,
+    height=0,
+)
+if save_global:
+    try:
+        orders_bytes = orders_file.getvalue() if orders_file is not None else orders_df.to_csv(index=False).encode("utf-8-sig")
+        campaigns_bytes = campaigns_file.getvalue() if campaigns_file is not None else campaigns_df.to_csv(index=False).encode("utf-8-sig")
+        if daily_orders_file is not None:
+            daily_bytes = daily_orders_file.getvalue()
+        elif snap is not None and snap.get("daily_orders_xlsx_bytes"):
+            daily_bytes = snap.get("daily_orders_xlsx_bytes")
+        else:
+            daily_bytes = None
+        save_latest_to_github(kpis, pdf_bytes, xlsx_bytes, orders_bytes, campaigns_bytes, daily_bytes)
+        st.success("Saved to GitHub.")
+    except Exception as e:
+        st.error(str(e))
+
 # --- Floating: Quick KPIs accordion (fixed bottom-left, persistent across all tabs) ---
 render_fixed_quick_kpis(daily_orders_df=daily_orders_df, orders_df=orders_df, fx=fx, currency=currency)
 
@@ -4012,9 +4080,6 @@ with tab_dashboard:
             unsafe_allow_html=True,
         )
 
-    # Charts
-    funnel_png, realized_png, potential_png = make_charts_bytes(kpis)
-
     def _pct(v: float, m: float) -> float:
         if m <= 0:
             return 0.0
@@ -4124,8 +4189,6 @@ with tab_dashboard:
 
     # Exports
     st.subheader("Export")
-    pdf_bytes = build_pdf_bytes(kpis, fx, funnel_png, realized_png, potential_png)
-    xlsx_bytes = build_excel_bytes(kpis, fx, funnel_png, realized_png, potential_png)
 
     export_col1, export_col2 = st.columns(2)
     export_col1.download_button(
@@ -4140,24 +4203,6 @@ with tab_dashboard:
         file_name=f"ecommerce_dashboard_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
-    st.subheader("Save latest snapshot")
-    if st.button("💾 Save latest dashboard to GitHub"):
-        try:
-            if not both_uploaded:
-                st.error("To save EVERYTHING (CSV + KPIs + PDF + Excel), please upload BOTH files first.")
-            else:
-                orders_bytes = orders_file.getvalue()
-                campaigns_bytes = campaigns_file.getvalue()
-                daily_bytes = daily_orders_file.getvalue() if daily_orders_file is not None else None
-                save_latest_to_github(kpis, pdf_bytes, xlsx_bytes, orders_bytes, campaigns_bytes, daily_bytes)
-                st.success("Saved EVERYTHING to GitHub (CSV + KPIs + PDF + Excel).")
-        except Exception as e:
-            st.error(str(e))
-
-
-
-
 
 with tab_ai:
     render_ai_summary(
