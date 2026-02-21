@@ -1947,6 +1947,80 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
 [data-testid="stSidebar"] label{
   color: var(--muted) !important;
 }
+[data-testid="stSidebar"] > div:first-child{
+  padding-top: 14px;
+}
+.sb-header{
+  border: 1px solid rgba(122,147,182,0.24);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(21,32,54,0.92), rgba(10,18,33,0.88));
+  padding: 16px 14px;
+  margin-bottom: 12px;
+}
+.sb-header-title{
+  color: #eef5fb;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.05;
+}
+.sb-header-sub{
+  color: #a9bccf;
+  font-size: 1rem;
+  margin-top: 3px;
+}
+.sb-section-title{
+  margin: 14px 0 8px 0;
+  color: #dbe8f5;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.sb-card{
+  border: 1px solid rgba(122,147,182,0.24);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(24,36,58,0.82), rgba(16,26,45,0.72));
+  padding: 10px 10px 2px 10px;
+  margin-bottom: 10px;
+}
+.sb-divider{
+  height: 1px;
+  background: rgba(151,177,205,0.18);
+  margin: 12px 0 10px 0;
+}
+.sb-foot{
+  margin-top: 12px;
+  border: 1px solid rgba(122,147,182,0.24);
+  border-radius: 14px;
+  background: rgba(8,15,30,0.72);
+  padding: 10px 12px;
+  text-align: center;
+  color: #8ea3ba;
+  font-size: 0.9rem;
+}
+[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div,
+[data-testid="stSidebar"] .stNumberInput input,
+[data-testid="stSidebar"] .stTextInput input,
+[data-testid="stSidebar"] .stDateInput input{
+  background: rgba(8,16,30,0.84) !important;
+  border: 1px solid rgba(120,146,178,0.35) !important;
+  border-radius: 12px !important;
+}
+[data-testid="stSidebar"] .stFileUploader{
+  border: 1px dashed rgba(138,163,192,0.38);
+  border-radius: 14px;
+  padding: 8px 10px;
+  background: linear-gradient(145deg, rgba(13,24,42,0.7), rgba(11,20,35,0.62));
+}
+[data-testid="stSidebar"] .stFileUploader section{
+  border: none !important;
+  background: transparent !important;
+}
+[data-testid="stSidebar"] .stFileUploader label{
+  color: #d5e3f1 !important;
+  font-weight: 700 !important;
+}
+[data-testid="stSidebar"] .stCaption{
+  color: #90a7c0 !important;
+}
 
 /* Hero */
 .hero-wrap{
@@ -2254,12 +2328,29 @@ st.markdown(
 )
 
 with st.sidebar:
-    st.header("Inputs")
-    fx = st.number_input("FX rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0)
-    currency = st.selectbox("Display currency (Orders)", ["USD", "IQD"], index=0)
-    orders_file = st.file_uploader("Orders CSV (Taager File)", type=["csv"])
-    campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"])
-    daily_orders_file = st.file_uploader("Daily Orders (Taager) XLSX", type=["xlsx"])
+    st.markdown(
+        """
+        <div class="sb-header">
+          <div class="sb-header-title">Inputs</div>
+          <div class="sb-header-sub">Configure dashboard settings</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown('<div class="sb-section-title">Settings</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-card">', unsafe_allow_html=True)
+    fx = st.number_input("FX Rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0)
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('<div class="sb-card">', unsafe_allow_html=True)
+    currency = st.selectbox("Display Currency (Orders)", ["USD", "IQD"], index=0)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-section-title">Data Files</div>', unsafe_allow_html=True)
+    orders_file = st.file_uploader("Orders CSV (Taager File)", type=["csv"], help="Upload orders data")
+    campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"], help="Upload campaign metrics")
+    daily_orders_file = st.file_uploader("Daily Orders (Taager) XLSX", type=["xlsx"], help="Upload daily order reports")
+    st.markdown('<div class="sb-foot">All data is processed locally</div>', unsafe_allow_html=True)
 
 both_uploaded = orders_file is not None and campaigns_file is not None
 one_uploaded = (orders_file is not None) ^ (campaigns_file is not None)
