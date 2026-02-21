@@ -2654,8 +2654,8 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
 .dash-fill-violet{ background: linear-gradient(90deg, #8b59ff, #bf68ff); }
 button.save-global-btn{
   position: fixed !important;
-  right: 24px !important;
-  top: 14px !important;
+  right: max(18px, calc((100vw - 1320px) / 2 + 28px)) !important;
+  top: 106px !important;
   z-index: 10000 !important;
   width: auto !important;
   min-width: 190px !important;
@@ -2692,7 +2692,7 @@ button.save-global-btn:before{
   .dash-bars-grid{ grid-template-columns: 1fr; }
   .dash-mini-grid-2, .dash-mini-grid-4{ grid-template-columns: 1fr; }
   button.save-global-btn{
-    top: 10px !important;
+    top: 74px !important;
     right: 12px !important;
     min-width: 160px !important;
     max-width: 190px !important;
