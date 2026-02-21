@@ -1992,6 +1992,15 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   font-size: 1.1rem;
   font-weight: 800;
 }
+.sb-field-title{
+  color:#dce9f7;
+  font-size:1.02rem;
+  font-weight:800;
+  margin: 2px 0 8px 0;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
 .sb-divider{
   height: 1px;
   background: rgba(151,177,205,0.18);
@@ -2033,6 +2042,10 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   font-weight:700 !important;
   font-size:0.98rem !important;
 }
+[data-testid="stSidebar"] [data-testid="stNumberInput"] [data-testid="stWidgetLabel"],
+[data-testid="stSidebar"] [data-testid="stSelectbox"] [data-testid="stWidgetLabel"]{
+  display:none !important;
+}
 [data-testid="stSidebar"] .stFileUploader{
   border: 1px dashed rgba(138,163,192,0.38);
   border-radius: 14px;
@@ -2040,13 +2053,24 @@ html, body, [class*="css"]  { font-family: "Manrope", "Avenir Next", "Segoe UI",
   background: linear-gradient(145deg, rgba(13,24,42,0.7), rgba(11,20,35,0.62));
   margin-bottom: 12px;
 }
+[data-testid="stSidebar"] .stFileUploader > label{
+  color:#dce9f7 !important;
+  font-weight:800 !important;
+  font-size:1rem !important;
+}
 [data-testid="stSidebar"] .stFileUploader section{
   border: none !important;
   background: transparent !important;
+  min-height: 128px;
 }
 [data-testid="stSidebar"] .stFileUploader label{
   color: #d5e3f1 !important;
   font-weight: 700 !important;
+}
+[data-testid="stSidebar"] .stFileUploader button{
+  border-radius: 12px !important;
+  border: 1px solid rgba(158,183,213,0.32) !important;
+  background: rgba(56,67,89,0.55) !important;
 }
 [data-testid="stSidebar"] .stCaption{
   color: #90a7c0 !important;
@@ -2373,17 +2397,16 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     st.markdown('<div class="sb-section-title">Settings</div>', unsafe_allow_html=True)
-    fx = st.number_input("FX Rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0)
-    currency = st.selectbox("Display Currency (Orders)", ["USD", "IQD"], index=0)
+    st.markdown('<div class="sb-field-title"><span>$</span><span>FX Rate (IQD per 1 USD)</span></div>', unsafe_allow_html=True)
+    fx = st.number_input("FX Rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0, label_visibility="collapsed")
+    st.markdown('<div class="sb-field-title"><span>◉</span><span>Display Currency (Orders)</span></div>', unsafe_allow_html=True)
+    currency = st.selectbox("Display Currency (Orders)", ["USD", "IQD"], index=0, label_visibility="collapsed")
 
     st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="sb-section-title">Data Files</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-section-title">📄 Data Files</div>', unsafe_allow_html=True)
     orders_file = st.file_uploader("Orders CSV (Taager File)", type=["csv"], help="Upload orders data")
-    st.caption("Upload orders data")
     campaigns_file = st.file_uploader("Campaigns CSV (Meta export)", type=["csv"], help="Upload campaign metrics")
-    st.caption("Upload campaign metrics")
     daily_orders_file = st.file_uploader("Daily Orders (Taager) XLSX", type=["xlsx"], help="Upload daily order reports")
-    st.caption("Upload daily order reports")
     st.markdown('<div class="sb-foot">All data is processed locally</div>', unsafe_allow_html=True)
 
 both_uploaded = orders_file is not None and campaigns_file is not None
