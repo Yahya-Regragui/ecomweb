@@ -2399,6 +2399,7 @@ def _build_llm_payload(
     windows: Optional[dict] = None,
     products_top: Optional[list] = None,
     campaigns_top: Optional[list] = None,
+    campaign_context: Optional[dict] = None,
     detailed_context: Optional[dict] = None,
     data_quality: Optional[dict] = None,
     spend_allocation_method: str = "order_share",
@@ -2429,6 +2430,7 @@ def _build_llm_payload(
         "yesterday": yesterday_row,
         "products_top": products_top or [],
         "campaigns_top": campaigns_top or [],
+        "campaign_context": campaign_context or {},
         "detailed_context": detailed_context or {},
     }
 @st.cache_data(show_spinner=False)
@@ -2474,6 +2476,7 @@ def chatgpt_generate_store_summary(payload_json: str, user_focus: str = "") -> s
         "- Hold: up to 3 campaigns with reasons\n"
         "- Cut/Pause: up to 3 campaigns with reasons\n"
         "Use `campaigns_top` only. If it is empty, say campaign-level data is missing.\n\n"
+        "If `campaign_context.today_campaigns` has rows, you MUST use them for the requested day and should not claim campaign data is missing.\n\n"
         "## Profit & operations\n"
         "Discuss how delivery rate / cancellations / returns affect profit. Give 3 concrete operational actions.\n\n"
         "## 24–48h plan\n"
@@ -2540,6 +2543,7 @@ def chatgpt_answer_data_question(payload_json: str, question: str) -> str:
         "Rules:\n"
         "- Use only the JSON data provided below.\n"
         "- If `detailed_context` exists, prioritize it for deeper answers.\n"
+        "- If `campaign_context.today_campaigns` has rows, include campaign-level details for that day.\n"
         "- If a metric is missing, say it is missing.\n"
         "- Be direct and practical.\n"
         "- When relevant, include exact numbers from the JSON.\n\n"
@@ -3228,6 +3232,17 @@ def render_ai_summary(
 
             # ---- Campaign leaderboard (last 7d) ----
             campaigns_top = []
+            campaign_context = {
+                "today_campaigns": [],
+                "last_14d_campaigns_by_day": [],
+                "all_time_campaigns": [],
+                "meta": {
+                    "today_rows": 0,
+                    "last_14d_rows": 0,
+                    "all_time_rows": 0,
+                    "today_date": str(pd.Timestamp(today).date()),
+                },
+            }
             if has_campaigns and "Reporting starts" in campaigns_df.columns:
                 c = campaigns_df.copy()
                 c["Reporting starts"] = pd.to_datetime(c["Reporting starts"], errors="coerce")
@@ -3244,6 +3259,8 @@ def render_ai_summary(
 
                     if results_col:
                         c[results_col] = pd.to_numeric(c[results_col], errors="coerce").fillna(0)
+                    else:
+                        c[results_col or "Results"] = 0.0
 
                     # SKU extraction quality (best-effort)
                     try:
@@ -3269,6 +3286,104 @@ def render_ai_summary(
                         }
                         for _, r in agg.iterrows()
                     ]
+
+                    # Rich campaign context (always included in payload)
+                    c_all_ctx = campaigns_df.copy()
+                    c_all_ctx["Reporting starts"] = pd.to_datetime(c_all_ctx["Reporting starts"], errors="coerce")
+                    c_all_ctx = c_all_ctx.dropna(subset=["Reporting starts"])
+                    c_all_ctx["day"] = c_all_ctx["Reporting starts"].dt.floor("D")
+                    c_all_ctx[spend_col] = pd.to_numeric(c_all_ctx[spend_col], errors="coerce").fillna(0)
+                    if results_col and results_col in c_all_ctx.columns:
+                        c_all_ctx[results_col] = pd.to_numeric(c_all_ctx[results_col], errors="coerce").fillna(0)
+                    else:
+                        c_all_ctx["Results"] = 0.0
+                        results_col = "Results"
+                    if "Impressions" in c_all_ctx.columns:
+                        c_all_ctx["Impressions"] = pd.to_numeric(c_all_ctx["Impressions"], errors="coerce").fillna(0)
+                    else:
+                        c_all_ctx["Impressions"] = 0.0
+                    if "Reach" in c_all_ctx.columns:
+                        c_all_ctx["Reach"] = pd.to_numeric(c_all_ctx["Reach"], errors="coerce").fillna(0)
+                    else:
+                        c_all_ctx["Reach"] = 0.0
+                    if "Campaign delivery" not in c_all_ctx.columns:
+                        c_all_ctx["Campaign delivery"] = "unknown"
+
+                    today_ctx = c_all_ctx[c_all_ctx["day"] == today].copy()
+                    today_agg = (
+                        today_ctx.groupby([name_col, "Campaign delivery"], as_index=False)[[spend_col, results_col, "Impressions", "Reach"]]
+                        .sum()
+                        .rename(
+                            columns={
+                                name_col: "campaign",
+                                spend_col: "spend_usd",
+                                results_col: "results",
+                                "Campaign delivery": "delivery",
+                            }
+                        )
+                        .sort_values("spend_usd", ascending=False)
+                    )
+                    campaign_context["today_campaigns"] = [
+                        {
+                            "campaign": str(r["campaign"]),
+                            "delivery": str(r["delivery"]),
+                            "spend_usd": float(r["spend_usd"]),
+                            "results": float(r["results"]),
+                            "impressions": float(r["Impressions"]),
+                            "reach": float(r["Reach"]),
+                        }
+                        for _, r in today_agg.iterrows()
+                    ]
+
+                    l14_ctx = c_all_ctx[(c_all_ctx["day"] >= last_14_start) & (c_all_ctx["day"] <= today)].copy()
+                    l14_agg = (
+                        l14_ctx.groupby(["day", name_col], as_index=False)[[spend_col, results_col, "Impressions", "Reach"]]
+                        .sum()
+                        .rename(columns={name_col: "campaign", spend_col: "spend_usd", results_col: "results"})
+                        .sort_values(["day", "spend_usd"], ascending=[True, False])
+                    )
+                    campaign_context["last_14d_campaigns_by_day"] = [
+                        {
+                            "day": str(pd.Timestamp(r["day"]).date()),
+                            "campaign": str(r["campaign"]),
+                            "spend_usd": float(r["spend_usd"]),
+                            "results": float(r["results"]),
+                            "impressions": float(r["Impressions"]),
+                            "reach": float(r["Reach"]),
+                        }
+                        for _, r in l14_agg.iterrows()
+                    ]
+
+                    all_agg = (
+                        c_all_ctx.groupby([name_col, "Campaign delivery"], as_index=False)[[spend_col, results_col, "Impressions", "Reach"]]
+                        .sum()
+                        .rename(
+                            columns={
+                                name_col: "campaign",
+                                spend_col: "spend_usd",
+                                results_col: "results",
+                                "Campaign delivery": "delivery",
+                            }
+                        )
+                        .sort_values("spend_usd", ascending=False)
+                    )
+                    campaign_context["all_time_campaigns"] = [
+                        {
+                            "campaign": str(r["campaign"]),
+                            "delivery": str(r["delivery"]),
+                            "spend_usd": float(r["spend_usd"]),
+                            "results": float(r["results"]),
+                            "impressions": float(r["Impressions"]),
+                            "reach": float(r["Reach"]),
+                        }
+                        for _, r in all_agg.iterrows()
+                    ]
+                    campaign_context["meta"] = {
+                        "today_rows": int(today_agg.shape[0]),
+                        "last_14d_rows": int(l14_agg.shape[0]),
+                        "all_time_rows": int(all_agg.shape[0]),
+                        "today_date": str(pd.Timestamp(today).date()),
+                    }
 
             detailed_context = {}
             if use_deeper_context:
@@ -3364,6 +3479,7 @@ def render_ai_summary(
                 windows=windows,
                 products_top=products_top,
                 campaigns_top=campaigns_top,
+                campaign_context=campaign_context,
                 detailed_context=detailed_context,
                 data_quality=data_quality,
                 spend_allocation_method="order_share",
