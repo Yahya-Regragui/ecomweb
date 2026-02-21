@@ -3877,93 +3877,91 @@ with tab_dashboard:
 
     confirmed_sub = f"↑ {int(kpis['confirmed_units']):,} confirmed"
     delivered_sub = f"↑ {int(kpis['delivered_units']):,} delivered"
-    st.markdown(
-        f"""
-        <div class="dash-wrap">
-          <div class="dash-top-grid">
+    t1, t2, t3 = st.columns(3)
+    with t1:
+        st.markdown(
+            f"""
             <div class="dash-top-card dash-card-blue">
-              <div class="dash-top-head">
-                <span>Confirmed Profit ({currency})</span>
-                <span class="dash-top-icon">$</span>
-              </div>
+              <div class="dash-top-head"><span>Confirmed Profit ({currency})</span><span class="dash-top-icon">$</span></div>
               <div class="dash-top-value">{_esc(money_ccy(kpis_disp["confirmed_profit_disp"], currency))}</div>
               <div class="dash-top-sub">{_esc(confirmed_sub)}</div>
             </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with t2:
+        st.markdown(
+            f"""
             <div class="dash-top-card dash-card-green">
-              <div class="dash-top-head">
-                <span>Delivered Profit ({currency})</span>
-                <span class="dash-top-icon">◈</span>
-              </div>
+              <div class="dash-top-head"><span>Delivered Profit ({currency})</span><span class="dash-top-icon">◈</span></div>
               <div class="dash-top-value">{_esc(money_ccy(kpis_disp["delivered_profit_disp"], currency))}</div>
               <div class="dash-top-sub">{_esc(delivered_sub)}</div>
             </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with t3:
+        st.markdown(
+            f"""
             <div class="dash-top-card dash-card-purple">
-              <div class="dash-top-head">
-                <span>Ad Spend ({currency})</span>
-                <span class="dash-top-icon">◎</span>
-              </div>
+              <div class="dash-top-head"><span>Ad Spend ({currency})</span><span class="dash-top-icon">◎</span></div>
               <div class="dash-top-value">{_esc(money_ccy(kpis_disp["spend_disp"], currency))}</div>
             </div>
-          </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-          <div class="dash-panel">
-            <div class="dash-panel-title">Profit After Ads</div>
-            <div class="dash-profit-grid">
-              <div>
-                <div class="dash-k-label">Net (Delivered − Spend)</div>
-                <div class="dash-k-value dash-k-value-green">{_esc(money_ccy(net_disp, currency))}</div>
-                <div class="dash-k-sub">Realized profitability</div>
-              </div>
-              <div>
-                <div class="dash-k-label">Potential (Confirmed - Spend)</div>
-                <div class="dash-k-value dash-k-value-violet">{_esc(money_ccy(pot_disp, currency))}</div>
-                <div class="dash-k-sub">If all confirmed deliver</div>
-              </div>
+    st.markdown(
+        f"""
+        <div class="dash-panel">
+          <div class="dash-panel-title">Profit After Ads</div>
+          <div class="dash-profit-grid">
+            <div>
+              <div class="dash-k-label">Net (Delivered − Spend)</div>
+              <div class="dash-k-value dash-k-value-green">{_esc(money_ccy(net_disp, currency))}</div>
+              <div class="dash-k-sub">Realized profitability</div>
             </div>
-          </div>
-
-          <div class="dash-lower-grid">
-            <div class="dash-panel">
-              <div class="dash-panel-title">ROAS</div>
-              <div class="dash-mini-grid-2">
-                <div class="dash-mini">
-                  <div class="dash-mini-label">ROAS (Realized)</div>
-                  <div class="dash-mini-value">{_esc(fmt_ratio(kpis["roas_real"]))}</div>
-                </div>
-                <div class="dash-mini">
-                  <div class="dash-mini-label">ROAS (Potential)</div>
-                  <div class="dash-mini-value">{_esc(fmt_ratio(kpis["roas_potential"]))}</div>
-                </div>
-              </div>
-              <div class="dash-note">Taager FX 1602 = payout rate to Payoneer (IQD ÷ USD).</div>
-            </div>
-
-            <div class="dash-panel">
-              <div class="dash-panel-title">Key Rates</div>
-              <div class="dash-mini-grid-4">
-                <div class="dash-mini">
-                  <div class="dash-mini-label">Confirmation Rate</div>
-                  <div class="dash-mini-value">{_esc(pct(kpis["confirmation_rate"]))}</div>
-                </div>
-                <div class="dash-mini">
-                  <div class="dash-mini-label">Delivery Rate</div>
-                  <div class="dash-mini-value">{_esc(pct(kpis["delivery_rate"]))}</div>
-                </div>
-                <div class="dash-mini">
-                  <div class="dash-mini-label">Return Rate</div>
-                  <div class="dash-mini-value">{_esc(pct(kpis["return_rate"]))}</div>
-                </div>
-                <div class="dash-mini">
-                  <div class="dash-mini-label">CPM</div>
-                  <div class="dash-mini-value">{_esc(fmt_money_or_na(kpis["cpm"]))}</div>
-                </div>
-              </div>
+            <div>
+              <div class="dash-k-label">Potential (Confirmed - Spend)</div>
+              <div class="dash-k-value dash-k-value-violet">{_esc(money_ccy(pot_disp, currency))}</div>
+              <div class="dash-k-sub">If all confirmed deliver</div>
             </div>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+    b1, b2 = st.columns(2)
+    with b1:
+        st.markdown(
+            f"""
+            <div class="dash-panel">
+              <div class="dash-panel-title">ROAS</div>
+              <div class="dash-mini-grid-2">
+                <div class="dash-mini"><div class="dash-mini-label">ROAS (Realized)</div><div class="dash-mini-value">{_esc(fmt_ratio(kpis["roas_real"]))}</div></div>
+                <div class="dash-mini"><div class="dash-mini-label">ROAS (Potential)</div><div class="dash-mini-value">{_esc(fmt_ratio(kpis["roas_potential"]))}</div></div>
+              </div>
+              <div class="dash-note">Taager FX 1602 = payout rate to Payoneer (IQD ÷ USD).</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with b2:
+        st.markdown(
+            f"""
+            <div class="dash-panel">
+              <div class="dash-panel-title">Key Rates</div>
+              <div class="dash-mini-grid-4">
+                <div class="dash-mini"><div class="dash-mini-label">Confirmation Rate</div><div class="dash-mini-value">{_esc(pct(kpis["confirmation_rate"]))}</div></div>
+                <div class="dash-mini"><div class="dash-mini-label">Delivery Rate</div><div class="dash-mini-value">{_esc(pct(kpis["delivery_rate"]))}</div></div>
+                <div class="dash-mini"><div class="dash-mini-label">Return Rate</div><div class="dash-mini-value">{_esc(pct(kpis["return_rate"]))}</div></div>
+                <div class="dash-mini"><div class="dash-mini-label">CPM</div><div class="dash-mini-value">{_esc(fmt_money_or_na(kpis["cpm"]))}</div></div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     # Charts
     funnel_png, realized_png, potential_png = make_charts_bytes(kpis)
