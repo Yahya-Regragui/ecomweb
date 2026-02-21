@@ -3486,10 +3486,106 @@ with tab_dashboard:
     funnel_png, realized_png, potential_png = make_charts_bytes(kpis)
 
     st.subheader("Charts")
-    cc1, cc2 = st.columns(2)
-    cc1.image(funnel_png, caption="Order Funnel", use_container_width=True)
-    cc2.image(realized_png, caption="Realized Profit (USD)", use_container_width=True)
-    st.image(potential_png, caption="Potential Profit from Confirmed (USD)", use_container_width=True)
+    if go is not None:
+        chart_config = {
+            "displayModeBar": True,
+            "scrollZoom": True,
+            "doubleClick": "reset",
+            "displaylogo": False,
+            "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+        }
+        plot_bg = "rgba(9,16,26,0.70)"
+        grid_clr = "rgba(184,202,217,0.16)"
+        text_clr = "#EAF2F8"
+        tick_clr = "#B8CAD9"
+
+        fig_funnel = go.Figure(
+            data=[
+                go.Bar(
+                    x=["Requested", "Confirmed", "Delivered"],
+                    y=[kpis["requested_units"], kpis["confirmed_units"], kpis["delivered_units"]],
+                    marker_color=["#64D2FF", "#4EE3A3", "#B58DFF"],
+                    text=[f"{int(kpis['requested_units']):,}", f"{int(kpis['confirmed_units']):,}", f"{int(kpis['delivered_units']):,}"],
+                    textposition="outside",
+                    hovertemplate="<b>%{x}</b><br>Units: %{y:,}<extra></extra>",
+                )
+            ]
+        )
+        fig_funnel.update_layout(
+            title="Order Funnel",
+            height=340,
+            margin=dict(l=20, r=20, t=52, b=22),
+            paper_bgcolor=plot_bg,
+            plot_bgcolor=plot_bg,
+            font=dict(family="Manrope, Segoe UI, sans-serif", color=text_clr),
+            dragmode="zoom",
+        )
+        fig_funnel.update_yaxes(showgrid=True, gridcolor=grid_clr, tickfont=dict(color=tick_clr))
+        fig_funnel.update_xaxes(tickfont=dict(color=tick_clr))
+
+        fig_realized = go.Figure(
+            data=[
+                go.Bar(
+                    x=["Delivered Profit", "Ad Spend", "Net Profit"],
+                    y=[kpis["delivered_profit_usd"], kpis["spend_usd"], kpis["net_profit_usd"]],
+                    marker_color=["#4EE3A3", "#FFA66B", "#64D2FF"],
+                    text=[f"${kpis['delivered_profit_usd']:,.2f}", f"${kpis['spend_usd']:,.2f}", f"${kpis['net_profit_usd']:,.2f}"],
+                    textposition="outside",
+                    hovertemplate="<b>%{x}</b><br>USD: %{y:,.2f}<extra></extra>",
+                )
+            ]
+        )
+        fig_realized.update_layout(
+            title="Realized Profit (USD)",
+            height=340,
+            margin=dict(l=20, r=20, t=52, b=22),
+            paper_bgcolor=plot_bg,
+            plot_bgcolor=plot_bg,
+            font=dict(family="Manrope, Segoe UI, sans-serif", color=text_clr),
+            dragmode="zoom",
+        )
+        fig_realized.update_yaxes(showgrid=True, gridcolor=grid_clr, tickfont=dict(color=tick_clr))
+        fig_realized.update_xaxes(tickfont=dict(color=tick_clr))
+
+        fig_potential = go.Figure(
+            data=[
+                go.Bar(
+                    x=["Confirmed Profit", "Ad Spend", "Potential Net"],
+                    y=[kpis["confirmed_profit_usd"], kpis["spend_usd"], kpis["potential_net_profit_usd"]],
+                    marker_color=["#4EE3A3", "#FFA66B", "#B58DFF"],
+                    text=[
+                        f"${kpis['confirmed_profit_usd']:,.2f}",
+                        f"${kpis['spend_usd']:,.2f}",
+                        f"${kpis['potential_net_profit_usd']:,.2f}",
+                    ],
+                    textposition="outside",
+                    hovertemplate="<b>%{x}</b><br>USD: %{y:,.2f}<extra></extra>",
+                )
+            ]
+        )
+        fig_potential.update_layout(
+            title="Potential Profit from Confirmed (USD)",
+            height=360,
+            margin=dict(l=20, r=20, t=52, b=22),
+            paper_bgcolor=plot_bg,
+            plot_bgcolor=plot_bg,
+            font=dict(family="Manrope, Segoe UI, sans-serif", color=text_clr),
+            dragmode="zoom",
+        )
+        fig_potential.update_yaxes(showgrid=True, gridcolor=grid_clr, tickfont=dict(color=tick_clr))
+        fig_potential.update_xaxes(tickfont=dict(color=tick_clr))
+
+        cc1, cc2 = st.columns(2)
+        with cc1:
+            st.plotly_chart(fig_funnel, use_container_width=True, config=chart_config)
+        with cc2:
+            st.plotly_chart(fig_realized, use_container_width=True, config=chart_config)
+        st.plotly_chart(fig_potential, use_container_width=True, config=chart_config)
+    else:
+        cc1, cc2 = st.columns(2)
+        cc1.image(funnel_png, caption="Order Funnel", use_container_width=True)
+        cc2.image(realized_png, caption="Realized Profit (USD)", use_container_width=True)
+        st.image(potential_png, caption="Potential Profit from Confirmed (USD)", use_container_width=True)
 
     # Exports
     st.subheader("Export")
