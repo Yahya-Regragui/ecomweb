@@ -3784,67 +3784,100 @@ with tab_daily:
                 st.dataframe(raw_m, use_container_width=True, height=240)
 
 with tab_orders:
-    st.subheader("Orders details")
+    st.subheader("Orders overview")
 
     if orders_df is None:
         st.info("No orders data available yet.")
     else:
-        # Keep only relevant columns + add derived rates
-        orders_view = orders_df.copy()
+        ov = orders_df.copy()
+        for c in ["requested_units", "confirmed_units", "delivered_units", "returned_units"]:
+            if c in ov.columns:
+                ov[c] = pd.to_numeric(ov[c], errors="coerce").fillna(0)
+
         if currency == "IQD":
-            orders_view["confirmed_profit_disp"] = orders_view["confirmed_profit_iqd"]
-            orders_view["delivered_profit_disp"] = orders_view["delivered_profit_iqd"]
+            ov["delivered_profit_disp"] = pd.to_numeric(ov.get("delivered_profit_iqd", 0), errors="coerce").fillna(0)
         else:
-            orders_view["confirmed_profit_disp"] = orders_view["confirmed_profit_usd"]
-            orders_view["delivered_profit_disp"] = orders_view["delivered_profit_usd"]
+            ov["delivered_profit_disp"] = pd.to_numeric(ov.get("delivered_profit_usd", 0), errors="coerce").fillna(0)
 
-        # Add rates (safe)
-        orders_view["confirmation_rate"] = orders_view["confirmed_units"] / orders_view["requested_units"].replace({0: pd.NA})
-        orders_view["delivery_rate"] = orders_view["delivered_units"] / orders_view["confirmed_units"].replace({0: pd.NA})
-        orders_view["return_rate"] = orders_view["returned_units"] / orders_view["delivered_units"].replace({0: pd.NA})
+        requested = float(ov.get("requested_units", pd.Series(dtype=float)).sum())
+        confirmed = float(ov.get("confirmed_units", pd.Series(dtype=float)).sum())
+        delivered = float(ov.get("delivered_units", pd.Series(dtype=float)).sum())
+        returned = float(ov.get("returned_units", pd.Series(dtype=float)).sum())
+        delivered_profit = float(ov["delivered_profit_disp"].sum())
 
-        # Choose relevant columns that actually exist
-        preferred_cols = [
-            "كود_المنتج", "اسم_المنتج",  # if present in your CSV
-            "requested_units", "confirmed_units", "delivered_units", "returned_units",
-            "confirmation_rate", "delivery_rate", "return_rate",
-            "confirmed_profit_disp", "delivered_profit_disp",
+        confirmation_rate = (confirmed / requested) if requested else 0.0
+        delivery_rate = (delivered / confirmed) if confirmed else 0.0
+        return_rate = (returned / delivered) if delivered else 0.0
 
-        ]
-        cols = [c for c in preferred_cols if c in orders_view.columns]
+        m1, m2, m3, m4, m5 = st.columns(5)
+        m1.metric("Requested", f"{int(requested):,}")
+        m2.metric("Confirmed", f"{int(confirmed):,}", f"{confirmation_rate*100:.1f}%")
+        m3.metric("Delivered", f"{int(delivered):,}", f"{delivery_rate*100:.1f}%")
+        m4.metric("Returned", f"{int(returned):,}", f"{return_rate*100:.1f}%")
+        m5.metric(f"Delivered Profit ({currency})", f"{delivered_profit:,.2f}")
 
-        # Simple filters
-        with st.expander("Filters", expanded=False):
-            search = st.text_input("Search product (code or name)")
-            min_delivered = st.number_input("Min delivered units", min_value=0, value=0, step=1)
-            sort_by = st.selectbox(
-                "Sort by",
-                options=[c for c in ["delivered_profit_disp", "confirmed_profit_disp", "delivered_units", "confirmed_units"] if c in orders_view.columns],
+        if go is not None:
+            c1, c2 = st.columns(2)
 
-            )
-            desc = st.checkbox("Sort descending", value=True)
+            with c1:
+                fig_funnel = go.Figure(
+                    data=[
+                        go.Bar(
+                            x=["Requested", "Confirmed", "Delivered", "Returned"],
+                            y=[requested, confirmed, delivered, returned],
+                            marker_color=["#64D2FF", "#4EE3A3", "#B58DFF", "#FFA66B"],
+                            text=[f"{int(requested):,}", f"{int(confirmed):,}", f"{int(delivered):,}", f"{int(returned):,}"],
+                            textposition="outside",
+                            hovertemplate="<b>%{x}</b><br>Units: %{y:,}<extra></extra>",
+                        )
+                    ]
+                )
+                fig_funnel.update_layout(
+                    title="Order Flow",
+                    height=320,
+                    margin=dict(l=20, r=20, t=50, b=20),
+                    paper_bgcolor="rgba(9,16,26,0.70)",
+                    plot_bgcolor="rgba(9,16,26,0.70)",
+                    font=dict(family="Manrope, Segoe UI, sans-serif", color="#EAF2F8"),
+                )
+                fig_funnel.update_yaxes(showgrid=True, gridcolor="rgba(184,202,217,0.16)")
+                st.plotly_chart(
+                    fig_funnel,
+                    use_container_width=True,
+                    config={"displayModeBar": True, "scrollZoom": True, "doubleClick": "reset", "displaylogo": False},
+                )
 
-        filtered = orders_view
-        if search:
-            # search across code/name if present
-            mask = pd.Series(False, index=filtered.index)
-            if "كود_المنتج" in filtered.columns:
-                mask |= filtered["كود_المنتج"].astype(str).str.contains(search, case=False, na=False)
-            if "اسم_المنتج" in filtered.columns:
-                mask |= filtered["اسم_المنتج"].astype(str).str.contains(search, case=False, na=False)
-            filtered = filtered[mask]
-
-        if "delivered_units" in filtered.columns:
-            filtered = filtered[filtered["delivered_units"] >= min_delivered]
-
-        if sort_by in filtered.columns:
-            filtered = filtered.sort_values(by=sort_by, ascending=not desc)
-
-        st.caption(f"{len(filtered):,} rows")
-        st.dataframe(
-            filtered[cols],
-            use_container_width=True
-        )
+            with c2:
+                fig_mix = go.Figure(
+                    data=[
+                        go.Pie(
+                            labels=["Delivered", "Returned", "Not delivered yet"],
+                            values=[
+                                max(delivered - returned, 0),
+                                returned,
+                                max(requested - delivered, 0),
+                            ],
+                            hole=0.58,
+                            marker=dict(colors=["#4EE3A3", "#FFA66B", "#5D7088"]),
+                            hovertemplate="<b>%{label}</b><br>%{value:,} units (%{percent})<extra></extra>",
+                            textinfo="label+percent",
+                        )
+                    ]
+                )
+                fig_mix.update_layout(
+                    title="Status Mix",
+                    height=320,
+                    margin=dict(l=20, r=20, t=50, b=20),
+                    paper_bgcolor="rgba(9,16,26,0.70)",
+                    plot_bgcolor="rgba(9,16,26,0.70)",
+                    font=dict(family="Manrope, Segoe UI, sans-serif", color="#EAF2F8"),
+                    showlegend=False,
+                )
+                st.plotly_chart(
+                    fig_mix,
+                    use_container_width=True,
+                    config={"displayModeBar": True, "scrollZoom": True, "doubleClick": "reset", "displaylogo": False},
+                )
 
 with tab_ads:
     st.subheader("Ads details")
