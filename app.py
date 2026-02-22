@@ -2763,6 +2763,74 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
   font-weight:800;
   margin:2px 0 8px 0;
 }
+.daily-profit-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.daily-profit-card{
+  border:1px solid rgba(94,122,157,0.26);
+  border-radius:18px;
+  background: linear-gradient(140deg, rgba(14,24,40,0.92), rgba(8,16,31,0.86));
+  padding:16px 18px;
+  min-height:360px;
+}
+.daily-profit-title{
+  color:#eef5fb;
+  font-size:1.15rem;
+  font-weight:800;
+  margin:2px 0 14px 0;
+}
+.daily-profit-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:8px 0;
+}
+.daily-profit-k{
+  color:#9db2c9;
+  font-size:1rem;
+  font-weight:600;
+}
+.daily-profit-v{
+  color:#eef5fb;
+  font-size:2.8rem;
+  line-height:1.03;
+  font-weight:800;
+  letter-spacing:-0.02em;
+}
+.daily-profit-v-sm{
+  color:#eef5fb;
+  font-size:2.1rem;
+  line-height:1.06;
+  font-weight:800;
+}
+.daily-profit-pos{ color:#27e09a; }
+.daily-profit-neg{ color:#ff6d78; }
+.daily-profit-vio{ color:#b678ff; }
+.daily-profit-divider{
+  height:1px;
+  background: rgba(120,145,172,0.24);
+  margin:14px 0 12px 0;
+}
+.daily-profit-mini{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.daily-profit-mini-label{
+  color:#92a9c1;
+  font-size:0.95rem;
+  font-weight:600;
+}
+.daily-profit-mini-value{
+  color:#eef5fb;
+  font-size:2.05rem;
+  line-height:1.05;
+  font-weight:800;
+}
 button.save-inline-btn{
   width: auto !important;
   min-width: 190px !important;
@@ -5336,31 +5404,100 @@ with tab_daily:
                         st.markdown('<div class="daily-chart-panel"><div class="daily-chart-title">Order Status Breakdown - Last 7 Days</div></div>', unsafe_allow_html=True)
                         st.plotly_chart(fig_source, use_container_width=True, config={"displaylogo": False})
                     else:
-                        fig_profit = go.Figure()
-                        fig_profit.add_trace(go.Bar(x=xvals, y=trend["profit_disp"], name=f"Profit ({currency})", marker_color="#2ad391", opacity=0.9))
-                        fig_profit.add_trace(go.Bar(x=xvals, y=trend["spend_disp"], name=f"Ad Spend ({currency})", marker_color="#ff8a25", opacity=0.88))
-                        fig_profit.add_trace(
+                        st.markdown('<div class="daily-profit-wrap">', unsafe_allow_html=True)
+
+                        top_l, top_r = st.columns(2)
+                        profit_margin_today = (profit_today / revenue_today * 100.0) if revenue_today > 0 else 0.0
+                        ad_spend_signed = -abs(spend_today)
+
+                        with top_l:
+                            st.markdown(
+                                f"""
+                                <div class="daily-profit-card">
+                                  <div class="daily-profit-title">Today&#39;s Profitability Breakdown</div>
+                                  <div class="daily-profit-row"><span class="daily-profit-k">Revenue</span><span class="daily-profit-v-sm">{_esc(money_ccy(revenue_today, currency))}</span></div>
+                                  <div class="daily-profit-row"><span class="daily-profit-k">Gross Profit</span><span class="daily-profit-v-sm daily-profit-pos">{_esc(money_ccy(profit_today, currency))}</span></div>
+                                  <div class="daily-profit-row"><span class="daily-profit-k">Ad Spend</span><span class="daily-profit-v-sm daily-profit-neg">{_esc(money_ccy(ad_spend_signed, currency))}</span></div>
+                                  <div class="daily-profit-divider"></div>
+                                  <div class="daily-profit-row"><span class="daily-profit-k">Net Profit</span><span class="daily-profit-v daily-profit-vio">{_esc(money_ccy(net_today, currency))}</span></div>
+                                  <div class="daily-profit-mini">
+                                    <div>
+                                      <div class="daily-profit-mini-label">Profit Margin</div>
+                                      <div class="daily-profit-mini-value">{profit_margin_today:.1f}%</div>
+                                    </div>
+                                    <div>
+                                      <div class="daily-profit-mini-label">ROAS</div>
+                                      <div class="daily-profit-mini-value">{roas_today:.2f}x</div>
+                                    </div>
+                                  </div>
+                                </div>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+
+                        with top_r:
+                            fig_ps = go.Figure()
+                            fig_ps.add_trace(
+                                go.Scatter(
+                                    x=xvals,
+                                    y=trend["profit_disp"],
+                                    mode="lines+markers",
+                                    name="Profit",
+                                    line={"color": "#17d59b", "width": 3, "shape": line_shape, "smoothing": 0.55},
+                                    marker={"size": 7, "color": "#17d59b", "line": {"color": "rgba(255,255,255,0.7)", "width": 1}},
+                                )
+                            )
+                            fig_ps.add_trace(
+                                go.Scatter(
+                                    x=xvals,
+                                    y=trend["spend_disp"],
+                                    mode="lines+markers",
+                                    name="Ad Spend",
+                                    line={"color": "#ff4f5a", "width": 3, "shape": line_shape, "smoothing": 0.55},
+                                    marker={"size": 7, "color": "#ff4f5a", "line": {"color": "rgba(255,255,255,0.7)", "width": 1}},
+                                )
+                            )
+                            fig_ps.update_layout(
+                                height=360,
+                                margin={"l": 54, "r": 18, "t": 20, "b": 42},
+                                paper_bgcolor="rgba(0,0,0,0)",
+                                plot_bgcolor="rgba(0,0,0,0)",
+                                font={"family": "Manrope, Segoe UI, sans-serif", "color": "#dbe8f4"},
+                                legend={"orientation": "h", "x": 0.3, "y": -0.1, "font": {"size": 13}},
+                            )
+                            fig_ps.update_xaxes(tickformat="%d", showgrid=True, gridcolor="rgba(120,145,172,0.18)", tickfont={"size": 13, "color": "#9eb3c9"})
+                            fig_ps.update_yaxes(showgrid=True, gridcolor="rgba(120,145,172,0.20)", zeroline=False, tickfont={"size": 13, "color": "#9eb3c9"})
+                            st.markdown('<div class="daily-chart-panel"><div class="daily-chart-title">Profit vs Ad Spend - Last 7 Days</div></div>', unsafe_allow_html=True)
+                            st.plotly_chart(fig_ps, use_container_width=True, config={"displaylogo": False})
+
+                        roas_series = np.where(trend["spend_disp"] > 0, trend["profit_disp"] / trend["spend_disp"], 0.0)
+                        fig_roas = go.Figure()
+                        fig_roas.add_trace(
                             go.Scatter(
                                 x=xvals,
-                                y=trend["net_disp"],
-                                mode="lines+markers",
-                                name=f"Net ({currency})",
-                                line={"color": "#66a3ff", "width": 3, "shape": line_shape, "smoothing": 0.55},
+                                y=roas_series,
+                                mode="lines",
+                                name="ROAS",
+                                line={"color": "#b36cff", "width": 3, "shape": line_shape, "smoothing": 0.65},
+                                fill="tozeroy",
+                                fillcolor="rgba(179,108,255,0.60)",
+                                hovertemplate="<b>%{x|%a %d %b}</b><br>ROAS: %{y:.2f}x<extra></extra>",
                             )
                         )
-                        fig_profit.update_layout(
-                            barmode="group",
-                            height=380,
+                        fig_roas.update_layout(
+                            height=330,
                             margin={"l": 54, "r": 18, "t": 20, "b": 42},
                             paper_bgcolor="rgba(0,0,0,0)",
                             plot_bgcolor="rgba(0,0,0,0)",
                             font={"family": "Manrope, Segoe UI, sans-serif", "color": "#dbe8f4"},
-                            legend={"orientation": "h", "x": 0.0, "y": 1.1},
+                            showlegend=False,
                         )
-                        fig_profit.update_xaxes(tickformat="%d", showgrid=True, gridcolor="rgba(120,145,172,0.18)")
-                        fig_profit.update_yaxes(showgrid=True, gridcolor="rgba(120,145,172,0.20)", zeroline=False)
-                        st.markdown('<div class="daily-chart-panel"><div class="daily-chart-title">Profitability Analysis - Last 7 Days</div></div>', unsafe_allow_html=True)
-                        st.plotly_chart(fig_profit, use_container_width=True, config={"displaylogo": False})
+                        fig_roas.update_xaxes(tickformat="%d", showgrid=True, gridcolor="rgba(120,145,172,0.18)", tickfont={"size": 13, "color": "#9eb3c9"})
+                        fig_roas.update_yaxes(showgrid=True, gridcolor="rgba(120,145,172,0.20)", zeroline=False, tickfont={"size": 13, "color": "#9eb3c9"})
+                        st.markdown('<div class="daily-chart-panel"><div class="daily-chart-title">ROAS (Return on Ad Spend) - Last 7 Days</div></div>', unsafe_allow_html=True)
+                        st.plotly_chart(fig_roas, use_container_width=True, config={"displaylogo": False})
+
+                        st.markdown('</div>', unsafe_allow_html=True)
                 else:
                     st.info("Install Plotly for chart visuals in Daily Performance.")
 
