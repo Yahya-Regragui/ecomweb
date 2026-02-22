@@ -2652,6 +2652,117 @@ div.kpi-fixed-expander summary { padding: 10px 12px !important; }
 .dash-fill-green{ background: linear-gradient(90deg, #18cf7a, #17e99f); }
 .dash-fill-orange{ background: linear-gradient(90deg, #ff8e21, #ff6b00); }
 .dash-fill-violet{ background: linear-gradient(90deg, #8b59ff, #bf68ff); }
+
+/* Daily Performance tab */
+.daily-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.daily-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.daily-title{
+  color:#f3f8fc;
+  font-size:3rem;
+  font-weight:800;
+  letter-spacing:-0.03em;
+  line-height:1.02;
+}
+.daily-sub{
+  margin-top:4px;
+  color:#97adc5;
+  font-size:1.1rem;
+  font-weight:600;
+}
+.daily-cards{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap:14px;
+}
+.daily-card{
+  border-radius:18px;
+  border:1px solid rgba(94,122,157,0.28);
+  padding:18px 18px 14px 18px;
+  min-height:166px;
+}
+.daily-card-blue{ background: linear-gradient(135deg, rgba(21,44,86,0.96), rgba(9,22,48,0.88)); border-color: rgba(68,135,227,0.32); }
+.daily-card-green{ background: linear-gradient(135deg, rgba(8,71,56,0.96), rgba(6,43,35,0.88)); border-color: rgba(37,173,118,0.35); }
+.daily-card-purple{ background: linear-gradient(135deg, rgba(45,28,89,0.96), rgba(31,20,64,0.88)); border-color: rgba(151,112,226,0.33); }
+.daily-card-orange{ background: linear-gradient(135deg, rgba(78,41,21,0.96), rgba(56,28,16,0.88)); border-color: rgba(220,129,60,0.34); }
+.daily-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#b2c3d6;
+  font-size:1rem;
+  font-weight:700;
+}
+.daily-card-icon{
+  font-size:1.4rem;
+  line-height:1;
+  opacity:0.95;
+}
+.daily-card-value{
+  margin-top:12px;
+  color:#f2f7fc;
+  font-size:3rem;
+  line-height:1.02;
+  letter-spacing:-0.03em;
+  font-weight:800;
+}
+.daily-card-delta{
+  margin-top:8px;
+  font-size:0.98rem;
+  font-weight:700;
+}
+.daily-delta-pos{ color:#27e09a; }
+.daily-delta-neg{ color:#ff7e87; }
+.daily-delta-flat{ color:#95a8be; }
+.daily-card-foot{
+  margin-top:12px;
+  border-top:1px solid rgba(129,153,179,0.24);
+  padding-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:#9db2c9;
+  font-size:0.95rem;
+  font-weight:600;
+}
+.daily-card-foot b{
+  color:#f3f8fc;
+  font-weight:800;
+}
+.daily-mode-wrap [role="radiogroup"]{
+  background: rgba(26,37,54,0.72);
+  border:1px solid rgba(94,122,157,0.26);
+  border-radius:999px;
+  padding:4px;
+  gap:0;
+}
+.daily-mode-wrap [role="radiogroup"] label{
+  margin:0 !important;
+}
+.daily-mode-wrap [role="radiogroup"] label p{
+  font-weight:700 !important;
+}
+.daily-chart-panel{
+  border:1px solid rgba(94,122,157,0.26);
+  border-radius:18px;
+  background: linear-gradient(140deg, rgba(14,24,40,0.92), rgba(8,16,31,0.86));
+  padding:14px;
+}
+.daily-chart-title{
+  color:#eef5fb;
+  font-size:1.15rem;
+  font-weight:800;
+  margin:2px 0 8px 0;
+}
 button.save-inline-btn{
   width: auto !important;
   min-width: 190px !important;
@@ -2687,6 +2798,8 @@ button.save-inline-btn:before{
   .dash-lower-grid{ grid-template-columns: 1fr; }
   .dash-bars-grid{ grid-template-columns: 1fr; }
   .dash-mini-grid-2, .dash-mini-grid-4{ grid-template-columns: 1fr; }
+  .daily-head{ flex-direction:column; }
+  .daily-cards{ grid-template-columns: 1fr; }
   button.save-inline-btn{
     min-width: 160px !important;
     max-width: 190px !important;
@@ -2700,6 +2813,7 @@ button.save-inline-btn:before{
   .hero-title{ font-size: 1.25rem; }
   .kpi-grid { grid-template-columns: 1fr; }
   .ai-grid-4, .ai-grid-3 { grid-template-columns: 1fr; }
+  .daily-title{ font-size: 2.1rem; }
 }
     </style>
 """,
@@ -4920,150 +5034,412 @@ with tab_ai:
 
 
 with tab_daily:
-    st.subheader("Daily performance")
+    st.markdown('<div class="daily-wrap">', unsafe_allow_html=True)
 
     if daily_orders_df is None or getattr(daily_orders_df, "empty", True):
-        st.info("Upload **Daily Orders (Taager) XLSX** to see the daily table.")
+        st.info("Upload **Daily Orders (Taager) XLSX** to see Daily Performance.")
     else:
-        # Month / year filter (based on daily orders dates)
         dtmp = parse_daily_orders(daily_orders_df)
         if "day" not in dtmp.columns or dtmp["day"].isna().all():
             st.warning("Couldn't read dates from the Daily Orders file (missing or invalid **Created At**).")
         else:
-            available_days = pd.to_datetime(dtmp["day"].dropna().unique())
-            years = sorted({d.year for d in available_days})
-            # Default to latest month
-            latest = pd.Timestamp(max(available_days))
+            dtmp = dtmp.dropna(subset=["day"]).copy()
+            dtmp["day"] = pd.to_datetime(dtmp["day"], errors="coerce").dt.floor("D")
+            dtmp = dtmp.dropna(subset=["day"])
+            available_days = sorted(pd.to_datetime(dtmp["day"].unique()))
+            min_day = pd.Timestamp(available_days[0]).date()
+            max_day = pd.Timestamp(available_days[-1]).date()
 
-            c1, c2, c3 = st.columns([1, 1, 2])
-            with c1:
-                sel_year = st.selectbox("Year", years, index=years.index(latest.year))
-            with c2:
-                months = list(range(1, 13))
-                sel_month = st.selectbox("Month", months, index=months.index(latest.month))
-            with c3:
-                st.caption("Table includes **all days** in the selected month, even if there were 0 orders / 0 spend.")
+            if "daily_perf_day" not in st.session_state:
+                st.session_state.daily_perf_day = max_day
 
-            view_mode = st.radio(
-                "View",
-                ["Daily summary", "Product by date"],
-                horizontal=True,
-            )
-
-            if view_mode == "Daily summary":
-                daily_table = build_daily_table(
-                    daily_df=daily_orders_df,
-                    campaigns_df=campaigns_df,
-                    fx_iqd_per_usd=fx,
-                    currency=currency,
-                    year=int(sel_year),
-                    month=int(sel_month),
+            head_l, head_r = st.columns([4, 1.4])
+            with head_l:
+                st.markdown(
+                    """
+                    <div class="daily-head-left">
+                      <div class="daily-title">Daily Performance</div>
+                      <div class="daily-sub">Analytics from Taager and Meta</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
+            with head_r:
+                selected_day = st.date_input(
+                    "Day",
+                    min_value=min_day,
+                    max_value=max_day,
+                    key="daily_perf_day",
+                    label_visibility="collapsed",
+                )
+
+            selected_ts = pd.Timestamp(selected_day).floor("D")
+            prev_ts = selected_ts - pd.Timedelta(days=1)
+
+            daily_summary_all = build_daily_summary(daily_orders_df, campaigns_df, fx, currency)
+            if daily_summary_all is None or daily_summary_all.empty:
+                st.info("No daily summary can be built from this Daily Orders file.")
             else:
-                # Build SKU list for selector (from the selected month)
-                dsel = parse_daily_orders(daily_orders_df)
-                start = pd.Timestamp(year=int(sel_year), month=int(sel_month), day=1)
-                end = (start + pd.offsets.MonthEnd(1)).normalize()
-                dsel = dsel[(dsel["day"] >= start) & (dsel["day"] <= end)].copy()
+                daily_summary_all = daily_summary_all.copy()
+                daily_summary_all["day"] = pd.to_datetime(daily_summary_all["day"], errors="coerce").dt.floor("D")
+                daily_summary_all = daily_summary_all.dropna(subset=["day"]).sort_values("day")
+                summary_by_day = daily_summary_all.set_index("day")
 
-                sku_set = set()
-                if "SKUs" in dsel.columns:
-                    for v in dsel["SKUs"].dropna().astype(str):
-                        for p in [x.strip() for x in v.split(",")]:
-                            if p:
-                                sku_set.add(p)
-                sku_list = sorted(sku_set)
+                def _metric_day(ts: pd.Timestamp, col: str) -> float:
+                    if ts not in summary_by_day.index or col not in summary_by_day.columns:
+                        return 0.0
+                    return float(pd.to_numeric(summary_by_day.at[ts, col], errors="coerce") or 0.0)
 
-                # Map SKU -> Product Name using Orders file (best-effort)
-                sku_to_name = build_sku_to_name_map(orders_df) if "orders_df" in locals() and orders_df is not None else {}
+                def _delta_text(curr: float, prev: float) -> tuple[str, str]:
+                    if abs(prev) < 1e-9:
+                        if abs(curr) < 1e-9:
+                            return "0.0% vs yesterday", "daily-delta-flat"
+                        return "new vs yesterday", "daily-delta-pos"
+                    change = ((curr - prev) / abs(prev)) * 100.0
+                    cls = "daily-delta-pos" if change >= 0 else "daily-delta-neg"
+                    arrow = "↗" if change >= 0 else "↘"
+                    return f"{arrow} {change:+.1f}% vs yesterday", cls
 
-                # Group SKUs under their product names (fallback to SKU when name is unknown)
-                name_to_skus = {}
-                for sku in sku_list:
-                    name = sku_to_name.get(str(sku).strip())
-                    label = name if name else str(sku)
-                    name_to_skus.setdefault(label, []).append(str(sku).strip())
+                id_col = get_daily_order_id_col(dtmp)
+                if id_col is None:
+                    dtmp["__rowid__"] = range(len(dtmp))
+                    id_col = "__rowid__"
 
-                product_options = sorted(name_to_skus.keys())
+                def _status_stats(ts: pd.Timestamp) -> dict:
+                    dd = dtmp[dtmp["day"] == ts].copy()
+                    if dd.empty:
+                        return {"orders": 0, "delivered": 0, "cancelled": 0, "returned": 0, "pending": 0, "delivery_rate": 0.0, "revenue_iqd": 0.0}
 
-                selected_names = st.multiselect(
-                    "Select product(s)",
-                    options=product_options,
-                    default=product_options[:1] if product_options else [],
+                    if "Status" in dd.columns:
+                        st_lower = dd["Status"].astype(str).str.strip().str.lower()
+                        dd = dd[~st_lower.str.contains("cancelled by you", na=False)].copy()
+                        st_lower = dd["Status"].astype(str).str.strip().str.lower()
+                    else:
+                        st_lower = pd.Series("", index=dd.index)
+
+                    orders = int(dd[id_col].nunique()) if not dd.empty else 0
+                    delivered = int(dd.loc[st_lower.str.contains("delivered", na=False), id_col].nunique()) if not dd.empty else 0
+                    cancelled = int(dd.loc[st_lower.str.contains("cancel|delivery failed", regex=True, na=False), id_col].nunique()) if not dd.empty else 0
+                    returned = int(dd.loc[st_lower.str.contains("return", na=False), id_col].nunique()) if not dd.empty else 0
+                    pending = max(orders - delivered - cancelled - returned, 0)
+                    delivery_rate = (delivered / orders * 100.0) if orders else 0.0
+                    rev_iqd = float(pd.to_numeric(dd.get("orders.export.cashOnDelivery", 0), errors="coerce").fillna(0).sum()) if not dd.empty else 0.0
+                    return {
+                        "orders": orders,
+                        "delivered": delivered,
+                        "cancelled": cancelled,
+                        "returned": returned,
+                        "pending": pending,
+                        "delivery_rate": delivery_rate,
+                        "revenue_iqd": rev_iqd,
+                    }
+
+                day_stats = _status_stats(selected_ts)
+                prev_stats = _status_stats(prev_ts)
+                orders_today = float(day_stats["orders"])
+                orders_prev = float(prev_stats["orders"])
+                profit_today = _metric_day(selected_ts, "profit_disp")
+                profit_prev = _metric_day(prev_ts, "profit_disp")
+                spend_today = _metric_day(selected_ts, "spend_disp")
+                net_today = _metric_day(selected_ts, "net_disp")
+                net_prev = _metric_day(prev_ts, "net_disp")
+                delivery_today = float(day_stats["delivery_rate"])
+                delivery_prev = float(prev_stats["delivery_rate"])
+                revenue_today = iqd_to_usd(day_stats["revenue_iqd"], fx) if currency == "USD" else day_stats["revenue_iqd"]
+                roas_today = (profit_today / spend_today) if spend_today > 0 else 0.0
+                roi_today = (net_today / spend_today) if spend_today > 0 else 0.0
+
+                d_orders_txt, d_orders_cls = _delta_text(orders_today, orders_prev)
+                d_profit_txt, d_profit_cls = _delta_text(profit_today, profit_prev)
+                d_net_txt, d_net_cls = _delta_text(net_today, net_prev)
+                d_delivery_txt, d_delivery_cls = _delta_text(delivery_today, delivery_prev)
+
+                st.markdown(
+                    f"""
+                    <div class="daily-cards">
+                      <div class="daily-card daily-card-blue">
+                        <div class="daily-card-head"><span>Orders Today</span><span class="daily-card-icon">🛒</span></div>
+                        <div class="daily-card-value">{int(orders_today):,}</div>
+                        <div class="daily-card-delta {d_orders_cls}">{_esc(d_orders_txt)}</div>
+                        <div class="daily-card-foot"><span>Delivered: <b>{day_stats["delivered"]:,}</b></span><span>Pending: <b>{day_stats["pending"]:,}</b></span></div>
+                      </div>
+                      <div class="daily-card daily-card-green">
+                        <div class="daily-card-head"><span>Profit Today</span><span class="daily-card-icon">$</span></div>
+                        <div class="daily-card-value">{_esc(money_ccy(profit_today, currency))}</div>
+                        <div class="daily-card-delta {d_profit_cls}">{_esc(d_profit_txt)}</div>
+                        <div class="daily-card-foot"><span>Revenue: <b>{_esc(money_ccy(revenue_today, currency))}</b></span><span>ROAS: <b>{roas_today:.2f}x</b></span></div>
+                      </div>
+                      <div class="daily-card daily-card-purple">
+                        <div class="daily-card-head"><span>Net Profit Today</span><span class="daily-card-icon">◎</span></div>
+                        <div class="daily-card-value">{_esc(money_ccy(net_today, currency))}</div>
+                        <div class="daily-card-delta {d_net_cls}">{_esc(d_net_txt)}</div>
+                        <div class="daily-card-foot"><span>Ad Spend: <b>{_esc(money_ccy(spend_today, currency))}</b></span><span>ROI: <b>{roi_today:.2f}x</b></span></div>
+                      </div>
+                      <div class="daily-card daily-card-orange">
+                        <div class="daily-card-head"><span>Delivery Rate Today</span><span class="daily-card-icon">%</span></div>
+                        <div class="daily-card-value">{delivery_today:.1f}%</div>
+                        <div class="daily-card-delta {d_delivery_cls}">{_esc(d_delivery_txt)}</div>
+                        <div class="daily-card-foot"><span>Delivered: <b>{day_stats["delivered"]:,}</b></span><span>Cancelled: <b>{day_stats["cancelled"]:,}</b></span></div>
+                      </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
 
-                selected_skus = []
-                for n in selected_names:
-                    selected_skus.extend(name_to_skus.get(n, []))
-
-                daily_table = build_product_by_date_table(
-                    daily_df=daily_orders_df,
-                    campaigns_df=campaigns_df,
-                    fx_iqd_per_usd=fx,
-                    currency=currency,
-                    year=int(sel_year),
-                    month=int(sel_month),
-                    selected_skus=selected_skus,
+                st.markdown('<div class="daily-mode-wrap">', unsafe_allow_html=True)
+                view_mode = st.radio(
+                    "Daily View",
+                    ["7-Day Trends", "Source Breakdown", "Profitability Analysis"],
+                    horizontal=True,
+                    key="daily_perf_mode",
+                    label_visibility="collapsed",
                 )
+                st.markdown('</div>', unsafe_allow_html=True)
 
-            # Insights
-            total_orders = int(daily_table["Orders"].sum())
-            total_profit = float(daily_table["Profit"].sum())
-            total_spend = float(daily_table["Ad Spend"].sum())
-            total_net = float(daily_table["Net Profit"].sum())
+                trend_days = pd.date_range(selected_ts - pd.Timedelta(days=6), selected_ts, freq="D")
+                trend = pd.DataFrame({"day": trend_days})
+                trend = trend.merge(
+                    daily_summary_all[["day", "orders_count", "profit_disp", "spend_disp", "net_disp"]],
+                    on="day",
+                    how="left",
+                ).fillna(0.0)
 
-            k1, k2, k3, k4 = st.columns(4)
-            k1.metric("Orders", f"{total_orders:,}")
-            k2.metric(f"Profit ({currency})", f"{total_profit:,.2f}")
-            k3.metric(f"Ad Spend ({currency})", f"{total_spend:,.2f}")
-            k4.metric(f"Net Profit ({currency})", f"{total_net:,.2f}")
+                tmp_7 = dtmp[(dtmp["day"] >= trend_days.min()) & (dtmp["day"] <= trend_days.max())].copy()
+                if "Status" in tmp_7.columns:
+                    st7 = tmp_7["Status"].astype(str).str.strip().str.lower()
+                    tmp_7 = tmp_7[~st7.str.contains("cancelled by you", na=False)].copy()
+                    st7 = tmp_7["Status"].astype(str).str.strip().str.lower()
+                else:
+                    st7 = pd.Series("", index=tmp_7.index)
 
-            # Stylish + dynamic Net Profit
-            def _style_net(val):
-                try:
-                    v = float(val)
-                except:
-                    return ""
-                if v > 0:
-                    return "font-weight:700; color:#19a974;"  # green
-                if v < 0:
-                    return "font-weight:700; color:#ff4d4f;"  # red
-                return "font-weight:700;"
+                id7_col = get_daily_order_id_col(tmp_7)
+                if id7_col is None:
+                    tmp_7["__rowid__"] = range(len(tmp_7))
+                    id7_col = "__rowid__"
 
-            styled = (
-                daily_table.style
-                .format({
-                    "Orders": "{:,.0f}",
-                    "Delivered": "{:,.0f}",
-                    "Cancelled": "{:,.0f}",
-                    "Returned": "{:,.0f}",
-                    "Ad Spend": "{:,.2f}",
-                    "Profit": "{:,.2f}",
-                    "Net Profit": "{:,.2f}",
-                    "Avg Profit / Delivered": "{:,.2f}",
-                    "Delivery Rate %": "{:,.1f}%",
-                })
-                .applymap(_style_net, subset=["Net Profit"])
-            )
+                if not tmp_7.empty:
+                    orders_7 = tmp_7.groupby("day")[id7_col].nunique().rename("orders")
+                    delivered_7 = tmp_7[st7.str.contains("delivered", na=False)].groupby("day")[id7_col].nunique().rename("delivered")
+                    cxl_7 = tmp_7[st7.str.contains("cancel|delivery failed", regex=True, na=False)].groupby("day")[id7_col].nunique().rename("cancelled")
+                    ret_7 = tmp_7[st7.str.contains("return", na=False)].groupby("day")[id7_col].nunique().rename("returned")
+                else:
+                    orders_7 = pd.Series(dtype=float)
+                    delivered_7 = pd.Series(dtype=float)
+                    cxl_7 = pd.Series(dtype=float)
+                    ret_7 = pd.Series(dtype=float)
 
-            st.dataframe(styled, use_container_width=True, height=520)
+                mix_7 = pd.DataFrame({"day": trend_days})
+                mix_7 = mix_7.merge(orders_7.reset_index(), on="day", how="left")
+                mix_7 = mix_7.merge(delivered_7.reset_index(), on="day", how="left")
+                mix_7 = mix_7.merge(cxl_7.reset_index(), on="day", how="left")
+                mix_7 = mix_7.merge(ret_7.reset_index(), on="day", how="left")
+                for c in ["orders", "delivered", "cancelled", "returned"]:
+                    mix_7[c] = pd.to_numeric(mix_7[c], errors="coerce").fillna(0.0)
+                mix_7["pending"] = (mix_7["orders"] - mix_7["delivered"] - mix_7["cancelled"] - mix_7["returned"]).clip(lower=0.0)
+                mix_7["delivery_rate"] = np.where(mix_7["orders"] > 0, (mix_7["delivered"] / mix_7["orders"]) * 100.0, 0.0)
+                xvals = trend["day"]
 
-            with st.expander("More insights (status mix + totals)"):
-                # Status mix per month
-                mix = {
-                    "Delivered %": (daily_table["Delivered"].sum() / total_orders * 100) if total_orders else 0,
-                    "Cancelled %": (daily_table["Cancelled"].sum() / total_orders * 100) if total_orders else 0,
-                    "Returned %": (daily_table["Returned"].sum() / total_orders * 100) if total_orders else 0,
-                    "Avg profit / order": (total_profit / total_orders) if total_orders else 0,
-                }
-                st.write(mix)
+                if go is not None:
+                    line_shape = "spline"
 
-                # Show the raw daily orders for the selected month (optional)
-                start_m = pd.Timestamp(year=int(sel_year), month=int(sel_month), day=1)
-                end_m = (start_m + pd.offsets.MonthEnd(1)).normalize()
-                raw_m = dtmp[(dtmp["day"] >= start_m) & (dtmp["day"] <= end_m)].copy()
-                st.caption(f"Raw rows in month: {len(raw_m):,}")
-                st.dataframe(raw_m, use_container_width=True, height=240)
+                    fig_orders = go.Figure()
+                    fig_orders.add_trace(
+                        go.Scatter(
+                            x=xvals,
+                            y=trend["orders_count"],
+                            mode="lines",
+                            line={"color": "#3b82ff", "width": 3, "shape": line_shape, "smoothing": 0.7},
+                            fill="tozeroy",
+                            fillcolor="rgba(59,130,255,0.30)",
+                            hovertemplate="<b>%{x|%a %d %b}</b><br>Orders: %{y:,.0f}<extra></extra>",
+                        )
+                    )
+                    fig_orders.update_layout(
+                        height=360,
+                        margin={"l": 54, "r": 18, "t": 22, "b": 42},
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font={"family": "Manrope, Segoe UI, sans-serif", "color": "#dbe8f4"},
+                        hovermode="x unified",
+                    )
+                    fig_orders.update_xaxes(tickformat="%d", showgrid=True, gridcolor="rgba(120,145,172,0.18)", tickfont={"size": 12, "color": "#9eb3c9"})
+                    fig_orders.update_yaxes(showgrid=True, gridcolor="rgba(120,145,172,0.20)", zeroline=False, tickfont={"size": 12, "color": "#9eb3c9"})
+
+                    fig_delivery = go.Figure()
+                    fig_delivery.add_trace(
+                        go.Scatter(
+                            x=xvals,
+                            y=mix_7["delivery_rate"],
+                            mode="lines+markers",
+                            line={"color": "#ff8a25", "width": 3, "shape": line_shape, "smoothing": 0.55},
+                            marker={"size": 7, "color": "#ff8a25"},
+                            hovertemplate="<b>%{x|%a %d %b}</b><br>Delivery Rate: %{y:.1f}%<extra></extra>",
+                        )
+                    )
+                    fig_delivery.update_layout(
+                        height=360,
+                        margin={"l": 54, "r": 18, "t": 22, "b": 42},
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font={"family": "Manrope, Segoe UI, sans-serif", "color": "#dbe8f4"},
+                        hovermode="x unified",
+                    )
+                    fig_delivery.update_xaxes(tickformat="%d", showgrid=True, gridcolor="rgba(120,145,172,0.18)", tickfont={"size": 12, "color": "#9eb3c9"})
+                    fig_delivery.update_yaxes(range=[0, 100], dtick=25, showgrid=True, gridcolor="rgba(120,145,172,0.20)", zeroline=False, tickfont={"size": 12, "color": "#9eb3c9"})
+
+                    if view_mode == "7-Day Trends":
+                        ch1, ch2 = st.columns(2)
+                        with ch1:
+                            st.markdown('<div class="daily-chart-panel"><div class="daily-chart-title">Orders - Last 7 Days</div></div>', unsafe_allow_html=True)
+                            st.plotly_chart(fig_orders, use_container_width=True, config={"displaylogo": False})
+                        with ch2:
+                            st.markdown('<div class="daily-chart-panel"><div class="daily-chart-title">Delivery Rate % - Last 7 Days</div></div>', unsafe_allow_html=True)
+                            st.plotly_chart(fig_delivery, use_container_width=True, config={"displaylogo": False})
+                    elif view_mode == "Source Breakdown":
+                        fig_source = go.Figure()
+                        fig_source.add_trace(go.Bar(x=xvals, y=mix_7["delivered"], name="Delivered", marker_color="#2ad391"))
+                        fig_source.add_trace(go.Bar(x=xvals, y=mix_7["pending"], name="Pending", marker_color="#5f8dff"))
+                        fig_source.add_trace(go.Bar(x=xvals, y=mix_7["cancelled"], name="Cancelled", marker_color="#ff8a25"))
+                        fig_source.add_trace(go.Bar(x=xvals, y=mix_7["returned"], name="Returned", marker_color="#d878ff"))
+                        fig_source.update_layout(
+                            barmode="stack",
+                            height=380,
+                            margin={"l": 54, "r": 18, "t": 20, "b": 42},
+                            paper_bgcolor="rgba(0,0,0,0)",
+                            plot_bgcolor="rgba(0,0,0,0)",
+                            font={"family": "Manrope, Segoe UI, sans-serif", "color": "#dbe8f4"},
+                            legend={"orientation": "h", "x": 0.0, "y": 1.1},
+                        )
+                        fig_source.update_xaxes(tickformat="%d", showgrid=True, gridcolor="rgba(120,145,172,0.18)")
+                        fig_source.update_yaxes(showgrid=True, gridcolor="rgba(120,145,172,0.20)", zeroline=False)
+                        st.markdown('<div class="daily-chart-panel"><div class="daily-chart-title">Order Status Breakdown - Last 7 Days</div></div>', unsafe_allow_html=True)
+                        st.plotly_chart(fig_source, use_container_width=True, config={"displaylogo": False})
+                    else:
+                        fig_profit = go.Figure()
+                        fig_profit.add_trace(go.Bar(x=xvals, y=trend["profit_disp"], name=f"Profit ({currency})", marker_color="#2ad391", opacity=0.9))
+                        fig_profit.add_trace(go.Bar(x=xvals, y=trend["spend_disp"], name=f"Ad Spend ({currency})", marker_color="#ff8a25", opacity=0.88))
+                        fig_profit.add_trace(
+                            go.Scatter(
+                                x=xvals,
+                                y=trend["net_disp"],
+                                mode="lines+markers",
+                                name=f"Net ({currency})",
+                                line={"color": "#66a3ff", "width": 3, "shape": line_shape, "smoothing": 0.55},
+                            )
+                        )
+                        fig_profit.update_layout(
+                            barmode="group",
+                            height=380,
+                            margin={"l": 54, "r": 18, "t": 20, "b": 42},
+                            paper_bgcolor="rgba(0,0,0,0)",
+                            plot_bgcolor="rgba(0,0,0,0)",
+                            font={"family": "Manrope, Segoe UI, sans-serif", "color": "#dbe8f4"},
+                            legend={"orientation": "h", "x": 0.0, "y": 1.1},
+                        )
+                        fig_profit.update_xaxes(tickformat="%d", showgrid=True, gridcolor="rgba(120,145,172,0.18)")
+                        fig_profit.update_yaxes(showgrid=True, gridcolor="rgba(120,145,172,0.20)", zeroline=False)
+                        st.markdown('<div class="daily-chart-panel"><div class="daily-chart-title">Profitability Analysis - Last 7 Days</div></div>', unsafe_allow_html=True)
+                        st.plotly_chart(fig_profit, use_container_width=True, config={"displaylogo": False})
+                else:
+                    st.info("Install Plotly for chart visuals in Daily Performance.")
+
+                with st.expander("Detailed table (month view + product breakdown)", expanded=False):
+                    years = sorted({d.year for d in available_days})
+                    c1, c2, c3 = st.columns([1, 1, 2])
+                    with c1:
+                        sel_year = st.selectbox("Year", years, index=years.index(selected_ts.year), key="daily_table_year")
+                    with c2:
+                        months = list(range(1, 13))
+                        sel_month = st.selectbox("Month", months, index=months.index(selected_ts.month), key="daily_table_month")
+                    with c3:
+                        st.caption("Table includes all days in selected month, including zero-activity days.")
+
+                    table_mode = st.radio(
+                        "Table View",
+                        ["Daily summary", "Product by date"],
+                        horizontal=True,
+                        key="daily_table_mode",
+                    )
+
+                    if table_mode == "Daily summary":
+                        daily_table = build_daily_table(
+                            daily_df=daily_orders_df,
+                            campaigns_df=campaigns_df,
+                            fx_iqd_per_usd=fx,
+                            currency=currency,
+                            year=int(sel_year),
+                            month=int(sel_month),
+                        )
+                    else:
+                        dsel = parse_daily_orders(daily_orders_df)
+                        start = pd.Timestamp(year=int(sel_year), month=int(sel_month), day=1)
+                        end = (start + pd.offsets.MonthEnd(1)).normalize()
+                        dsel = dsel[(dsel["day"] >= start) & (dsel["day"] <= end)].copy()
+
+                        sku_set = set()
+                        if "SKUs" in dsel.columns:
+                            for v in dsel["SKUs"].dropna().astype(str):
+                                for p in [x.strip() for x in v.split(",")]:
+                                    if p:
+                                        sku_set.add(p)
+
+                        sku_to_name = build_sku_to_name_map(orders_df) if orders_df is not None else {}
+                        name_to_skus = {}
+                        for sku in sorted(sku_set):
+                            name = sku_to_name.get(str(sku).strip())
+                            label = name if name else str(sku)
+                            name_to_skus.setdefault(label, []).append(str(sku).strip())
+
+                        product_options = sorted(name_to_skus.keys())
+                        selected_names = st.multiselect(
+                            "Select product(s)",
+                            options=product_options,
+                            default=product_options[:1] if product_options else [],
+                            key="daily_table_products",
+                        )
+                        selected_skus = []
+                        for n in selected_names:
+                            selected_skus.extend(name_to_skus.get(n, []))
+
+                        daily_table = build_product_by_date_table(
+                            daily_df=daily_orders_df,
+                            campaigns_df=campaigns_df,
+                            fx_iqd_per_usd=fx,
+                            currency=currency,
+                            year=int(sel_year),
+                            month=int(sel_month),
+                            selected_skus=selected_skus,
+                        )
+
+                    def _style_net(val):
+                        try:
+                            v = float(val)
+                        except Exception:
+                            return ""
+                        if v > 0:
+                            return "font-weight:700; color:#19a974;"
+                        if v < 0:
+                            return "font-weight:700; color:#ff4d4f;"
+                        return "font-weight:700;"
+
+                    styled = (
+                        daily_table.style
+                        .format({
+                            "Orders": "{:,.0f}",
+                            "Delivered": "{:,.0f}",
+                            "Cancelled": "{:,.0f}",
+                            "Returned": "{:,.0f}",
+                            "Ad Spend": "{:,.2f}",
+                            "Profit": "{:,.2f}",
+                            "Net Profit": "{:,.2f}",
+                            "Avg Profit / Delivered": "{:,.2f}",
+                            "Delivery Rate %": "{:,.1f}%",
+                        })
+                        .applymap(_style_net, subset=["Net Profit"])
+                    )
+                    st.dataframe(styled, use_container_width=True, height=520)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with tab_orders:
     st.subheader("Orders overview")
