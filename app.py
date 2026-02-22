@@ -2847,7 +2847,28 @@ with st.sidebar:
     )
     st.markdown('<div class="sb-section-title">Settings</div>', unsafe_allow_html=True)
     st.markdown('<div class="sb-field-title"><span>$</span><span>FX Rate (IQD per 1 USD)</span></div>', unsafe_allow_html=True)
-    fx = st.number_input("FX Rate (IQD per 1 USD)", min_value=1.0, value=1310.0, step=1.0, label_visibility="collapsed")
+    fx_mode = st.radio(
+        "FX Mode",
+        ["Default (1310)", "Secondary (1600)", "Manual"],
+        index=0,
+        horizontal=False,
+        label_visibility="collapsed",
+        key="fx_mode",
+    )
+    if fx_mode == "Default (1310)":
+        fx = 1310.0
+    elif fx_mode == "Secondary (1600)":
+        fx = 1600.0
+    else:
+        fx = st.number_input(
+            "Manual FX Rate (IQD per 1 USD)",
+            min_value=1.0,
+            value=1310.0,
+            step=1.0,
+            key="fx_manual_value",
+            label_visibility="collapsed",
+        )
+    st.caption(f"Selected FX: {fx:,.0f} IQD per 1 USD")
     st.markdown('<div class="sb-field-title"><span>◉</span><span>Display Currency (Orders)</span></div>', unsafe_allow_html=True)
     currency = st.selectbox("Display Currency (Orders)", ["USD", "IQD"], index=0, label_visibility="collapsed")
 
